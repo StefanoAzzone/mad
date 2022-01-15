@@ -38,9 +38,9 @@ class Album {
   }
 }
 
-class Art {
+class Cover {
   int id;
   Image image;
-  
-  Art(this.id, this.image);
+
+  Cover(this.id, this.image);
 }

@@ -30,6 +30,9 @@ dependencies:
   flutter:
     sdk: flutter
   crypto:
+  path_provider:
+  flutter_audio_query:
+  audio_manager:
 
 
   # The following adds the Cupertino Icons font to your application.

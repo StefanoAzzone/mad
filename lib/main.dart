@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import 'dart:io';
+import 'package:path_provider/path_provider.dart';
+import 'package:flutter_audio_query/flutter_audio_query.dart';
+import 'package:audio_manager/audio_manager.dart';
 
 void main() {
   runApp(const MyApp());
@@ -49,9 +53,13 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   int _counter = 0;
+  String allArtists = "";
 
   void _incrementCounter() {
     setState(() {
+      getMusicFolder((String p) {
+        allArtists = p;
+      });
       // This call to setState tells the Flutter framework that something has
       // changed in this State, which causes it to rerun the build method below
       // so that the display can reflect the updated values. If we changed
@@ -102,6 +110,10 @@ class _MyHomePageState extends State<MyHomePage> {
               '$_counter',
               style: Theme.of(context).textTheme.headline4,
             ),
+            Text(
+              "Artists: $allArtists",
+              style: Theme.of(context).textTheme.headline4,
+            ),
           ],
         ),
       ),
@@ -111,5 +123,16 @@ class _MyHomePageState extends State<MyHomePage> {
         child: const Icon(Icons.add),
       ), // This trailing comma makes auto-formatting nicer for build methods.
     );
+  }
+
+  void getMusicFolder(Function setString) async {
+    String allArtists = "";
+    final FlutterAudioQuery audioQuery = FlutterAudioQuery();
+    // returns all artists available
+    List<ArtistInfo> artists = await audioQuery.getArtists();
+    artists.forEach((artist) {
+      allArtists = allArtists + artist.name + ", ";
+    });
+    setString(allArtists);
   }
 }
