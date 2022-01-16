@@ -38,6 +38,17 @@ class Album {
   }
 }
 
+class Playlist {
+  int id = -1;
+  String name;
+  List<Track> tracks = [];
+
+  Playlist(this.name) {
+    tracks = [];
+    id = hash(name);
+  }
+}
+
 class Cover {
   int id;
   Image image;
