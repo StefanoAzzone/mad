@@ -5,7 +5,7 @@ import 'package:mad/data.dart';
 
 class AlbumList extends StatelessWidget {
   List<Album> albums = List.generate(
-      20, (index) => Album("AlbumName" + index.toString(), "Elon Musk"));
+      20, (index) => Album("AlbumName" + index.toString(), "Elon Musk", "ciao"));
 
   @override
   Widget build(BuildContext context) {
