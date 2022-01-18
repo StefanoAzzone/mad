@@ -2,16 +2,15 @@ import 'package:flutter/material.dart';
 import 'dart:io';
 
 import 'package:mad/data.dart';
+import 'package:path_provider/path_provider.dart';
 
 class TrackList extends StatelessWidget {
   Function callback;
+  String path = "";
 
   TrackList(Function this.callback);
 
-  List<Track> tracks = List.generate(
-      20,
-      (index) => Track("TrackName" + index.toString(), "artist", "album",
-          index));
+  List<Track> tracks = Database.instance.tracks;
 
   @override
   Widget build(BuildContext context) {

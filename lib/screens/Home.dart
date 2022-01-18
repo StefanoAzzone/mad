@@ -37,69 +37,83 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
-    return DefaultTabController(
-        length: 4,
-        child: Scaffold(
-          appBar: AppBar(
-            bottom: TabBar(tabs: [
-              Tab(
-                icon: Icon(Icons.music_note),
-                text: "Tracks",
-              ),
-              Tab(
-                icon: Icon(Icons.album),
-                text: "Albums",
-              ),
-              Tab(
-                icon: Icon(Icons.person),
-                text: "Artists",
-              ),
-              Tab(
-                icon: Icon(Icons.playlist_play),
-                text: "Playlists",
-              ),
-            ]),
-            title: Text("MBox"),
-            centerTitle: true,
-          ),
-          body: Column(
-            children: [
-              
-              Expanded(
-                child: TabBarView(
-                  children: [
-                    TrackList((Track track) {
-                      queue.add(track);
-                      Navigator.pushNamed(context, '/playingTrack');
-                      }),
-                    AlbumList(),
-                    ArtistList(),
-                    PlaylistList(),
-                  ],
-                ),
-              ),
-              Align(
-                  alignment: Alignment.bottomCenter,
-                  child: Row(
-                    children: [
-                      Align(
-                        alignment: Alignment.bottomLeft,
-                        child: Text("Track being played.mp3"),
+    return FutureBuilder(
+        future: database.init(),
+        builder: (BuildContext context, AsyncSnapshot snapshot) {
+          switch (snapshot.connectionState) {
+            case ConnectionState.waiting:
+              return CircularProgressIndicator();
+            case ConnectionState.done:
+              if (snapshot.hasError) {
+                return Text('Error: ${snapshot.error}');
+              } else {
+                return DefaultTabController(
+                    length: 4,
+                    child: Scaffold(
+                      appBar: AppBar(
+                        bottom: TabBar(tabs: [
+                          Tab(
+                            icon: Icon(Icons.music_note),
+                            text: "Tracks",
+                          ),
+                          Tab(
+                            icon: Icon(Icons.album),
+                            text: "Albums",
+                          ),
+                          Tab(
+                            icon: Icon(Icons.person),
+                            text: "Artists",
+                          ),
+                          Tab(
+                            icon: Icon(Icons.playlist_play),
+                            text: "Playlists",
+                          ),
+                        ]),
+                        title: Text("MBox"),
+                        centerTitle: true,
                       ),
-                      IconButton(
-                        alignment: Alignment.bottomRight,
-                        color: Colors.deepPurple,
-                        onPressed: () {
-                          database.findMusic();
-                          print("I'm singing in the rain!!!");
-                        },
-                        icon: Icon(Icons.play_arrow),
+                      body: Column(
+                        children: [
+                          Expanded(
+                            child: TabBarView(
+                              children: [
+                                TrackList((Track track) {
+                                  queue.add(track);
+                                  Navigator.pushNamed(context, '/playingTrack');
+                                }),
+                                AlbumList(),
+                                ArtistList(),
+                                PlaylistList(),
+                              ],
+                            ),
+                          ),
+                          Align(
+                              alignment: Alignment.bottomCenter,
+                              child: Row(
+                                children: [
+                                  Align(
+                                    alignment: Alignment.bottomLeft,
+                                    child: Text("Track being played.mp3"),
+                                  ),
+                                  IconButton(
+                                    alignment: Alignment.bottomRight,
+                                    color: Colors.deepPurple,
+                                    onPressed: () {
+                                      print("I'm singing in the rain!!!");
+                                    },
+                                    icon: Icon(Icons.play_arrow),
+                                  ),
+                                ],
+                              )),
+                        ],
                       ),
-                    ],
-                  )),
-            ],
-          ),
-        ));
+                    ));
+              }
+
+            default:
+              return Text('Error: ${snapshot.error}');
+          }
+        });
   }
 
   // void getMusicFolder(Function setString) async {

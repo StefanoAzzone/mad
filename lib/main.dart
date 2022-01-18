@@ -6,6 +6,7 @@ import 'package:mad/screens/Home.dart';
 import 'package:mad/screens/PlayingTrack.dart';
 
 void main() {
+  //Database.instance.init();
   runApp(MyApp());
 }
 
@@ -28,5 +29,3 @@ class MyApp extends StatelessWidget {
     );
   }
 }
-
-
