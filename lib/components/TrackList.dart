@@ -14,14 +14,32 @@ class TrackList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    int count = database.state == DatabaseState.Ready
+        ? tracks.length
+        : tracks.length + 1;
     return ListView.builder(
         shrinkWrap: true,
-        itemCount: tracks.length,
+        itemCount: count,
         itemBuilder: (context, index) {
+          if (index == tracks.length) {
+            Size size = MediaQuery.of(context).size;
+            return Center(
+                child: SizedBox(
+                    width: size.width < size.height
+                        ? size.width / 10
+                        : size.height / 10,
+                    height: size.width < size.height
+                        ? size.width / 10
+                        : size.height / 10,
+                    child: CircularProgressIndicator(
+                      backgroundColor: Colors.blue,
+                      color: Colors.white,
+                    )));
+          }
           return ListTile(
-            title: Text(tracks[index].name + " - " + tracks[index].artist),
+            title: Text(tracks[index].title + " - " + tracks[index].artist),
             onTap: () {
-              print(tracks[index].name);
+              print(tracks[index].title);
               callback(tracks[index]);
             },
           );

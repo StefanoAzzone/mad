@@ -21,7 +21,7 @@ class MyApp extends StatelessWidget {
       initialRoute: '/',
       routes: {
         '/': (context) => const MyHomePage(title: 'MBox'),
-        '/playingTrack': (context) => PlayingTrack(queue),
+        '/playingTrack': (context) => PlayingTrack(),
       },
       theme: ThemeData(
         primarySwatch: Colors.blue,

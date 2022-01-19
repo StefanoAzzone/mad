@@ -16,16 +16,16 @@ int hash(String input) {
 
 class Track {
   int id = -1;
-  String name;
+  String title;
   String path;
   String artist;
   String album;
   String lyrics;
   int trackNumber;
 
-  Track(this.name, this.path, this.artist, this.album, this.lyrics,
+  Track(this.title, this.path, this.artist, this.album, this.lyrics,
       this.trackNumber) {
-    id = hash(name + artist + album);
+    id = hash(title + artist + album);
   }
 }
 
@@ -60,11 +60,26 @@ class Playlist {
   }
 }
 
+TrackQueue trackQueue = TrackQueue.instance;
+
 class TrackQueue {
   List<Track> queue = [];
   int currentIndex = 0;
+  static final TrackQueue instance = TrackQueue._internal();
+  factory TrackQueue() {
+    return instance;
+  }
+  TrackQueue._internal();
 
-  void add(Track track) {
+  void pushFront(Track track) {
+    queue.insert(currentIndex, track);
+  }
+
+  void pushNext(Track track) {
+    queue.insert(currentIndex + 1, track);
+  }
+
+  void pushlast(Track track) {
     queue.add(track);
   }
 
@@ -84,7 +99,8 @@ class TrackQueue {
   trackQueue() {}
 }
 
-Database database = Database();
+Database database = Database.instance;
+enum DatabaseState { Uninitialized, Loading, Ready }
 
 class Database {
   static const String MUSIC_PATH = "storage/emulated/0/Music";
@@ -93,6 +109,7 @@ class Database {
   List<Track> tracks = [];
   List<Artist> authors = [];
   List<Album> albums = [];
+  DatabaseState state = DatabaseState.Uninitialized;
   static final Database instance = Database._internal();
 
   factory Database() {
@@ -100,13 +117,15 @@ class Database {
   }
   Database._internal();
 
-  Future init() async {
-    return Future(() {
-      findMusic();
-    });
+  void init(Function update) {
+    state = DatabaseState.Loading;
+    loadData();
+    findMusic(update);
   }
 
-  void findMusic() async {
+  void loadData() {}
+
+  void findMusic(Function update) async {
     List<FileSystemEntity> files = Directory(MUSIC_PATH).listSync();
     for (var i = 0; i < files.length; i++) {
       if (SUPPORTED_FORMATS.contains(p.extension(files[i].path))) {
@@ -127,13 +146,18 @@ class Database {
           lyrics = tag.lyrics;
         }
         tracks.add(Track(
-            title ?? "Unknown",
+            title != null && title != "" ? title : p.basename(files[i].path),
             p.basename(files[i].path),
-            artist ?? "Unknown",
-            album ?? "Unknown",
-            lyrics ?? "Unknown",
-            trackNumber != null ? int.parse(trackNumber) : 0));
+            artist != null && artist != "" ? artist : "Unknown",
+            album != null && album != "" ? album : "Unknown",
+            lyrics != null && lyrics != "" ? lyrics : "Unknown",
+            trackNumber != null && trackNumber != ""
+                ? int.parse(trackNumber)
+                : 0));
+
+        update();
       }
     }
+    state = DatabaseState.Ready;
   }
 }
