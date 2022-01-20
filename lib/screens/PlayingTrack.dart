@@ -3,6 +3,7 @@ import 'dart:collection';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:mad/Player.dart';
+import 'package:mad/buttons/PlayButton.dart';
 import 'package:mad/data.dart';
 
 class PlayingTrack extends StatelessWidget {
@@ -28,22 +29,24 @@ class PlayingTrack extends StatelessWidget {
         Row(
           children: [
             IconButton(
-                onPressed: () => (print("ramen")),
+                onPressed: () {
+                  player.toEnd();
+                  print("ramen");
+                },
                 icon: Icon(Icons.ramen_dining)),
             IconButton(
                 onPressed: () => (print("prev")),
                 icon: Icon(Icons.skip_previous_rounded)),
-            IconButton(
-                onPressed: () {
-                  print("play");
-                  player.play();
-                },
-                icon: Icon(Icons.play_arrow)),
+            PlayButton(),
             IconButton(
                 onPressed: () => (print("next")),
                 icon: Icon(Icons.skip_next_rounded)),
             IconButton(
-                onPressed: () => (print("queue")), icon: Icon(Icons.view_list)),
+                onPressed: () {
+                  print("queue");
+                  Navigator.pushNamed(context, '/queue');
+                },
+                icon: Icon(Icons.view_list)),
           ],
         )
       ],

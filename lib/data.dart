@@ -70,17 +70,33 @@ class TrackQueue {
     return instance;
   }
   TrackQueue._internal();
+  int get length {
+    return queue.length;
+  }
 
   void pushFront(Track track) {
     queue.insert(currentIndex, track);
   }
 
   void pushNext(Track track) {
-    queue.insert(currentIndex + 1, track);
+    if (queue.isNotEmpty) {
+      queue.insert(currentIndex + 1, track);
+    } else {
+      pushFront(track);
+    }
   }
 
-  void pushlast(Track track) {
+  void pushLast(Track track) {
     queue.add(track);
+  }
+
+  void setCurrent(int index) {
+    currentIndex = index;
+  }
+
+  void reset() {
+    currentIndex = 0;
+    queue = [];
   }
 
   void remove(int index) {

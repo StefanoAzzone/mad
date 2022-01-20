@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:mad/Player.dart';
 import 'package:mad/components/AlbumList.dart';
 import 'package:mad/components/ArtistList.dart';
+import 'package:mad/components/PlayBar.dart';
 import 'package:mad/components/PlaylistList.dart';
 import 'package:mad/components/TrackList.dart';
 import 'package:mad/data.dart';
@@ -57,9 +59,13 @@ class _MyHomePageState extends State<MyHomePage> {
               Expanded(
                 child: TabBarView(
                   children: [
-                    TrackList((Track track) {
+                    TrackList((Track track) async {
+                      player.pause();
+                      trackQueue.reset();
                       trackQueue.pushFront(track);
-                      Navigator.pushNamed(context, '/playingTrack');
+                      player.play();
+                      await Navigator.pushNamed(context, '/playingTrack');
+                      _updatePage();
                     }),
                     AlbumList(),
                     ArtistList(),
@@ -67,37 +73,9 @@ class _MyHomePageState extends State<MyHomePage> {
                   ],
                 ),
               ),
-              Align(
-                  alignment: Alignment.bottomCenter,
-                  child: Row(
-                    children: [
-                      Align(
-                        alignment: Alignment.bottomLeft,
-                        child: Text("Track being played.mp3"),
-                      ),
-                      IconButton(
-                        alignment: Alignment.bottomRight,
-                        color: Colors.deepPurple,
-                        onPressed: () {
-                          print("I'm singing in the rain!!!");
-                        },
-                        icon: Icon(Icons.play_arrow),
-                      ),
-                    ],
-                  )),
+              PlayBar(),
             ],
           ),
         ));
   }
-
-  // void getMusicFolder(Function setString) async {
-  //   String allArtists = "";
-  //   final FlutterAudioQuery audioQuery = FlutterAudioQuery();
-  //   // returns all artists available
-  //   List<ArtistInfo> artists = await audioQuery.getArtists();
-  //   artists.forEach((artist) {
-  //     allArtists = allArtists + artist.name + ", ";
-  //   });
-  //   setString(allArtists);
-  // }
 }
