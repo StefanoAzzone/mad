@@ -6,10 +6,19 @@ import 'package:mad/Player.dart';
 import 'package:mad/components/PlayBar.dart';
 import 'package:mad/data.dart';
 
-class ShowQueue extends StatelessWidget {
+class ShowQueue extends StatefulWidget {
   ShowQueue();
 
+  @override
+  State<ShowQueue> createState() => _ShowQueueState();
+}
+
+class _ShowQueueState extends State<ShowQueue> {
   List<Track> queue = [];
+
+  void _update() {
+    setState(() {});
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -47,7 +56,7 @@ class ShowQueue extends StatelessWidget {
               child: Icon(Icons.add),
               onPressed: () async {
                 await Navigator.pushNamed(context, '/select');
-                build(context);
+                _update();
               }),
           PlayBar(),
         ]));

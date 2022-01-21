@@ -3,6 +3,8 @@ import 'dart:collection';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:mad/Player.dart';
+import 'package:mad/bar/ProgressBar.dart';
+import 'package:mad/buttons/CoverButton.dart';
 import 'package:mad/buttons/PlayButton.dart';
 import 'package:mad/data.dart';
 
@@ -14,18 +16,8 @@ class PlayingTrack extends StatelessWidget {
     return Scaffold(
         body: Column(
       children: [
-        IconButton(
-          icon: Icon(Icons.ac_unit),
-          onPressed: () {
-            print("lyrics, " + trackQueue.current().title);
-          },
-        ),
-        //Image.network("https://www.notebookcheck.it/fileadmin/_processed_/9/1/csm_GeForce_RTX_6_0de5ad89ce.jpg"),
-        Slider(
-            value: 0,
-            onChanged: (double value) =>
-                print("New value: " + value.toString()),
-            max: 100),
+        CoverButton(),
+        ProgressBar(),
         Row(
           children: [
             IconButton(

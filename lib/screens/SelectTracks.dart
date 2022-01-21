@@ -23,6 +23,7 @@ class SelectTracks extends StatelessWidget {
         body: Column(children: [
           Expanded(
             child: TrackList((Track track) {
+              //TODO: switch to callback
               trackQueue.pushLast(track);
             }),
           ),

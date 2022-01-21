@@ -5,7 +5,12 @@ import 'package:mad/data.dart';
 
 class AlbumList extends StatelessWidget {
   List<Album> albums = List.generate(
-      20, (index) => Album("AlbumName" + index.toString(), "Elon Musk", "ciao"));
+      20,
+      (index) => Album(
+          "AlbumName" + index.toString(),
+          "Elon Musk",
+          Image.network(
+              'https://awsimages.detik.net.id/visual/2021/04/29/infografis-terbongkar-tesla-elon-musk-miliki-miliaran-bitcoinaristya-rahadian_43.jpeg?w=450&q=90')));
 
   @override
   Widget build(BuildContext context) {

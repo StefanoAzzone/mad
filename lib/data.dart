@@ -1,10 +1,12 @@
 import 'dart:async';
 import 'dart:collection';
+import 'dart:typed_data';
 import 'dart:ui';
 
 import 'package:audiotagger/audiotagger.dart';
 import 'package:audiotagger/models/tag.dart';
 import 'package:crypto/crypto.dart';
+import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as p;
 import 'dart:convert'; // for the utf8.encode method
@@ -19,13 +21,13 @@ class Track {
   String title;
   String path;
   String artist;
-  String album;
+  Album album;
   String lyrics;
   int trackNumber;
 
   Track(this.title, this.path, this.artist, this.album, this.lyrics,
       this.trackNumber) {
-    id = hash(title + artist + album);
+    id = hash(title + artist + album.name);
   }
 }
 
@@ -42,7 +44,7 @@ class Album {
   int id = -1;
   String name;
   String artist;
-  String cover;
+  Image cover;
 
   Album(this.name, this.artist, this.cover) {
     id = hash(name + artist);
@@ -125,6 +127,7 @@ class Database {
   List<Track> tracks = [];
   List<Artist> authors = [];
   List<Album> albums = [];
+  Audiotagger tagger = Audiotagger();
   DatabaseState state = DatabaseState.Uninitialized;
   static final Database instance = Database._internal();
 
@@ -137,6 +140,7 @@ class Database {
     state = DatabaseState.Loading;
     loadData();
     findMusic(update);
+    findAlbum();
   }
 
   void loadData() {}
@@ -145,27 +149,32 @@ class Database {
     List<FileSystemEntity> files = Directory(MUSIC_PATH).listSync();
     for (var i = 0; i < files.length; i++) {
       if (SUPPORTED_FORMATS.contains(p.extension(files[i].path))) {
-        Audiotagger tagger = Audiotagger();
         Tag? tag = await tagger.readTags(
           path: files[i].path,
         );
         String? title = null;
         String? artist = null;
-        String? album = null;
+        String? albumName = null;
         String? trackNumber = null;
         String? lyrics = null;
         if (tag != null) {
           title = tag.title;
           artist = tag.artist;
-          album = tag.album;
+          albumName = tag.album;
           trackNumber = tag.trackNumber;
           lyrics = tag.lyrics;
         }
+
+        Album album = Album(albumName ?? "Unknown", artist ?? "Unknown",
+            await getCover(files[i].path));
+
+        albums.add(album);
+
         tracks.add(Track(
             title != null && title != "" ? title : p.basename(files[i].path),
             p.basename(files[i].path),
             artist != null && artist != "" ? artist : "Unknown",
-            album != null && album != "" ? album : "Unknown",
+            album,
             lyrics != null && lyrics != "" ? lyrics : "Unknown",
             trackNumber != null && trackNumber != ""
                 ? int.parse(trackNumber)
@@ -176,4 +185,17 @@ class Database {
     }
     state = DatabaseState.Ready;
   }
+
+  Future getCover(String path) async {
+    final Uint8List? bytes = await tagger.readArtwork(path: path);
+
+    return Future(() {
+      return bytes != null
+          ? Image.memory(bytes)
+          : Image.network(
+              'https://awsimages.detik.net.id/visual/2021/04/29/infografis-terbongkar-tesla-elon-musk-miliki-miliaran-bitcoinaristya-rahadian_43.jpeg?w=450&q=90');
+    });
+  }
+
+  void findAlbum() {}
 }

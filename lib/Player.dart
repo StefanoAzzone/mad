@@ -8,24 +8,22 @@ Player player = Player.instance;
 
 class Player {
   static final Player instance = Player._internal();
-  bool isPlaying = false;
   factory Player() {
     return instance;
   }
-  Player._internal();
+  Player._internal() {
+    audioPlayer.onPlayerCompletion.listen((event) {
+      next();
+    });
+  }
   AudioPlayer audioPlayer = AudioPlayer();
 
   void play() async {
-    if (!isPlaying) {
-      isPlaying = true;
+    if (!_isPlaying()) {
       int result = await audioPlayer.play(
           Database.MUSIC_PATH + "/" + trackQueue.current().path,
           isLocal: true);
-      audioPlayer.onPlayerCompletion.listen((event) {
-        next();
-      });
     } else {
-      isPlaying = false;
       pause();
     }
   }
@@ -36,17 +34,20 @@ class Player {
 
   void pause() async {
     await audioPlayer.pause();
-    isPlaying = false;
+  }
+
+  void setCurrentTrackPosition(Duration position) async {
+    await audioPlayer.seek(position);
   }
 
   void prev() async {
     if (trackQueue.currentIndex == 0) {
       await audioPlayer.seek(Duration.zero);
-      if (!isPlaying) {
+      if (!_isPlaying()) {
         play();
       }
     } else {
-      if (isPlaying) {
+      if (_isPlaying()) {
         pause();
       }
       trackQueue.currentIndex--;
@@ -59,11 +60,15 @@ class Player {
       await audioPlayer.seek(Duration.zero);
       pause();
     } else {
-      if (isPlaying) {
+      if (_isPlaying()) {
         pause();
       }
       trackQueue.currentIndex++;
       play();
     }
+  }
+
+  bool _isPlaying() {
+    return audioPlayer.state == PlayerState.PLAYING;
   }
 }

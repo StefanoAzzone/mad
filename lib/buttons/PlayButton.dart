@@ -1,3 +1,4 @@
+import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
 import 'package:mad/Player.dart';
 import 'dart:io';
@@ -10,23 +11,21 @@ class PlayButton extends StatefulWidget {
 }
 
 class _PlayButtonState extends State<PlayButton> {
-  bool isPlaying = false;
+  PlayerState state = PlayerState.PLAYING;
 
-  void _update() {
-    isPlaying = player.isPlaying;
-    setState(() {});
+  _PlayButtonState() {
+    player.audioPlayer.onPlayerStateChanged
+        .listen((PlayerState s) => {setState(() => state = s)});
   }
 
   @override
   Widget build(BuildContext context) {
     return IconButton(
         onPressed: () {
-          print("play");
           player.play();
-          _update();
         },
         icon: (() {
-          if (isPlaying) {
+          if (state == PlayerState.PLAYING) {
             return Icon(Icons.pause);
           }
           return Icon(Icons.play_arrow);
