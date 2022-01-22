@@ -37,7 +37,8 @@ class TrackList extends StatelessWidget {
                     )));
           }
           return ListTile(
-            title: Text(tracks[index].title + " - " + tracks[index].artist),
+            title:
+                Text(tracks[index].title + " - " + tracks[index].artist.name),
             onTap: () {
               print(tracks[index].title);
               callback(tracks[index]);

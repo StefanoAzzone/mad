@@ -20,14 +20,14 @@ class Track {
   int id = -1;
   String title;
   String path;
-  String artist;
+  Artist artist;
   Album album;
   String lyrics;
   int trackNumber;
 
   Track(this.title, this.path, this.artist, this.album, this.lyrics,
       this.trackNumber) {
-    id = hash(title + artist + album.name);
+    id = hash(title + artist.name + album.name);
   }
 }
 
@@ -153,27 +153,29 @@ class Database {
           path: files[i].path,
         );
         String? title = null;
-        String? artist = null;
+        String? artistName = null;
         String? albumName = null;
         String? trackNumber = null;
         String? lyrics = null;
         if (tag != null) {
           title = tag.title;
-          artist = tag.artist;
+          artistName = tag.artist;
           albumName = tag.album;
           trackNumber = tag.trackNumber;
           lyrics = tag.lyrics;
         }
 
-        Album album = Album(albumName ?? "Unknown", artist ?? "Unknown",
+        Album album = Album(albumName ?? "Unknown", artistName ?? "Unknown",
             await getCover(files[i].path));
-
         albums.add(album);
+
+        Artist artist = Artist(artistName ?? "Unknown");
+        authors.add(artist);
 
         tracks.add(Track(
             title != null && title != "" ? title : p.basename(files[i].path),
             p.basename(files[i].path),
-            artist != null && artist != "" ? artist : "Unknown",
+            artist,
             album,
             lyrics != null && lyrics != "" ? lyrics : "Unknown",
             trackNumber != null && trackNumber != ""

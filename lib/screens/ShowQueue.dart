@@ -39,8 +39,8 @@ class _ShowQueueState extends State<ShowQueue> {
                 itemCount: trackQueue.length,
                 itemBuilder: (context, index) {
                   return ListTile(
-                    title:
-                        Text(queue[index].title + " - " + queue[index].artist),
+                    title: Text(
+                        queue[index].title + " - " + queue[index].artist.name),
                     onTap: () {
                       if (index != trackQueue.currentIndex) {
                         player.pause();
