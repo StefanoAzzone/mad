@@ -1,12 +1,12 @@
 import 'dart:async';
 import 'dart:collection';
 import 'dart:typed_data';
-import 'dart:ui';
 
 import 'package:audiotagger/audiotagger.dart';
 import 'package:audiotagger/models/tag.dart';
 import 'package:crypto/crypto.dart';
 import 'package:flutter/material.dart';
+import 'package:mad/metadata_loader.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as p;
 import 'dart:convert'; // for the utf8.encode method
@@ -146,6 +146,8 @@ class Database {
   void loadData() {}
 
   void findMusic(Function update) async {
+    MetadataLoader m = MetadataLoader();
+    m.initialize();
     List<FileSystemEntity> files = Directory(MUSIC_PATH).listSync();
     for (var i = 0; i < files.length; i++) {
       if (SUPPORTED_FORMATS.contains(p.extension(files[i].path))) {

@@ -67,8 +67,6 @@ class _MyHomePageState extends State<MyHomePage> {
                       player.play();
                       await Navigator.pushNamed(context, '/playingTrack');
                       _updatePage();
-                      MetadataLoader m = MetadataLoader();
-                      m.searchArtist('Green Day');
                     }),
                     AlbumList(),
                     ArtistList(),
