@@ -28,7 +28,7 @@ void main() {
     expect(find.text('0'), findsNothing);
     expect(find.text('1'), findsOneWidget);
 
-    Artist a = Artist("Gogol Bordello");
+    Artist a = Artist("Gogol Bordello", defaultImage);
     print(a.hashCode);
   });
 }

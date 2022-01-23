@@ -4,8 +4,8 @@ import 'dart:io';
 import 'package:mad/data.dart';
 
 class ArtistList extends StatelessWidget {
-  List<Artist> artists =
-      List.generate(20, (index) => Artist("Artist" + index.toString()));
+  List<Artist> artists = List.generate(
+      20, (index) => Artist("Artist" + index.toString(), defaultImage));
 
   @override
   Widget build(BuildContext context) {

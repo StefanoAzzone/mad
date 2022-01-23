@@ -34,8 +34,9 @@ class Track {
 class Artist {
   int id = -1;
   String name;
+  Image image;
 
-  Artist(this.name) {
+  Artist(this.name, this.image) {
     id = hash(name);
   }
 }
@@ -43,11 +44,11 @@ class Artist {
 class Album {
   int id = -1;
   String name;
-  String artist;
+  Artist artist;
   Image cover;
 
   Album(this.name, this.artist, this.cover) {
-    id = hash(name + artist);
+    id = hash(name + artist.name);
   }
 }
 
@@ -119,13 +120,15 @@ class TrackQueue {
 
 Database database = Database.instance;
 enum DatabaseState { Uninitialized, Loading, Ready }
+final Image defaultImage = Image.network(
+    'https://awsimages.detik.net.id/visual/2021/04/29/infografis-terbongkar-tesla-elon-musk-miliki-miliaran-bitcoinaristya-rahadian_43.jpeg?w=450&q=90');
 
 class Database {
   static const String MUSIC_PATH = "storage/emulated/0/Music";
   static const List<String> SUPPORTED_FORMATS = [".mp3"];
   List files = [];
   List<Track> tracks = [];
-  List<Artist> authors = [];
+  List<Artist> artists = [];
   List<Album> albums = [];
   Audiotagger tagger = Audiotagger();
   DatabaseState state = DatabaseState.Uninitialized;
@@ -146,8 +149,9 @@ class Database {
   void loadData() {}
 
   void findMusic(Function update) async {
-    MetadataLoader m = MetadataLoader();
-    m.initialize();
+    MetadataLoader loader = MetadataLoader();
+    await loader.initialize();
+
     List<FileSystemEntity> files = Directory(MUSIC_PATH).listSync();
     for (var i = 0; i < files.length; i++) {
       if (SUPPORTED_FORMATS.contains(p.extension(files[i].path))) {
@@ -167,22 +171,28 @@ class Database {
           lyrics = tag.lyrics;
         }
 
-        Album album = Album(albumName ?? "Unknown", artistName ?? "Unknown",
-            await getCover(files[i].path));
-        albums.add(album);
+        var info = await loader.searchTrack(
+            title != null && title != "" ? title : p.basename(files[i].path));
+        Track track = await createTrack(info, files[i].path, loader);
 
-        Artist artist = Artist(artistName ?? "Unknown");
-        authors.add(artist);
+        // Album album = Album(
+        //     albumName ?? "Unknown",
+        //     Artist(artistName ?? "Unknown", defaultImage),
+        //     await getCover(files[i].path));
+        // albums.add(album);
 
-        tracks.add(Track(
-            title != null && title != "" ? title : p.basename(files[i].path),
-            p.basename(files[i].path),
-            artist,
-            album,
-            lyrics != null && lyrics != "" ? lyrics : "Unknown",
-            trackNumber != null && trackNumber != ""
-                ? int.parse(trackNumber)
-                : 0));
+        // Artist artist = Artist(artistName ?? "Unknown", defaultImage);
+        // artists.add(artist);
+
+        // tracks.add(Track(
+        //     title != null && title != "" ? title : p.basename(files[i].path),
+        //     p.basename(files[i].path),
+        //     artist,
+        //     album,
+        //     lyrics != null && lyrics != "" ? lyrics : "Unknown",
+        //     trackNumber != null && trackNumber != ""
+        //         ? int.parse(trackNumber)
+        //         : 0));
 
         update();
       }
@@ -194,11 +204,68 @@ class Database {
     final Uint8List? bytes = await tagger.readArtwork(path: path);
 
     return Future(() {
-      return bytes != null
-          ? Image.memory(bytes)
-          : Image.network(
-              'https://awsimages.detik.net.id/visual/2021/04/29/infografis-terbongkar-tesla-elon-musk-miliki-miliaran-bitcoinaristya-rahadian_43.jpeg?w=450&q=90');
+      return bytes != null ? Image.memory(bytes) : defaultImage;
     });
+  }
+
+  Future<Track> createTrack(
+      var item, String path, MetadataLoader loader) async {
+    Artist? artist = containsArtist(loader.extractArtistIdFromTrack(item));
+    if (artist == null) {
+      artist = await createArtistFromTrack(item, loader);
+      artists.add(artist);
+    }
+
+    Album? album = containsAlbum(loader.extractAlbumIdFromTrack(item));
+    if (album == null) {
+      album = await createAlbumFromTrack(item, artist, loader);
+      albums.add(album);
+    }
+
+    return Track(loader.extractTitleFromTrack(item), path, artist, album,
+        "lyrics", loader.extractTrackNumberFromTrack(item));
+  }
+
+  Future<Album> createAlbum(var item, MetadataLoader loader) async {
+    Artist? artist = containsArtist(loader.extractArtistIdFromAlbum(item));
+    if (artist == null) {
+      artist = await createArtistFromAlbum(item, loader);
+      artists.add(artist);
+    }
+    return Album(loader.extractAlbumTitleFromAlbum(item), artist,
+        loader.extractCoverFromAlbum(item));
+  }
+
+  Future<Album> createAlbumFromTrack(
+      var item, Artist artist, MetadataLoader loader) {
+    return Future(() async {
+      return Album(loader.extractAlbumNameFromTrack(item), artist,
+          loader.extractCoverFromTrack(item));
+    });
+  }
+
+  Future<Artist> createArtistFromAlbum(var item, MetadataLoader loader) {
+    return Future(() async {
+      return Artist(loader.extractArtistNameFromAlbum(item),
+          await loader.getArtistImage(loader.extractArtistIdFromAlbum(item)));
+    });
+  }
+
+  Future<Artist> createArtistFromTrack(var item, MetadataLoader loader) {
+    return Future(() async {
+      return Artist(loader.extractArtistNameFromTrack(item),
+          await loader.getArtistImage(loader.extractArtistIdFromTrack(item)));
+    });
+  }
+
+  Artist? containsArtist(String Id) {
+    //TODO
+    return null;
+  }
+
+  Album? containsAlbum(String Id) {
+    //TODO
+    return null;
   }
 
   void findAlbum() {}
