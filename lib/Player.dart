@@ -18,14 +18,18 @@ class Player {
   }
   AudioPlayer audioPlayer = AudioPlayer();
 
-  void play() async {
+  void toggle() async {
     if (!_isPlaying()) {
-      int result = await audioPlayer.play(
-          Database.MUSIC_PATH + "/" + trackQueue.current().path,
-          isLocal: true);
+      play();
     } else {
       pause();
     }
+  }
+
+  void play() async {
+    int result = await audioPlayer.play(
+        trackQueue.current().path,
+        isLocal: true);
   }
 
   void toEnd() async {

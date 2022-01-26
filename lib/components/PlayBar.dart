@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:mad/Player.dart';
+import 'package:mad/buttons/PlayButton.dart';
 import 'dart:io';
 
 import 'package:mad/data.dart';
@@ -15,15 +16,7 @@ class PlayBar extends StatelessWidget {
               Expanded(
                 child: Text(trackQueue.current().title),
               ),
-              IconButton(
-                alignment: Alignment.bottomRight,
-                color: Colors.deepPurple,
-                onPressed: () {
-                  player.play();
-                  print("I'm singing in the rain!!!");
-                },
-                icon: Icon(Icons.play_arrow),
-              ),
+              PlayButton(),
             ],
           ));
     }

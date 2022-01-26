@@ -4,13 +4,7 @@ import 'dart:io';
 import 'package:mad/data.dart';
 
 class AlbumList extends StatelessWidget {
-  List<Album> albums = List.generate(
-      20,
-      (index) => Album(
-          "AlbumName" + index.toString(),
-          Artist("Elon Musk", defaultImage),
-          Image.network(
-              'https://awsimages.detik.net.id/visual/2021/04/29/infografis-terbongkar-tesla-elon-musk-miliki-miliaran-bitcoinaristya-rahadian_43.jpeg?w=450&q=90')));
+  List<Album> albums = Database.instance.albums;
 
   @override
   Widget build(BuildContext context) {
@@ -19,10 +13,9 @@ class AlbumList extends StatelessWidget {
         children: List<IconButton>.generate(albums.length, (index) {
           return IconButton(
             onPressed: () {
-              print(albums[index].name + "--" + albums[index].artist.name);
+              print(albums[index].name + "-" + albums[index].artist.name);
             },
-            icon: Image.network(
-                'https://awsimages.detik.net.id/visual/2021/04/29/infografis-terbongkar-tesla-elon-musk-miliki-miliaran-bitcoinaristya-rahadian_43.jpeg?w=450&q=90'),
+            icon: albums[index].cover,
           );
         }));
   }

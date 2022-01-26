@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'dart:collection';
 import 'dart:typed_data';
+import 'dart:ui';
+import 'package:flutter/src/widgets/image.dart' as img;
 
 import 'package:audiotagger/audiotagger.dart';
 import 'package:audiotagger/models/tag.dart';
@@ -11,6 +13,8 @@ import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as p;
 import 'dart:convert'; // for the utf8.encode method
 import 'dart:io';
+
+import 'package:spotify/spotify.dart';
 
 int hash(String input) {
   return md5.convert(utf8.encode(input)).hashCode;
@@ -34,7 +38,7 @@ class Track {
 class Artist {
   int id = -1;
   String name;
-  Image image;
+  img.Image image;
 
   Artist(this.name, this.image) {
     id = hash(name);
@@ -45,7 +49,7 @@ class Album {
   int id = -1;
   String name;
   Artist artist;
-  Image cover;
+  img.Image cover;
 
   Album(this.name, this.artist, this.cover) {
     id = hash(name + artist.name);
@@ -120,7 +124,7 @@ class TrackQueue {
 
 Database database = Database.instance;
 enum DatabaseState { Uninitialized, Loading, Ready }
-final Image defaultImage = Image.network(
+final img.Image defaultImage = img.Image.network(
     'https://awsimages.detik.net.id/visual/2021/04/29/infografis-terbongkar-tesla-elon-musk-miliki-miliaran-bitcoinaristya-rahadian_43.jpeg?w=450&q=90');
 
 class Database {
@@ -133,6 +137,8 @@ class Database {
   Audiotagger tagger = Audiotagger();
   DatabaseState state = DatabaseState.Uninitialized;
   static final Database instance = Database._internal();
+  static final Artist UnknownArtist = Artist("Unknown Artist", defaultImage);
+  static final Album UnknownAlbum = Album("Unknown Album", UnknownArtist, defaultImage);
 
   factory Database() {
     return instance;
@@ -140,6 +146,9 @@ class Database {
   Database._internal();
 
   void init(Function update) {
+
+    albums.add(UnknownAlbum);
+    artists.add(UnknownArtist);
     state = DatabaseState.Loading;
     loadData();
     findMusic(update);
@@ -173,7 +182,10 @@ class Database {
 
         var info = await loader.searchTrack(
             title != null && title != "" ? title : p.basename(files[i].path));
-        Track track = await createTrack(info, files[i].path, loader);
+        if(info == null)
+          tracks.add(Track(p.basename(files[i].path), files[i].path, UnknownArtist, UnknownAlbum, "Unknown lyrics", 0));
+        else
+          tracks.add(await createTrack(info, files[i].path, loader));
 
         // Album album = Album(
         //     albumName ?? "Unknown",
@@ -204,7 +216,7 @@ class Database {
     final Uint8List? bytes = await tagger.readArtwork(path: path);
 
     return Future(() {
-      return bytes != null ? Image.memory(bytes) : defaultImage;
+      return bytes != null ? img.Image.memory(bytes) : defaultImage;
     });
   }
 

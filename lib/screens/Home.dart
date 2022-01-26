@@ -61,7 +61,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 child: TabBarView(
                   children: [
                     TrackList((Track track) async {
-                      //player.pause();
+                      player.pause();
                       trackQueue.reset();
                       trackQueue.pushFront(track);
                       player.play();

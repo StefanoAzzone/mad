@@ -92,7 +92,7 @@ class MetadataLoader {
 
     var items = jsonDecode(response.body)["tracks"]["items"];
 
-    return Future(() => items[0]);
+    return Future(() => items.length != 0 ? items[0] : null);
   }
 
   String extractAlbumTitleFromAlbum(var item) {

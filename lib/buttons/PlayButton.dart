@@ -22,7 +22,7 @@ class _PlayButtonState extends State<PlayButton> {
   Widget build(BuildContext context) {
     return IconButton(
         onPressed: () {
-          player.play();
+          player.toggle();
         },
         icon: (() {
           if (state == PlayerState.PLAYING) {
