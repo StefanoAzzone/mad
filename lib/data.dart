@@ -220,7 +220,6 @@ class Database {
   void loadData() {}
 
   void findMusic(Function update) async {
-    MetadataLoader loader = MetadataLoader();
     await loader.initialize();
 
     List<FileSystemEntity> files = Directory(MUSIC_PATH).listSync();
@@ -242,7 +241,7 @@ class Database {
           lyrics = tag.lyrics;
         }
 
-        var info = await loader.searchTrack(
+        var info = await loader.searchFirstTrack(
             title != null && title != "" ? title : p.basename(files[i].path));
         if (info == null)
           tracks.add(Track(p.basename(files[i].path), files[i].path,
@@ -272,9 +271,9 @@ class Database {
         update();
       }
     }
-    String json = jsonEncode(database.toJson());
-    Map<String, dynamic> map = jsonDecode(json);
-    fromJson(map);
+    // String json = jsonEncode(database.toJson());
+    // Map<String, dynamic> map = jsonDecode(json);
+    // fromJson(map);
     state = DatabaseState.Ready;
   }
 

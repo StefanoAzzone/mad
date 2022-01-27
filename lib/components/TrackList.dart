@@ -6,8 +6,8 @@ import 'package:path_provider/path_provider.dart';
 
 class TrackList extends StatefulWidget {
   Function callback;
-  TrackList(Function this.callback);  
-    @override
+  TrackList(Function this.callback);
+  @override
   State<TrackList> createState() => _TrackListState(callback);
 }
 
@@ -27,7 +27,8 @@ class _TrackListState extends State<TrackList> {
         shrinkWrap: true,
         itemCount: count,
         itemBuilder: (context, index) {
-          RenderObject? overlay = Overlay.of(context)?.context.findRenderObject();
+          RenderObject? overlay =
+              Overlay.of(context)?.context.findRenderObject();
           if (index == tracks.length) {
             Size size = MediaQuery.of(context).size;
             return Center(
@@ -44,37 +45,57 @@ class _TrackListState extends State<TrackList> {
                     )));
           }
           return GestureDetector(
-            onTapDown: (TapDownDetails details){
-              _tapPosition = details.globalPosition;
-            },
-            onLongPress: () {
-      
-              Size? size = overlay?.semanticBounds.size;
-              if(size != null) {
-                showMenu(context: context, 
-                        position: RelativeRect.fromRect(
-                        _tapPosition & const Size(40, 40), // smaller rect, the touch area
-                        Offset.zero & size  // Bigger rect, the entire screen
-                        ),
-                        items: <PopupMenuEntry<String>>[
-                                const PopupMenuItem<String>(
-                                  value: 'Value1',
-                                  child: Text('Choose value 1'),
-                                ),
-                              ],);
-              }
-            },
-            child: ListTile(
-              title:
-                  Text(tracks[index].title + " - " + tracks[index].artist.name),
-              onTap: () {
-                print(tracks[index].title);
-                callback(tracks[index]);
+              onTapDown: (TapDownDetails details) {
+                _tapPosition = details.globalPosition;
               },
-            )
-
-          ); 
+              onLongPress: () {
+                Size? size = overlay?.semanticBounds.size;
+                if (size != null) {
+                  showMenu(
+                    context: context,
+                    position: RelativeRect.fromRect(
+                        _tapPosition &
+                            const Size(40, 40), // smaller rect, the touch area
+                        Offset.zero & size // Bigger rect, the entire screen
+                        ),
+                    items: <PopupMenuEntry<String>>[
+                      PopupMenuItem<String>(
+                          value: 'Value1',
+                          child: Column(
+                            children: [
+                              TextButton(
+                                  onPressed: () {
+                                    Navigator.pop(context);
+                                    Navigator.pushNamed(
+                                        context, '/editMetadata');
+                                  },
+                                  child: Text(
+                                    "Edit metadata",
+                                    style: TextStyle(color: Colors.black),
+                                  )),
+                              TextButton(
+                                  onPressed: () {
+                                    trackQueue.pushLast(database.tracks[index]);
+                                    Navigator.pop(context);
+                                  },
+                                  child: Text(
+                                    "Add to queue",
+                                    style: TextStyle(color: Colors.black),
+                                  )),
+                            ],
+                          )),
+                    ],
+                  );
+                }
+              },
+              child: ListTile(
+                title: Text(
+                    tracks[index].title + " - " + tracks[index].artist.name),
+                onTap: () {
+                  print(tracks[index].title);
+                  callback(tracks[index]);
+                },
+              ));
         });
   }
-
 }

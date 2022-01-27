@@ -6,6 +6,8 @@ import 'package:flutter/src/widgets/image.dart' as image;
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
+MetadataLoader loader = MetadataLoader.instance;
+
 class MetadataLoader {
   String base = "https://api.spotify.com";
   String accounts = "https://accounts.spotify.com";
@@ -17,14 +19,18 @@ class MetadataLoader {
   String clientSecret = "80b9db3e3b2e4f9ba283a0b1e07af86d";
   String token = "";
   SpotifyApi? spotify;
+  static final MetadataLoader instance = MetadataLoader._internal();
 
-  MetadataLoader() {
+  factory MetadataLoader() {
+    return instance;
+  }
+  MetadataLoader._internal();
+
+  Future initialize() async {
     SpotifyApiCredentials credentials =
         SpotifyApiCredentials(clientId, clientSecret);
     spotify = SpotifyApi(credentials);
-  }
 
-  Future initialize() async {
     return Future(() async {
       if (token == "") {
         Codec<String, String> stringToBase64 = utf8.fuse(base64);
@@ -47,23 +53,6 @@ class MetadataLoader {
     });
   }
 
-  // void searchTrack(String artist) async {
-  //   //SEARCH//
-  //   String url =
-  //       base + searchEndPoint + "?" + "q=track:American%20Idiot&type=track";
-  //   print(url);
-  //   http.Response response =
-  //       await http.get(Uri.parse(url), headers: <String, String>{
-  //     "Accept": "application/json",
-  //     'Content-Type': 'application/json',
-  //     'Authorization': 'Bearer ' + token,
-  //   });
-
-  //   print(response.body);
-  //   var items = jsonDecode(response.body)["tracks"]["items"];
-  //   print(items);
-  // }
-
   Future<data.Artist> searchArtist(String artist) async {
     http.Response response =
         await queryAPI(Uri.encodeFull("artist:" + artist + "&type=artist"));
@@ -71,10 +60,6 @@ class MetadataLoader {
     var items = jsonDecode(response.body)["artists"]["items"];
 
     return Future(() => items[0]);
-
-    // print(items);
-    // return Future<data.Artist>(() => data.Artist(
-    //     first["name"], image.Image.network(first["images"][0]["url"])));
   }
 
   Future searchAlbum(String title) async {
@@ -86,13 +71,26 @@ class MetadataLoader {
     return Future(() => items[0]);
   }
 
-  Future searchTrack(String title) async {
+  Future searchFirstTrack(String title) async {
     http.Response response =
         await queryAPI(Uri.encodeFull("track:" + title + "&type=track"));
 
     var items = jsonDecode(response.body)["tracks"]["items"];
 
     return Future(() => items.length != 0 ? items[0] : null);
+  }
+
+  Future searchAllTracks(String title) async {
+    http.Response response =
+        await queryAPI(Uri.encodeFull("track:" + title + "&type=track"));
+
+    var items = jsonDecode(response.body)["tracks"]["items"];
+
+    return Future(() => items.length != 0 ? items : null);
+  }
+
+  int getItemsCount(var items) {
+    return items != null ? items.length : 0;
   }
 
   String extractAlbumTitleFromAlbum(var item) {
@@ -113,6 +111,20 @@ class MetadataLoader {
 
   String extractTitleFromTrack(var item) {
     return item["name"];
+  }
+
+  String extractTitleFromTracks(var items, int index) {
+    return items[index]["name"];
+  }
+
+  String extractArtistFromTracks(var items, int index) {
+    return items[index]["artists"][0]["name"];
+  }
+
+  image.Image extractThumbnailUrlFromTracks(var items, int index) {
+    var tmp = items[index]["album"]["images"];
+
+    return image.Image.network(tmp[tmp.length - 1]["url"]);
   }
 
   String extractArtistNameFromTrack(var item) {

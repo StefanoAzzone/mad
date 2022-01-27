@@ -3,6 +3,7 @@ import 'dart:collection';
 import 'package:flutter/material.dart';
 import 'package:mad/data.dart';
 import 'package:mad/screens/Home.dart';
+import 'package:mad/screens/MetadataEditor.dart';
 import 'package:mad/screens/PlayingTrack.dart';
 import 'package:mad/screens/SelectTracks.dart';
 import 'package:mad/screens/ShowQueue.dart';
@@ -26,6 +27,7 @@ class MyApp extends StatelessWidget {
         '/playingTrack': (context) => PlayingTrack(),
         '/queue': (context) => ShowQueue(),
         '/select': (context) => SelectTracks(),
+        '/editMetadata': (context) => MetadataEditor(),
       },
       theme: ThemeData(
         primarySwatch: Colors.blue,
