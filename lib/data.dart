@@ -33,6 +33,26 @@ class Track {
       this.trackNumber) {
     id = hash(title + artist.name + album.name);
   }
+
+  static Track fromJson(Map<String, dynamic> json) => Track(
+      //TODO: ID???
+      json["title"],
+      json["path"],
+      database.containsArtist(json["Artist"].toString()) ??
+          Database.UnknownArtist,
+      database.containsAlbum(json["Album"].toString()) ?? Database.UnknownAlbum,
+      json["lyrics"],
+      json["trackNumber"]);
+
+  Map<String, dynamic> toJson() => <String, dynamic>{
+        'id': id,
+        'title': title,
+        'path': path,
+        'artist': artist.id,
+        'album': album.id,
+        'lyrics': lyrics,
+        'trackNumber': trackNumber,
+      };
 }
 
 class Artist {
@@ -43,6 +63,17 @@ class Artist {
   Artist(this.name, this.image) {
     id = hash(name);
   }
+
+  static Artist fromJson(Map<String, dynamic> json) => Artist(
+      //TODO: ID???
+      json["name"],
+      img.Image.network(json["image"]));
+
+  Map<String, dynamic> toJson() => <String, dynamic>{
+        'id': id,
+        'name': name,
+        'image': "url",
+      };
 }
 
 class Album {
@@ -54,6 +85,20 @@ class Album {
   Album(this.name, this.artist, this.cover) {
     id = hash(name + artist.name);
   }
+
+  static Album fromJson(Map<String, dynamic> json) => Album(
+      //TODO: ID???
+      json["name"],
+      database.containsArtist(json["Artist"].toString()) ??
+          Database.UnknownArtist,
+      img.Image.network(json["image"]));
+
+  Map<String, dynamic> toJson() => <String, dynamic>{
+        'id': id,
+        'name': name,
+        'Artist': artist.id,
+        'image': "url",
+      };
 }
 
 class Playlist {
@@ -138,21 +183,38 @@ class Database {
   DatabaseState state = DatabaseState.Uninitialized;
   static final Database instance = Database._internal();
   static final Artist UnknownArtist = Artist("Unknown Artist", defaultImage);
-  static final Album UnknownAlbum = Album("Unknown Album", UnknownArtist, defaultImage);
+  static final Album UnknownAlbum =
+      Album("Unknown Album", UnknownArtist, defaultImage);
 
   factory Database() {
     return instance;
   }
   Database._internal();
 
-  void init(Function update) {
+  Map<String, dynamic> toJson() => <String, dynamic>{
+        'tracks': tracks.map((e) => e.toJson()).toList(),
+        'artists': artists.map((e) => e.toJson()).toList(),
+        'albums': albums.map((e) => e.toJson()).toList(),
+      };
 
+  void fromJson(Map<String, dynamic> json) {
+    tracks = ((json['tracks'] as List<dynamic>)
+        .map((e) => Track.fromJson(e as Map<String, dynamic>))
+        .toList());
+    artists = ((json['artists'] as List<dynamic>)
+        .map((e) => Artist.fromJson(e as Map<String, dynamic>))
+        .toList());
+    albums = ((json['albums'] as List<dynamic>)
+        .map((e) => Album.fromJson(e as Map<String, dynamic>))
+        .toList());
+  }
+
+  void init(Function update) {
     albums.add(UnknownAlbum);
     artists.add(UnknownArtist);
     state = DatabaseState.Loading;
     loadData();
     findMusic(update);
-    findAlbum();
   }
 
   void loadData() {}
@@ -182,8 +244,9 @@ class Database {
 
         var info = await loader.searchTrack(
             title != null && title != "" ? title : p.basename(files[i].path));
-        if(info == null)
-          tracks.add(Track(p.basename(files[i].path), files[i].path, UnknownArtist, UnknownAlbum, "Unknown lyrics", 0));
+        if (info == null)
+          tracks.add(Track(p.basename(files[i].path), files[i].path,
+              UnknownArtist, UnknownAlbum, "Unknown lyrics", 0));
         else
           tracks.add(await createTrack(info, files[i].path, loader));
 
@@ -209,6 +272,9 @@ class Database {
         update();
       }
     }
+    String json = jsonEncode(database.toJson());
+    Map<String, dynamic> map = jsonDecode(json);
+    fromJson(map);
     state = DatabaseState.Ready;
   }
 
@@ -279,6 +345,4 @@ class Database {
     //TODO
     return null;
   }
-
-  void findAlbum() {}
 }
