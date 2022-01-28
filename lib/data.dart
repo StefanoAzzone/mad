@@ -8,6 +8,7 @@ import 'package:audiotagger/audiotagger.dart';
 import 'package:audiotagger/models/tag.dart';
 import 'package:crypto/crypto.dart';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart';
 import 'package:mad/metadata_loader.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as p;
@@ -243,11 +244,12 @@ class Database {
 
         var info = await loader.searchFirstTrack(
             title != null && title != "" ? title : p.basename(files[i].path));
+
         if (info == null)
           tracks.add(Track(p.basename(files[i].path), files[i].path,
               UnknownArtist, UnknownAlbum, "Unknown lyrics", 0));
         else
-          tracks.add(await createTrack(info, files[i].path, loader));
+          tracks.add(await createTrack(info, files[i].path));
 
         // Album album = Album(
         //     albumName ?? "Unknown",
@@ -277,6 +279,14 @@ class Database {
     state = DatabaseState.Ready;
   }
 
+  Future setNewMetadata(int index, var metadata) async {
+    //TODO: delete old artist and album if not usefull
+    return Future(() async {
+      String path = tracks[index].path;
+      tracks[index] = await createTrack(metadata, path);
+    });
+  }
+
   Future getCover(String path) async {
     final Uint8List? bytes = await tagger.readArtwork(path: path);
 
@@ -285,50 +295,50 @@ class Database {
     });
   }
 
-  Future<Track> createTrack(
-      var item, String path, MetadataLoader loader) async {
+  Future<Track> createTrack(var item, String path) async {
     Artist? artist = containsArtist(loader.extractArtistIdFromTrack(item));
     if (artist == null) {
-      artist = await createArtistFromTrack(item, loader);
+      artist = await createArtistFromTrack(item);
       artists.add(artist);
     }
 
     Album? album = containsAlbum(loader.extractAlbumIdFromTrack(item));
     if (album == null) {
-      album = await createAlbumFromTrack(item, artist, loader);
+      album = await createAlbumFromTrack(item, artist);
       albums.add(album);
     }
 
+    String lyrics = await loader.getLyricsFromTrack(item);
+
     return Track(loader.extractTitleFromTrack(item), path, artist, album,
-        "lyrics", loader.extractTrackNumberFromTrack(item));
+        lyrics, loader.extractTrackNumberFromTrack(item));
   }
 
-  Future<Album> createAlbum(var item, MetadataLoader loader) async {
+  Future<Album> createAlbum(var item) async {
     Artist? artist = containsArtist(loader.extractArtistIdFromAlbum(item));
     if (artist == null) {
-      artist = await createArtistFromAlbum(item, loader);
+      artist = await createArtistFromAlbum(item);
       artists.add(artist);
     }
     return Album(loader.extractAlbumTitleFromAlbum(item), artist,
         loader.extractCoverFromAlbum(item));
   }
 
-  Future<Album> createAlbumFromTrack(
-      var item, Artist artist, MetadataLoader loader) {
+  Future<Album> createAlbumFromTrack(var item, Artist artist) {
     return Future(() async {
       return Album(loader.extractAlbumNameFromTrack(item), artist,
           loader.extractCoverFromTrack(item));
     });
   }
 
-  Future<Artist> createArtistFromAlbum(var item, MetadataLoader loader) {
+  Future<Artist> createArtistFromAlbum(var item) {
     return Future(() async {
       return Artist(loader.extractArtistNameFromAlbum(item),
           await loader.getArtistImage(loader.extractArtistIdFromAlbum(item)));
     });
   }
 
-  Future<Artist> createArtistFromTrack(var item, MetadataLoader loader) {
+  Future<Artist> createArtistFromTrack(var item) {
     return Future(() async {
       return Artist(loader.extractArtistNameFromTrack(item),
           await loader.getArtistImage(loader.extractArtistIdFromTrack(item)));

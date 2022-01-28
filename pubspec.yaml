@@ -42,6 +42,7 @@ dependencies:
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.2
   spotify: ^0.7.0
+  html: ^0.15.0
 
 dev_dependencies:
   flutter_test:

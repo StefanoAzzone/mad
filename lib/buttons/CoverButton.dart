@@ -27,15 +27,18 @@ class _CoverButtonState extends State<CoverButton> {
         ? (size.width / 100 * 95)
         : (size.height / 100 * 95);
     return Expanded(
-        child: IconButton(
-            iconSize: imageSize,
-            onPressed: () {
-              setState(() {
-                lyricsVisible = !lyricsVisible;
-              });
-            },
-            icon: (() {
-              return trackQueue.current().album.cover;
-            }())));
+        child: GestureDetector(
+      child: (() {
+        if (lyricsVisible) {
+          return SingleChildScrollView(
+            child: Text(trackQueue.current().lyrics),
+          );
+        }
+        return trackQueue.current().album.cover;
+      }()),
+      onTap: (() => setState(() {
+            lyricsVisible = !lyricsVisible;
+          })),
+    ));
   }
 }

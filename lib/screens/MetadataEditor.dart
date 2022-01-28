@@ -56,19 +56,27 @@ class _MetadataEditorState extends State<MetadataEditor> {
                                     overflow: TextOverflow.fade,
                                   ),
                                 )),
-                            Text(
-                              loader.extractArtistFromTracks(result, index),
-                              overflow: TextOverflow.fade,
-                              style: const TextStyle(
-                                fontSize: 12,
+                            SizedBox(
+                              height: size.height / 25,
+                              width: size.width - 112,
+                              child: Center(
+                                child: Text(
+                                  loader.extractArtistFromTracks(result, index),
+                                  overflow: TextOverflow.fade,
+                                  style: const TextStyle(
+                                    fontSize: 12,
+                                  ),
+                                ),
                               ),
-                            ),
+                            )
                           ],
                         )
                       ],
                     ),
                   ),
-                  onTap: () {},
+                  onTap: () {
+                    Navigator.pop(context, loader.getItem(result, index));
+                  },
                 );
               },
             ),

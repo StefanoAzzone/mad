@@ -64,10 +64,17 @@ class _TrackListState extends State<TrackList> {
                           child: Column(
                             children: [
                               TextButton(
-                                  onPressed: () {
+                                  onPressed: () async {
                                     Navigator.pop(context);
-                                    Navigator.pushNamed(
+                                    var metadata = await Navigator.pushNamed(
                                         context, '/editMetadata');
+                                    if (metadata != null) {
+                                      await database.setNewMetadata(
+                                          index, metadata);
+                                      setState(() {
+                                        tracks = database.tracks;
+                                      });
+                                    }
                                   },
                                   child: Text(
                                     "Edit metadata",
