@@ -229,46 +229,17 @@ class Database {
         Tag? tag = await tagger.readTags(
           path: files[i].path,
         );
-        String? title = null;
-        String? artistName = null;
-        String? albumName = null;
-        String? trackNumber = null;
-        String? lyrics = null;
-        if (tag != null) {
-          title = tag.title;
-          artistName = tag.artist;
-          albumName = tag.album;
-          trackNumber = tag.trackNumber;
-          lyrics = tag.lyrics;
-        }
+        String? title = tag?.title;
 
         var info = await loader.searchFirstTrack(
             title != null && title != "" ? title : p.basename(files[i].path));
 
-        if (info == null)
+        if (info == null) {
           tracks.add(Track(p.basename(files[i].path), files[i].path,
               UnknownArtist, UnknownAlbum, "Unknown lyrics", 0));
-        else
-          tracks.add(await createTrack(info, files[i].path));
-
-        // Album album = Album(
-        //     albumName ?? "Unknown",
-        //     Artist(artistName ?? "Unknown", defaultImage),
-        //     await getCover(files[i].path));
-        // albums.add(album);
-
-        // Artist artist = Artist(artistName ?? "Unknown", defaultImage);
-        // artists.add(artist);
-
-        // tracks.add(Track(
-        //     title != null && title != "" ? title : p.basename(files[i].path),
-        //     p.basename(files[i].path),
-        //     artist,
-        //     album,
-        //     lyrics != null && lyrics != "" ? lyrics : "Unknown",
-        //     trackNumber != null && trackNumber != ""
-        //         ? int.parse(trackNumber)
-        //         : 0));
+        } else {
+          tracks.add(await createTrack(info, tag, files[i].path));
+        }
 
         update();
       }
@@ -283,7 +254,7 @@ class Database {
     //TODO: delete old artist and album if not usefull
     return Future(() async {
       String path = tracks[index].path;
-      tracks[index] = await createTrack(metadata, path);
+      tracks[index] = await createTrack(metadata, null, path);
     });
   }
 
@@ -295,11 +266,42 @@ class Database {
     });
   }
 
-  Future<Track> createTrack(var item, String path) async {
-    Artist? artist = containsArtist(loader.extractArtistIdFromTrack(item));
-    if (artist == null) {
-      artist = await createArtistFromTrack(item);
-      artists.add(artist);
+  Future<Track> createTrack(var item, Tag? tag, String path) async {
+    String? title = null;
+    String? artistName = null;
+    String? albumName = null;
+    int? trackNumber = null;
+    String? lyrics = null;
+    if (tag != null) {
+      title = tag.title;
+      artistName = tag.artist;
+      albumName = tag.album;
+      trackNumber = int.parse(tag.trackNumber ?? "-1");
+      lyrics = tag.lyrics;
+    }
+
+    Artist? artist;
+    if (artistName == "" || artistName == null) {
+      //tag missing
+      artist = containsArtist(loader.extractArtistIdFromTrack(item));
+      if (artist == null) {
+        artist = await createArtistFromTrack(item);
+        artists.add(artist);
+      }
+    } else {
+      //tag present
+      var item = await loader.searchArtist(artistName);
+      artist = (item == null)
+          ? Artist(artistName, defaultImage) //Artist not found
+          : Artist(
+              //Artist found
+              loader.extractArtistNameFromArtist(item),
+              await loader
+                  .getArtistImage(loader.extractArtistIdFromArtist(item)));
+      //TODO : fix the id: we are not using the right id
+      if (containsArtist(artist.id.toString()) == null) {
+        artists.add(artist);
+      }
     }
 
     Album? album = containsAlbum(loader.extractAlbumIdFromTrack(item));
@@ -308,10 +310,33 @@ class Database {
       albums.add(album);
     }
 
-    String lyrics = await loader.getLyricsFromTrack(item);
+    // TODO
+    // Album? album;
+    // if (albumName == "" || albumName == null) {
+    //   album = containsAlbum(loader.extractAlbumIdFromTrack(item));
+    //   if (album == null) {
+    //     album = await createAlbumFromTrack(item, artist);
+    //     albums.add(album);
+    //   }
+    // }
+    // else{
+    //   album = await loader.searchAlbum(albumName);
+    //   if (containsAlbum(album.id.toString()) != null) {
+    //     artists.add(artist);
+    //   }
+    // }
 
-    return Track(loader.extractTitleFromTrack(item), path, artist, album,
-        lyrics, loader.extractTrackNumberFromTrack(item));
+    if (title == null || title == "") {
+      title = loader.extractTitleFromTrack(item);
+    }
+    if (lyrics == null || lyrics == "") {
+      lyrics = await loader.getLyricsFromTrack(item);
+    }
+    if (trackNumber == null || trackNumber == -1) {
+      trackNumber = loader.extractTrackNumberFromTrack(item);
+    }
+
+    return Track(title, path, artist, album, lyrics, trackNumber);
   }
 
   Future<Album> createAlbum(var item) async {

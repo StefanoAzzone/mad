@@ -59,13 +59,13 @@ class MetadataLoader {
     });
   }
 
-  Future<data.Artist> searchArtist(String artist) async {
+  Future searchArtist(String artist) async {
     http.Response response =
         await queryAPI(Uri.encodeFull("artist:" + artist + "&type=artist"));
 
     var items = jsonDecode(response.body)["artists"]["items"];
 
-    return Future(() => items[0]);
+    return Future(() => items.length != 0 ? items[0] : null);
   }
 
   Future searchAlbum(String title) async {
@@ -74,7 +74,7 @@ class MetadataLoader {
 
     var items = jsonDecode(response.body)["albums"]["items"];
 
-    return Future(() => items[0]);
+    return Future(() => items.length != 0 ? items[0] : null);
   }
 
   Future searchFirstTrack(String title) async {
@@ -101,6 +101,14 @@ class MetadataLoader {
 
   Map getItem(var items, int index) {
     return items[index];
+  }
+
+  String extractArtistIdFromArtist(var item) {
+    return item["id"];
+  }
+
+  String extractArtistNameFromArtist(var item) {
+    return item["name"];
   }
 
   String extractAlbumTitleFromAlbum(var item) {
@@ -166,6 +174,16 @@ class MetadataLoader {
         extractTitleFromTrack(item) + " " + extractArtistNameFromTrack(item));
   }
 
+  Future<http.Response> queryAPI(String query) {
+    String url = base + searchEndPoint + "?" + "q=" + query;
+    // print(url);
+    return http.get(Uri.parse(url), headers: <String, String>{
+      "Accept": "application/json",
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer ' + spotifyToken,
+    });
+  }
+
   Future<String> queryLyrics(String query) async {
     String lyrics = "";
     String url = genius +
@@ -205,23 +223,17 @@ class MetadataLoader {
     for (var i = 0; i < nodes.length; i++) {
       if (nodes[i].firstChild == null) {
         if (nodes[i].text != "") {
-          lyrics += nodes[i].text + "\n";
+          if (nodes[i].text[0] == '[') {
+            lyrics += '\n ' + nodes[i].text + "\n\n";
+          } else {
+            lyrics += nodes[i].text + "\n";
+          }
         }
       } else {
         lyrics += parseLyrics(nodes[i].nodes);
       }
     }
     return lyrics;
-  }
-
-  Future<http.Response> queryAPI(String query) {
-    String url = base + searchEndPoint + "?" + "q=" + query;
-    // print(url);
-    return http.get(Uri.parse(url), headers: <String, String>{
-      "Accept": "application/json",
-      'Content-Type': 'application/json',
-      'Authorization': 'Bearer ' + spotifyToken,
-    });
   }
 
   Future<image.Image> getArtistImage(String Id) async {
