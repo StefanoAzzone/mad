@@ -22,3 +22,4 @@ TODOs:
 -album nullable
 -horizontal/vertical layout
 -tests
+-allow to use w/o internet 

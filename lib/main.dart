@@ -2,6 +2,8 @@ import 'dart:collection';
 
 import 'package:flutter/material.dart';
 import 'package:mad/data.dart';
+import 'package:mad/screens/AlbumTracks.dart';
+import 'package:mad/screens/ArtistAlbums.dart';
 import 'package:mad/screens/Home.dart';
 import 'package:mad/screens/MetadataEditor.dart';
 import 'package:mad/screens/PlayingTrack.dart';
@@ -28,6 +30,10 @@ class MyApp extends StatelessWidget {
         '/queue': (context) => ShowQueue(),
         '/select': (context) => SelectTracks(),
         '/editMetadata': (context) => MetadataEditor(),
+        ExtractArgumentsAlbumTracks.routeName: (context) =>
+          const ExtractArgumentsAlbumTracks(),
+        ExtractArgumentsArtistAlbums.routeName: (context) =>
+          const ExtractArgumentsArtistAlbums(),
       },
       theme: ThemeData(
         primarySwatch: Colors.blue,

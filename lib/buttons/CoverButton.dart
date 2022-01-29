@@ -26,19 +26,22 @@ class _CoverButtonState extends State<CoverButton> {
     imageSize = size.width < size.height
         ? (size.width / 100 * 95)
         : (size.height / 100 * 95);
-    return Expanded(
-        child: GestureDetector(
-      child: (() {
-        if (lyricsVisible) {
-          return SingleChildScrollView(
-            child: Text(trackQueue.current().lyrics),
-          );
-        }
-        return trackQueue.current().album.cover;
-      }()),
-      onTap: (() => setState(() {
-            lyricsVisible = !lyricsVisible;
-          })),
-    ));
+    return GestureDetector(
+          child: SizedBox(
+            height: imageSize,
+            width: imageSize,
+            child: (() {
+              if (lyricsVisible) {
+                return SingleChildScrollView(
+                  child: Text(trackQueue.current().lyrics),
+                );
+              }
+              return trackQueue.current().album.cover;
+            }()),
+          ),
+          onTap: (() => setState(() {
+                lyricsVisible = !lyricsVisible;
+              })),
+    );
   }
 }

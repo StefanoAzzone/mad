@@ -25,7 +25,7 @@ class SelectTracks extends StatelessWidget {
             child: TrackList((Track track) {
               //TODO: switch to callback
               trackQueue.pushLast(track);
-            }),
+            }, database.tracks),
           ),
           PlayBar(),
         ]));

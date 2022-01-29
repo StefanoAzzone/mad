@@ -67,8 +67,8 @@ class _MyHomePageState extends State<MyHomePage> {
                       player.play();
                       await Navigator.pushNamed(context, '/playingTrack');
                       _updatePage();
-                    }),
-                    AlbumList(),
+                    }, database.tracks),
+                    AlbumList(database.albums),
                     ArtistList(),
                     PlaylistList(),
                   ],

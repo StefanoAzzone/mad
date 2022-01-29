@@ -142,7 +142,7 @@ class MetadataLoader {
   image.Image extractThumbnailUrlFromTracks(var items, int index) {
     var tmp = items[index]["album"]["images"];
 
-    return image.Image.network(tmp[tmp.length - 1]["url"]);
+    return tmp.length > 0 ? image.Image.network(tmp[tmp.length - 1]["url"]) : data.defaultAlbumThumbnail;
   }
 
   String extractArtistNameFromTrack(var item) {

@@ -33,6 +33,7 @@ class Track {
   Track(this.title, this.path, this.artist, this.album, this.lyrics,
       this.trackNumber) {
     id = hash(title + artist.name + album.name);
+    album.addTrack(this);
   }
 
   static Track fromJson(Map<String, dynamic> json) => Track(
@@ -54,9 +55,15 @@ class Track {
         'lyrics': lyrics,
         'trackNumber': trackNumber,
       };
+  
+  void delete() {
+    album.deleteTrack(this);
+    database.tracks.remove(this);
+  }
 }
 
 class Artist {
+  List<Album> albumList = [];
   int id = -1;
   String name;
   img.Image image;
@@ -75,9 +82,21 @@ class Artist {
         'name': name,
         'image': "url",
       };
+
+  void addAlbum(Album album) {
+    albumList.add(album);
+  }
+
+  void deleteAlbum(Album album) {
+    albumList.remove(album);
+    if(albumList.isEmpty) {
+      database.deleteArtist(this);
+    }
+  }
 }
 
 class Album {
+  List<Track> trackList = [];
   int id = -1;
   String name;
   Artist artist;
@@ -85,9 +104,11 @@ class Album {
 
   Album(this.name, this.artist, this.cover) {
     id = hash(name + artist.name);
+    artist.addAlbum(this);
   }
 
   static Album fromJson(Map<String, dynamic> json) => Album(
+
       //TODO: ID???
       json["name"],
       database.containsArtist(json["Artist"].toString()) ??
@@ -100,6 +121,15 @@ class Album {
         'Artist': artist.id,
         'image': "url",
       };
+
+  void addTrack(Track track) {
+    trackList.add(track);
+  }
+
+  void deleteTrack(Track track) {
+    if(trackList.remove(track) && trackList.isEmpty)
+      database.deleteAlbum(this);
+  }
 }
 
 class Playlist {
@@ -170,8 +200,9 @@ class TrackQueue {
 
 Database database = Database.instance;
 enum DatabaseState { Uninitialized, Loading, Ready }
-final img.Image defaultImage = img.Image.network(
-    'https://awsimages.detik.net.id/visual/2021/04/29/infografis-terbongkar-tesla-elon-musk-miliki-miliaran-bitcoinaristya-rahadian_43.jpeg?w=450&q=90');
+final img.Image defaultImage = img.Image.asset('images/musk.jpeg');
+
+final img.Image defaultAlbumThumbnail = img.Image.asset('images/albumThumb.png');
 
 class Database {
   static const String MUSIC_PATH = "storage/emulated/0/Music";
@@ -180,6 +211,7 @@ class Database {
   List<Track> tracks = [];
   List<Artist> artists = [];
   List<Album> albums = [];
+  List<Playlist> playlists = [];
   Audiotagger tagger = Audiotagger();
   DatabaseState state = DatabaseState.Uninitialized;
   static final Database instance = Database._internal();
@@ -211,8 +243,8 @@ class Database {
   }
 
   void init(Function update) {
-    albums.add(UnknownAlbum);
-    artists.add(UnknownArtist);
+    insertAlbum(UnknownAlbum);
+    insertArtist(UnknownArtist);
     state = DatabaseState.Loading;
     loadData();
     findMusic(update);
@@ -235,10 +267,10 @@ class Database {
             title != null && title != "" ? title : p.basename(files[i].path));
 
         if (info == null) {
-          tracks.add(Track(p.basename(files[i].path), files[i].path,
+          insertTrack(Track(p.basename(files[i].path), files[i].path,
               UnknownArtist, UnknownAlbum, "Unknown lyrics", 0));
         } else {
-          tracks.add(await createTrack(info, tag, files[i].path));
+          insertTrack(await createTrack(info, tag, files[i].path));
         }
 
         update();
@@ -250,11 +282,12 @@ class Database {
     state = DatabaseState.Ready;
   }
 
-  Future setNewMetadata(int index, var metadata) async {
-    //TODO: delete old artist and album if not usefull
+  Future setNewMetadata(Track track, var metadata) async {
+    //TODO: delete old artist and album if not useful
     return Future(() async {
-      String path = tracks[index].path;
-      tracks[index] = await createTrack(metadata, null, path);
+      String path = track.path;
+      track.delete();
+      insertTrack(await createTrack(metadata, null, path));
     });
   }
 
@@ -286,7 +319,7 @@ class Database {
       artist = containsArtist(loader.extractArtistIdFromTrack(item));
       if (artist == null) {
         artist = await createArtistFromTrack(item);
-        artists.add(artist);
+        insertArtist(artist);
       }
     } else {
       //tag present
@@ -300,14 +333,14 @@ class Database {
                   .getArtistImage(loader.extractArtistIdFromArtist(item)));
       //TODO : fix the id: we are not using the right id
       if (containsArtist(artist.id.toString()) == null) {
-        artists.add(artist);
+        insertArtist(artist);
       }
     }
 
     Album? album = containsAlbum(loader.extractAlbumIdFromTrack(item));
     if (album == null) {
       album = await createAlbumFromTrack(item, artist);
-      albums.add(album);
+      insertAlbum(album);
     }
 
     // TODO
@@ -343,7 +376,7 @@ class Database {
     Artist? artist = containsArtist(loader.extractArtistIdFromAlbum(item));
     if (artist == null) {
       artist = await createArtistFromAlbum(item);
-      artists.add(artist);
+      insertArtist(artist);
     }
     return Album(loader.extractAlbumTitleFromAlbum(item), artist,
         loader.extractCoverFromAlbum(item));
@@ -378,5 +411,43 @@ class Database {
   Album? containsAlbum(String Id) {
     //TODO
     return null;
+  }
+
+  void deleteAlbum(Album album) {
+    albums.remove(album);
+  }
+
+  void deleteArtist(Artist artist) {
+    artists.remove(artist);
+  }
+
+  void insertTrack(Track track) {
+    for(int i = 0; i < tracks.length; i++) {
+      if(track.title.compareTo(tracks[i].title) < 0) {
+        tracks.insert(i, track);
+        return;
+      }
+    }
+    tracks.add(track);
+  }
+
+  void insertAlbum(Album album) {
+    for(int i = 0; i < albums.length; i++) {
+      if(album.name.compareTo(albums[i].name) < 0) {
+        albums.insert(i, album);
+        return;
+      }
+    }
+    albums.add(album);
+  }
+
+  void insertArtist(Artist artist) {
+    for(int i = 0; i < artists.length; i++) {
+      if(artist.name.compareTo(artists[i].name) < 0) {
+        artists.insert(i, artist);
+        return;
+      }
+    }
+    artists.add(artist);
   }
 }

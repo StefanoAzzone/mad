@@ -52,13 +52,21 @@ class _ShowQueueState extends State<ShowQueue> {
                   );
                 }),
           ),
-          FloatingActionButton(
+        ]),
+        floatingActionButton: FloatingActionButton(
               child: Icon(Icons.add),
               onPressed: () async {
                 await Navigator.pushNamed(context, '/select');
                 _update();
               }),
-          PlayBar(),
-        ]));
+        floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
+        bottomNavigationBar: BottomAppBar(
+          shape: const CircularNotchedRectangle(),
+          child: Container(
+            child: PlayBar(),
+            height: 70,
+          )
+        ),
+      );
   }
 }

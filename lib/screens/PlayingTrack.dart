@@ -14,11 +14,17 @@ class PlayingTrack extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+        appBar: AppBar(title: Text(trackQueue.current().title + " - " + 
+                              trackQueue.current().artist.name),
+                              centerTitle: true,),
+        
         body: Column(
+          mainAxisAlignment: MainAxisAlignment.end,
       children: [
-        CoverButton(),
+        Expanded(child: CoverButton()),
         ProgressBar(),
         Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
             IconButton(
                 onPressed: () {

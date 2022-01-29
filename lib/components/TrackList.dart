@@ -6,17 +6,18 @@ import 'package:path_provider/path_provider.dart';
 
 class TrackList extends StatefulWidget {
   Function callback;
-  TrackList(Function this.callback);
+  List<Track> list;
+  TrackList(this.callback, this.list);
   @override
-  State<TrackList> createState() => _TrackListState(callback);
+  State<TrackList> createState() => _TrackListState(callback, list);
 }
 
 class _TrackListState extends State<TrackList> {
   Function callback;
+  List<Track> tracks;
   var _tapPosition;
 
-  _TrackListState(this.callback);
-  List<Track> tracks = Database.instance.tracks;
+  _TrackListState(this.callback, this.tracks);
 
   @override
   Widget build(BuildContext context) {
@@ -70,9 +71,9 @@ class _TrackListState extends State<TrackList> {
                                         context, '/editMetadata');
                                     if (metadata != null) {
                                       await database.setNewMetadata(
-                                          index, metadata);
+                                          tracks[index], metadata);
                                       setState(() {
-                                        tracks = database.tracks;
+                                        //tracks = database.tracks;
                                       });
                                     }
                                   },
@@ -82,7 +83,7 @@ class _TrackListState extends State<TrackList> {
                                   )),
                               TextButton(
                                   onPressed: () {
-                                    trackQueue.pushLast(database.tracks[index]);
+                                    trackQueue.pushLast(tracks[index]);
                                     Navigator.pop(context);
                                   },
                                   child: Text(

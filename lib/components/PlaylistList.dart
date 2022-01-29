@@ -4,12 +4,12 @@ import 'dart:io';
 import 'package:mad/data.dart';
 
 class PlaylistList extends StatelessWidget {
-  List<Playlist> playlists = List.generate(
-      20, (index) => Playlist("playlist_Tesla_" + index.toString()));
-
+  List<Playlist> playlists = database.playlists;
+  
   @override
   Widget build(BuildContext context) {
-    return ListView.builder(
+    return Scaffold(
+      body: ListView.builder(
         shrinkWrap: true,
         itemCount: playlists.length,
         itemBuilder: (context, index) {
@@ -19,6 +19,11 @@ class PlaylistList extends StatelessWidget {
               print(playlists[index].name);
             },
           );
-        });
+        }),
+      floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
+      floatingActionButton: FloatingActionButton(
+        onPressed: (){},
+      ),
+    );
   }
 }
