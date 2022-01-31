@@ -40,9 +40,9 @@ class Track {
       //TODO: ID???
       json["title"],
       json["path"],
-      database.containsArtist(json["Artist"].toString()) ??
+      database.containsArtist(json["Artist"]) ??
           Database.UnknownArtist,
-      database.containsAlbum(json["Album"].toString()) ?? Database.UnknownAlbum,
+      database.containsAlbum(json["Album"]) ?? Database.UnknownAlbum,
       json["lyrics"],
       json["trackNumber"]);
 
@@ -111,7 +111,7 @@ class Album {
 
       //TODO: ID???
       json["name"],
-      database.containsArtist(json["Artist"].toString()) ??
+      database.containsArtist(json["Artist"]) ??
           Database.UnknownArtist,
       img.Image.network(json["image"]));
 
@@ -204,7 +204,7 @@ class TrackQueue {
 
 Database database = Database.instance;
 enum DatabaseState { Uninitialized, Loading, Ready }
-final img.Image defaultImage = img.Image.asset('images/musk.jpeg');
+final img.Image defaultImage = img.Image.asset('images/DefaultImage.png');
 
 final img.Image defaultAlbumThumbnail =
     img.Image.asset('images/albumThumb.png');
@@ -329,6 +329,7 @@ class Database {
     String? albumName = null;
     int? trackNumber = null;
     String? lyrics = null;
+    
     if (tag != null) {
       title = tag.title;
       artistName = tag.artist;
@@ -339,49 +340,64 @@ class Database {
 
     print(path + " found:");
 
-    Artist? artist;
+    Artist artist;
+    Artist? tmpArtist;
     if (artistName == "" || artistName == null) {
       //tag missing
-      artist = containsArtist(loader.extractArtistIdFromTrack(item));
-      if (artist == null) {
+      tmpArtist = containsArtist(hash(loader.extractArtistNameFromTrack(item)));
+      if (tmpArtist == null) {
         artist = await createArtistFromTrack(item);
         insertArtist(artist);
+      } else {
+        artist = tmpArtist;
       }
       //await tagger.writeTag(path: path, tagField: "artist", value: artist.name);
       print("artist " + artist.name + " not in tags; used API instead");
     } else {
       //tag present
       var item = await loader.searchArtist(artistName);
+      
       artist = (item == null)
           ? Artist(artistName, defaultImage) //Artist not found
           : Artist(
               loader.extractArtistNameFromArtist(item), //Artist found
               await loader.getArtistImage(loader.extractId(item)));
       //TODO : fix the id: we are not using the right id
-      if (containsArtist(artist.id.toString()) == null) {
+      tmpArtist = containsArtist(artist.id);
+      if (tmpArtist == null) {
         insertArtist(artist);
+      } else {
+        artist = tmpArtist;
       }
     }
 
-    Album? album;
+    Album album;
+    Album? tmpAlbum;
     if (albumName == "" || albumName == null) {
       //tag missing
-      album = containsAlbum(loader.extractAlbumIdFromTrack(item));
-      if (album == null) {
+      tmpAlbum = containsAlbum(hash(loader.extractAlbumNameFromTrack(item)
+         + loader.extractArtistNameFromTrack(item)));
+      if (tmpAlbum == null) {
         album = await createAlbumFromTrack(item, artist);
         albums.add(album);
+      } else {
+        album = tmpAlbum;
       }
       //await tagger.writeTag(path: path, tagField: "album", value: album.name);
       print("album " + album.name + " not in tags; used API instead");
     } else {
       //tag present
+      
       var item = await loader.searchAlbum(albumName);
       album = (item == null)
           ? Album(albumName, artist, defaultImage) //Album not found
           : Album(loader.extractAlbumTitleFromAlbum(item), artist,
               loader.extractCoverFromAlbum(item)); //Album found
-      if (containsAlbum(album.id.toString()) != null) {
+      tmpAlbum = containsAlbum(album.id);
+      if (tmpAlbum == null) {
         albums.add(album);
+      } else {
+        album = tmpAlbum;
       }
     }
 
@@ -407,7 +423,7 @@ class Database {
   }
 
   Future<Album> createAlbum(var item) async {
-    Artist? artist = containsArtist(loader.extractArtistIdFromAlbum(item));
+    Artist? artist = containsArtist(hash(loader.extractArtistNameFromAlbum(item)));
     if (artist == null) {
       artist = await createArtistFromAlbum(item);
       insertArtist(artist);
@@ -437,13 +453,19 @@ class Database {
     });
   }
 
-  Artist? containsArtist(String Id) {
-    //TODO
+  Artist? containsArtist(int Id) {
+    for(int i = 0; i < artists.length; i++) {
+      if (artists[i].id == Id) 
+        return artists[i];
+    }
     return null;
   }
 
-  Album? containsAlbum(String Id) {
-    //TODO
+  Album? containsAlbum(int Id) {
+    for(int i = 0; i < albums.length; i++) {
+      if (albums[i].id == Id) 
+        return albums[i];
+    }
     return null;
   }
 

@@ -33,29 +33,40 @@ class _MyHomePageState extends State<MyHomePage> {
     return DefaultTabController(
         length: 4,
         child: Scaffold(
-          appBar: AppBar(
-            bottom: const TabBar(tabs: [
-              Tab(
-                icon: Icon(Icons.music_note),
-                text: "Tracks",
-              ),
-              Tab(
-                icon: Icon(Icons.album),
-                text: "Albums",
-              ),
-              Tab(
-                icon: Icon(Icons.person),
-                text: "Artists",
-              ),
-              Tab(
-                icon: Icon(Icons.playlist_play),
-                text: "Playlists",
-              ),
-            ]),
-            title: Text("MBox"),
-            centerTitle: true,
-          ),
-          body: Column(
+          body: NestedScrollView(
+            headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
+              return <Widget>[
+                SliverAppBar(
+                  snap: true,
+                  title: Text('MBox'),
+                  pinned: true,
+                  floating: true,
+                  forceElevated: innerBoxIsScrolled,
+                  centerTitle: true,
+                  bottom: TabBar(
+                    tabs: const [
+                      Tab(
+                        icon: Icon(Icons.music_note),
+                        text: "Tracks",
+                      ),
+                      Tab(
+                        icon: Icon(Icons.album),
+                        text: "Albums",
+                      ),
+                      Tab(
+                        icon: Icon(Icons.person),
+                        text: "Artists",
+                      ),
+                      Tab(
+                        icon: Icon(Icons.playlist_play),
+                        text: "Playlists",
+                      ),
+                    ],
+                  ),
+                ),
+              ];
+            },
+            body:  Column(
             children: [
               Expanded(
                 child: TabBarView(
@@ -74,9 +85,20 @@ class _MyHomePageState extends State<MyHomePage> {
                   ],
                 ),
               ),
-              PlayBar(),
+              
             ],
           ),
-        ));
+          ),
+          bottomNavigationBar: BottomAppBar(
+            color: Colors.lightBlueAccent,
+            child: SizedBox(
+              child: PlayBar(),
+              height: 50,
+              
+            ) 
+          )
+          
+        )
+      );
   }
 }

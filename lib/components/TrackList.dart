@@ -21,6 +21,7 @@ class _TrackListState extends State<TrackList> {
 
   @override
   Widget build(BuildContext context) {
+    Size size = MediaQuery.of(context).size;
     int count = database.state == DatabaseState.Ready
         ? tracks.length
         : tracks.length + 1;
@@ -134,13 +135,52 @@ class _TrackListState extends State<TrackList> {
                 }
               },
               child: ListTile(
-                title: Text(
-                    tracks[index].title + " - " + tracks[index].artist.name),
+                title: Row(
+                  children: [
+                    SizedBox(
+                      width: size.width*0.15,
+                      height: 50,
+                      child: tracks[index].album.cover,
+                    ),
+                    const SizedBox(
+                      height: 50,
+                      width: 10,
+                    ),
+                    SizedBox(
+                      height: 50,
+                      width: size.width*0.70,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            tracks[index].title,
+                            overflow: TextOverflow.ellipsis,
+                            textAlign: TextAlign.left,
+                            style: const TextStyle(
+                              fontSize: 15,
+                            ),
+                          ),
+                          Text(
+                            tracks[index].artist.name,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                              fontSize: 11,
+                            ),
+                          )
+                        ],
+                      )
+                    )
+                    
+                  ],
+                ),
+
                 onTap: () {
                   print(tracks[index].title);
                   callback(tracks[index]);
                 },
-              ));
+              )
+              );
         });
   }
 }

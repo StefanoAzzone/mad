@@ -1,9 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:mad/Player.dart';
-import 'package:mad/components/AlbumList.dart';
 import 'package:mad/components/PlayBar.dart';
-import 'package:mad/components/TrackList.dart';
-import 'package:mad/data.dart';
 import 'package:mad/metadata_loader.dart';
 import 'package:mad/screens/Info/AlbumInfo.dart';
 
@@ -13,44 +9,51 @@ class ArtistInfo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder(
-        future: loader.getAlbumsOfArtist(artistName),
-        builder: (context, snapshot) {
-          if (!snapshot.hasData) {
-            return const SizedBox(
-              width: 50,
-              height: 50,
-              child: CircularProgressIndicator(),
-            );
-          } else {
-            return Scaffold(
-                appBar: AppBar(
-                  title: Text(artistName),
-                  centerTitle: true,
-                ),
-                body: Column(children: [
-                  Expanded(
-                      child: GridView.count(
-                          crossAxisCount: 2,
-                          children: List<IconButton>.generate(
-                              loader.getItemsCount(snapshot.data), (index) {
-                            return IconButton(
-                              onPressed: () {
-                                Navigator.pushNamed(
-                                  context,
-                                  ExtractArgumentsAlbumInfo.routeName,
-                                  arguments:
-                                      loader.getItem(snapshot.data, index),
-                                );
-                              },
-                              icon: loader.extractCoverFromAlbum(
-                                  loader.getItem(snapshot.data, index)),
-                            );
-                          }))),
-                  PlayBar(),
-                ]));
-          }
+    return OrientationBuilder(
+      builder: (context, orientation) {
+        return FutureBuilder(
+          future: loader.getAlbumsOfArtist(artistName),
+          builder: (context, snapshot) {
+            if (!snapshot.hasData) {
+              return const SizedBox(
+                width: 50,
+                height: 50,
+                child: CircularProgressIndicator(),
+              );
+            } else {
+              return Scaffold(
+                  appBar: AppBar(
+                    title: Text(artistName),
+                    centerTitle: true,
+                  ),
+                  body: Column(children: [
+                    Expanded(
+                        child: GridView.count(
+                            crossAxisCount: orientation == Orientation.portrait ? 2 : 4,
+                            children: List<IconButton>.generate(
+                                loader.getItemsCount(snapshot.data), (index) {
+                              return IconButton(
+                                onPressed: () {
+                                  Navigator.pushNamed(
+                                    context,
+                                    ExtractArgumentsAlbumInfo.routeName,
+                                    arguments:
+                                        loader.getItem(snapshot.data, index),
+                                  );
+                                },
+                                icon: loader.extractCoverFromAlbum(
+                                    loader.getItem(snapshot.data, index)),
+                              );
+                            }))
+                            ),
+                    PlayBar(),
+                  ]));
+            }
         });
+
+      },
+    );
+
   }
 }
 

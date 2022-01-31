@@ -7,7 +7,6 @@ import 'package:flutter/src/widgets/image.dart' as image;
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:html/parser.dart' as parser;
-import 'package:http/http.dart' as http;
 
 MetadataLoader loader = MetadataLoader.instance;
 
@@ -22,6 +21,7 @@ class MetadataLoader {
   String lyricsSearchEndpoint = "/search";
   String clientIdSpotify = "78ca50e274ca45e8b9bf23d451748e2f";
   String clientSecretSpotify = "80b9db3e3b2e4f9ba283a0b1e07af86d";
+  String youtubeSearchUrl = "https://www.youtube.com/results?search_query=";
   // String clientIdGenius =
   //     "fSJ3EY4K-_ZNnUJUsglEVdjX0v0dPsVZo-Qu45LURNX2_xJcJ2FmzA0se4gRyALF";
   // String clientSecretGenius =
@@ -195,6 +195,8 @@ class MetadataLoader {
       'Authorization': 'Bearer ' + spotifyToken,
     });
     return Future<image.Image>(() {
+      if(jsonDecode(response.body)["images"].length == 0)
+        return data.defaultImage;
       return image.Image.network(jsonDecode(response.body)["images"][0]["url"]);
     });
   }
@@ -261,6 +263,16 @@ class MetadataLoader {
     }
 
     return lyrics;
+  }
+
+  Future<String> queryYouTubeUrl(String query) async {
+    String url = youtubeSearchUrl + query;  
+    http.Response response = await http.get(Uri.parse(url));
+
+      int i = response.body.indexOf("/watch?v=");
+      int j = response.body.substring(i).indexOf('"');
+
+    return "http://youtube.com" + response.body.substring(i, i+j);
   }
 
   String parseLyrics(var nodes) {
