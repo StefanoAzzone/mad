@@ -24,49 +24,51 @@ class _ShowQueueState extends State<ShowQueue> {
   Widget build(BuildContext context) {
     queue = trackQueue.queue;
     return Scaffold(
-        appBar: AppBar(
-          title: Text("Queue"),
-          centerTitle: true,
-        ),
-        body: Column(children: [
-          Expanded(
-            child: ListView.builder(
-                controller: ScrollController(
-                  keepScrollOffset: true,
-                  initialScrollOffset: trackQueue.currentIndex.toDouble(),
-                ),
-                shrinkWrap: true,
-                itemCount: trackQueue.length,
-                itemBuilder: (context, index) {
-                  return ListTile(
-                    title: Text(
-                        queue[index].title + " - " + queue[index].artist.name),
-                    onTap: () {
-                      if (index != trackQueue.currentIndex) {
-                        player.pause();
-                        trackQueue.setCurrent(index);
-                        player.play();
-                      }
-                      Navigator.pushNamed(context, '/playingTrack');
-                    },
-                  );
-                }),
-          ),
-        ]),
-        floatingActionButton: FloatingActionButton(
-              child: Icon(Icons.add),
-              onPressed: () async {
-                await Navigator.pushNamed(context, '/select');
-                _update();
+      appBar: AppBar(
+        title: Text("Queue"),
+        centerTitle: true,
+      ),
+      body: Column(children: [
+        Expanded(
+          child: ListView.builder(
+              controller: ScrollController(
+                keepScrollOffset: true,
+                initialScrollOffset: trackQueue.currentIndex.toDouble(),
+              ),
+              shrinkWrap: true,
+              itemCount: trackQueue.length,
+              itemBuilder: (context, index) {
+                return ListTile(
+                  title: Text(
+                      queue[index].title + " - " + queue[index].artist.name),
+                  onTap: () {
+                    if (index != trackQueue.currentIndex) {
+                      player.pause();
+                      trackQueue.setCurrent(index);
+                      player.play();
+                    }
+                    Navigator.pushNamed(context, '/playingTrack');
+                  },
+                );
               }),
-        floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
-        bottomNavigationBar: BottomAppBar(
+        ),
+      ]),
+      floatingActionButton: FloatingActionButton(
+          child: Icon(Icons.add),
+          onPressed: () async {
+            await Navigator.pushNamed(context, '/select',
+                arguments: (Track track) {
+              trackQueue.pushLast(track);
+            });
+            _update();
+          }),
+      floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
+      bottomNavigationBar: BottomAppBar(
           shape: const CircularNotchedRectangle(),
           child: Container(
             child: PlayBar(),
             height: 70,
-          )
-        ),
-      );
+          )),
+    );
   }
 }

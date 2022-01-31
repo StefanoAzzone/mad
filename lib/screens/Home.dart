@@ -34,7 +34,7 @@ class _MyHomePageState extends State<MyHomePage> {
         length: 4,
         child: Scaffold(
           appBar: AppBar(
-            bottom: TabBar(tabs: [
+            bottom: const TabBar(tabs: [
               Tab(
                 icon: Icon(Icons.music_note),
                 text: "Tracks",

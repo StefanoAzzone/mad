@@ -55,7 +55,7 @@ class Track {
         'lyrics': lyrics,
         'trackNumber': trackNumber,
       };
-  
+
   void delete() {
     album.deleteTrack(this);
     database.tracks.remove(this);
@@ -89,7 +89,7 @@ class Artist {
 
   void deleteAlbum(Album album) {
     albumList.remove(album);
-    if(albumList.isEmpty) {
+    if (albumList.isEmpty) {
       database.deleteArtist(this);
     }
   }
@@ -127,7 +127,7 @@ class Album {
   }
 
   void deleteTrack(Track track) {
-    if(trackList.remove(track) && trackList.isEmpty)
+    if (trackList.remove(track) && trackList.isEmpty)
       database.deleteAlbum(this);
   }
 }
@@ -140,6 +140,10 @@ class Playlist {
   Playlist(this.name) {
     tracks = [];
     id = hash(name);
+  }
+
+  void addTrack(Track track) {
+    tracks.add(track);
   }
 }
 
@@ -202,7 +206,8 @@ Database database = Database.instance;
 enum DatabaseState { Uninitialized, Loading, Ready }
 final img.Image defaultImage = img.Image.asset('images/musk.jpeg');
 
-final img.Image defaultAlbumThumbnail = img.Image.asset('images/albumThumb.png');
+final img.Image defaultAlbumThumbnail =
+    img.Image.asset('images/albumThumb.png');
 
 class Database {
   static const String MUSIC_PATH = "storage/emulated/0/Music";
@@ -267,9 +272,28 @@ class Database {
             title != null && title != "" ? title : p.basename(files[i].path));
 
         if (info == null) {
-          insertTrack(Track(p.basename(files[i].path), files[i].path,
-              UnknownArtist, UnknownAlbum, "Unknown lyrics", 0));
+          //cannot find info: try to use tags
+          String title = tag?.title ?? "";
+          String artistName = tag?.artist ?? "";
+          Artist artist = artistName != ""
+              ? Artist(artistName, defaultImage)
+              : UnknownArtist;
+          String albumName = tag?.album ?? "";
+          Album album = albumName != ""
+              ? Album(albumName, artist, defaultImage)
+              : UnknownAlbum;
+          String lyrisc = tag?.lyrics ?? "";
+          String trackNumber = tag?.trackNumber ?? "";
+          insertTrack(Track(
+              title != "" ? title : p.basename(files[i].path),
+              files[i].path,
+              artist,
+              album,
+              lyrisc != "" ? lyrisc : "Unknown lyrics",
+              trackNumber != "" ? int.parse(trackNumber) : 0));
+          print(title + " not found; generated using tags, if possible.");
         } else {
+          //info found
           insertTrack(await createTrack(info, tag, files[i].path));
         }
 
@@ -313,6 +337,8 @@ class Database {
       lyrics = tag.lyrics;
     }
 
+    print(path + " found:");
+
     Artist? artist;
     if (artistName == "" || artistName == null) {
       //tag missing
@@ -321,52 +347,60 @@ class Database {
         artist = await createArtistFromTrack(item);
         insertArtist(artist);
       }
+      //await tagger.writeTag(path: path, tagField: "artist", value: artist.name);
+      print("artist " + artist.name + " not in tags; used API instead");
     } else {
       //tag present
       var item = await loader.searchArtist(artistName);
       artist = (item == null)
           ? Artist(artistName, defaultImage) //Artist not found
           : Artist(
-              //Artist found
-              loader.extractArtistNameFromArtist(item),
-              await loader
-                  .getArtistImage(loader.extractArtistIdFromArtist(item)));
+              loader.extractArtistNameFromArtist(item), //Artist found
+              await loader.getArtistImage(loader.extractId(item)));
       //TODO : fix the id: we are not using the right id
       if (containsArtist(artist.id.toString()) == null) {
         insertArtist(artist);
       }
     }
 
-    Album? album = containsAlbum(loader.extractAlbumIdFromTrack(item));
-    if (album == null) {
-      album = await createAlbumFromTrack(item, artist);
-      insertAlbum(album);
+    Album? album;
+    if (albumName == "" || albumName == null) {
+      //tag missing
+      album = containsAlbum(loader.extractAlbumIdFromTrack(item));
+      if (album == null) {
+        album = await createAlbumFromTrack(item, artist);
+        albums.add(album);
+      }
+      //await tagger.writeTag(path: path, tagField: "album", value: album.name);
+      print("album " + album.name + " not in tags; used API instead");
+    } else {
+      //tag present
+      var item = await loader.searchAlbum(albumName);
+      album = (item == null)
+          ? Album(albumName, artist, defaultImage) //Album not found
+          : Album(loader.extractAlbumTitleFromAlbum(item), artist,
+              loader.extractCoverFromAlbum(item)); //Album found
+      if (containsAlbum(album.id.toString()) != null) {
+        albums.add(album);
+      }
     }
-
-    // TODO
-    // Album? album;
-    // if (albumName == "" || albumName == null) {
-    //   album = containsAlbum(loader.extractAlbumIdFromTrack(item));
-    //   if (album == null) {
-    //     album = await createAlbumFromTrack(item, artist);
-    //     albums.add(album);
-    //   }
-    // }
-    // else{
-    //   album = await loader.searchAlbum(albumName);
-    //   if (containsAlbum(album.id.toString()) != null) {
-    //     artists.add(artist);
-    //   }
-    // }
 
     if (title == null || title == "") {
       title = loader.extractTitleFromTrack(item);
+      //await tagger.writeTag(path: path, tagField: "title", value: title);
+      print("title " + title + " not in tags; used API instead");
     }
     if (lyrics == null || lyrics == "") {
       lyrics = await loader.getLyricsFromTrack(item);
+      //await tagger.writeTag(path: path, tagField: "lyrics", value: lyrics);
+      print("lyrics not in tags; used API instead");
     }
     if (trackNumber == null || trackNumber == -1) {
       trackNumber = loader.extractTrackNumberFromTrack(item);
+      //await tagger.writeTag(path: path, tagField: "trackNumber", value: trackNumber.toString());
+      print("trackNumber " +
+          trackNumber.toString() +
+          " not in tags; used API instead");
     }
 
     return Track(title, path, artist, album, lyrics, trackNumber);
@@ -422,8 +456,8 @@ class Database {
   }
 
   void insertTrack(Track track) {
-    for(int i = 0; i < tracks.length; i++) {
-      if(track.title.compareTo(tracks[i].title) < 0) {
+    for (int i = 0; i < tracks.length; i++) {
+      if (track.title.compareTo(tracks[i].title) < 0) {
         tracks.insert(i, track);
         return;
       }
@@ -432,8 +466,8 @@ class Database {
   }
 
   void insertAlbum(Album album) {
-    for(int i = 0; i < albums.length; i++) {
-      if(album.name.compareTo(albums[i].name) < 0) {
+    for (int i = 0; i < albums.length; i++) {
+      if (album.name.compareTo(albums[i].name) < 0) {
         albums.insert(i, album);
         return;
       }
@@ -442,12 +476,16 @@ class Database {
   }
 
   void insertArtist(Artist artist) {
-    for(int i = 0; i < artists.length; i++) {
-      if(artist.name.compareTo(artists[i].name) < 0) {
+    for (int i = 0; i < artists.length; i++) {
+      if (artist.name.compareTo(artists[i].name) < 0) {
         artists.insert(i, artist);
         return;
       }
     }
     artists.add(artist);
+  }
+
+  void createPlaylist(String name) {
+    playlists.add(Playlist(name));
   }
 }

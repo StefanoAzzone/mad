@@ -17,8 +17,8 @@ class MetadataLoader {
   String accounts = "https://accounts.spotify.com";
   String authReqEndPoint = "/api/token";
   String searchEndPoint = "/v1/search";
-  String ArtistsEndPoint = "/v1/artists";
-  String AlbumsEndPoint = "/v1/albums";
+  String artistsEndPoint = "/v1/artists";
+  String albumsEndPoint = "/v1/albums";
   String lyricsSearchEndpoint = "/search";
   String clientIdSpotify = "78ca50e274ca45e8b9bf23d451748e2f";
   String clientSecretSpotify = "80b9db3e3b2e4f9ba283a0b1e07af86d";
@@ -103,7 +103,7 @@ class MetadataLoader {
     return items[index];
   }
 
-  String extractArtistIdFromArtist(var item) {
+  String extractId(var item) {
     return item["id"];
   }
 
@@ -142,7 +142,9 @@ class MetadataLoader {
   image.Image extractThumbnailUrlFromTracks(var items, int index) {
     var tmp = items[index]["album"]["images"];
 
-    return tmp.length > 0 ? image.Image.network(tmp[tmp.length - 1]["url"]) : data.defaultAlbumThumbnail;
+    return tmp.length > 0
+        ? image.Image.network(tmp[tmp.length - 1]["url"])
+        : data.defaultAlbumThumbnail;
   }
 
   String extractArtistNameFromTrack(var item) {
@@ -169,13 +171,56 @@ class MetadataLoader {
     return image.Image.network(item["album"]["images"][0]["url"]);
   }
 
+  Future getTracksOfAlbum(String albumId) async {
+    return jsonDecode((await queryAlbumTracks(albumId)).body)['items'];
+  }
+
+  Future getAlbumsOfArtist(String artistName) async {
+    String id = extractId(await searchArtist(artistName));
+
+    return jsonDecode((await queryArtistAlbums(id)).body)['items'];
+  }
+
   Future<String> getLyricsFromTrack(var item) async {
     return await queryLyrics(
         extractTitleFromTrack(item) + " " + extractArtistNameFromTrack(item));
   }
 
+  Future<image.Image> getArtistImage(String Id) async {
+    String url = base + artistsEndPoint + "/" + Id;
+    http.Response response =
+        await http.get(Uri.parse(url), headers: <String, String>{
+      "Accept": "application/json",
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer ' + spotifyToken,
+    });
+    return Future<image.Image>(() {
+      return image.Image.network(jsonDecode(response.body)["images"][0]["url"]);
+    });
+  }
+
   Future<http.Response> queryAPI(String query) {
     String url = base + searchEndPoint + "?" + "q=" + query;
+    // print(url);
+    return http.get(Uri.parse(url), headers: <String, String>{
+      "Accept": "application/json",
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer ' + spotifyToken,
+    });
+  }
+
+  Future<http.Response> queryAlbumTracks(String id) {
+    String url = base + albumsEndPoint + '/' + id + "/tracks";
+    // print(url);
+    return http.get(Uri.parse(url), headers: <String, String>{
+      "Accept": "application/json",
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer ' + spotifyToken,
+    });
+  }
+
+  Future<http.Response> queryArtistAlbums(String id) {
+    String url = base + artistsEndPoint + '/' + id + "/albums";
     // print(url);
     return http.get(Uri.parse(url), headers: <String, String>{
       "Accept": "application/json",
@@ -193,7 +238,7 @@ class MetadataLoader {
         query +
         "&access_token=" +
         geniusToken;
-    print(url);
+    // print(url);
     http.Response response = await http.get(Uri.parse(url));
 
     var json = jsonDecode(response.body);
@@ -234,18 +279,5 @@ class MetadataLoader {
       }
     }
     return lyrics;
-  }
-
-  Future<image.Image> getArtistImage(String Id) async {
-    String url = base + ArtistsEndPoint + "/" + Id;
-    http.Response response =
-        await http.get(Uri.parse(url), headers: <String, String>{
-      "Accept": "application/json",
-      'Content-Type': 'application/json',
-      'Authorization': 'Bearer ' + spotifyToken,
-    });
-    return Future<image.Image>(() {
-      return image.Image.network(jsonDecode(response.body)["images"][0]["url"]);
-    });
   }
 }

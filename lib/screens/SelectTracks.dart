@@ -8,7 +8,8 @@ import 'package:mad/components/TrackList.dart';
 import 'package:mad/data.dart';
 
 class SelectTracks extends StatelessWidget {
-  SelectTracks();
+  Function callback;
+  SelectTracks(this.callback);
 
   List<Track> list = [];
 
@@ -21,13 +22,21 @@ class SelectTracks extends StatelessWidget {
           centerTitle: true,
         ),
         body: Column(children: [
-          Expanded(
-            child: TrackList((Track track) {
-              //TODO: switch to callback
-              trackQueue.pushLast(track);
-            }, database.tracks),
-          ),
+          Expanded(child: TrackList(callback, list)),
           PlayBar(),
         ]));
+  }
+}
+
+class ExtractArgumentsSelectTracks extends StatelessWidget {
+  const ExtractArgumentsSelectTracks({Key? key}) : super(key: key);
+
+  static const routeName = '/select';
+
+  @override
+  Widget build(BuildContext context) {
+    final Function f = ModalRoute.of(context)!.settings.arguments as Function;
+
+    return SelectTracks(f);
   }
 }

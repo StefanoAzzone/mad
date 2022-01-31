@@ -6,7 +6,7 @@ import 'package:mad/data.dart';
 
 class AlbumTracks extends StatelessWidget {
   Album album;
-  AlbumTracks(this.album);
+  AlbumTracks(this.album, {Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {

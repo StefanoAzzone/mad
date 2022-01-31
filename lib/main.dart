@@ -5,9 +5,12 @@ import 'package:mad/data.dart';
 import 'package:mad/screens/AlbumTracks.dart';
 import 'package:mad/screens/ArtistAlbums.dart';
 import 'package:mad/screens/Home.dart';
+import 'package:mad/screens/Info/AlbumInfo.dart';
+import 'package:mad/screens/Info/ArtistInfo.dart';
 import 'package:mad/screens/MetadataEditor.dart';
 import 'package:mad/screens/PlayingTrack.dart';
 import 'package:mad/screens/SelectTracks.dart';
+import 'package:mad/screens/ShowPlaylist.dart';
 import 'package:mad/screens/ShowQueue.dart';
 
 void main() {
@@ -28,12 +31,19 @@ class MyApp extends StatelessWidget {
         '/': (context) => const MyHomePage(title: 'MBox'),
         '/playingTrack': (context) => PlayingTrack(),
         '/queue': (context) => ShowQueue(),
-        '/select': (context) => SelectTracks(),
+        ExtractArgumentsSelectTracks.routeName: (context) =>
+            const ExtractArgumentsSelectTracks(),
         '/editMetadata': (context) => MetadataEditor(),
         ExtractArgumentsAlbumTracks.routeName: (context) =>
-          const ExtractArgumentsAlbumTracks(),
+            const ExtractArgumentsAlbumTracks(),
         ExtractArgumentsArtistAlbums.routeName: (context) =>
-          const ExtractArgumentsArtistAlbums(),
+            const ExtractArgumentsArtistAlbums(),
+        ExtractArgumentsShowPlaylist.routeName: (context) =>
+            const ExtractArgumentsShowPlaylist(),
+        ExtractArgumentsArtistInfo.routeName: (context) =>
+            const ExtractArgumentsArtistInfo(),
+        ExtractArgumentsAlbumInfo.routeName: (context) =>
+            const ExtractArgumentsAlbumInfo(),
       },
       theme: ThemeData(
         primarySwatch: Colors.blue,

@@ -40,7 +40,7 @@ class _TrackListState extends State<TrackList> {
                     height: size.width < size.height
                         ? size.width / 10
                         : size.height / 10,
-                    child: CircularProgressIndicator(
+                    child: const CircularProgressIndicator(
                       backgroundColor: Colors.blue,
                       color: Colors.white,
                     )));
@@ -77,7 +77,7 @@ class _TrackListState extends State<TrackList> {
                                       });
                                     }
                                   },
-                                  child: Text(
+                                  child: const Text(
                                     "Edit metadata",
                                     style: TextStyle(color: Colors.black),
                                   )),
@@ -86,8 +86,45 @@ class _TrackListState extends State<TrackList> {
                                     trackQueue.pushLast(tracks[index]);
                                     Navigator.pop(context);
                                   },
-                                  child: Text(
+                                  child: const Text(
                                     "Add to queue",
+                                    style: TextStyle(color: Colors.black),
+                                  )),
+                              TextButton(
+                                  onPressed: () {
+                                    showDialog(
+                                        context: context,
+                                        builder: (BuildContext context) {
+                                          return AlertDialog(
+                                              title:
+                                                  const Text('Add to playlist'),
+                                              content: Container(
+                                                height: 500,
+                                                width: 500,
+                                                child: ListView.builder(
+                                                    shrinkWrap: true,
+                                                    itemCount: database
+                                                        .playlists.length,
+                                                    itemBuilder: (context, i) {
+                                                      return ListTile(
+                                                        title: Text(database
+                                                            .playlists[i].name),
+                                                        onTap: () {
+                                                          database.playlists[i]
+                                                              .addTrack(tracks[
+                                                                  index]);
+                                                          Navigator.pop(
+                                                              context);
+                                                          Navigator.pop(
+                                                              context);
+                                                        },
+                                                      );
+                                                    }),
+                                              ));
+                                        });
+                                  },
+                                  child: const Text(
+                                    "Add to playlist",
                                     style: TextStyle(color: Colors.black),
                                   )),
                             ],
