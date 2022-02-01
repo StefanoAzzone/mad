@@ -30,9 +30,10 @@ class _TrackListState extends State<TrackList> {
       builder: (context, orientation) {
         var ncols = orientation == Orientation.portrait ? 1 : 2;
         return GridView.count(
+            padding: EdgeInsets.only(top: 0.0),
             crossAxisCount: ncols,
             shrinkWrap: true,
-            childAspectRatio: 8,
+            childAspectRatio: 6.5,
             children: List.generate(tracks.length, (index) {
               RenderObject? overlay =
                   Overlay.of(context)?.context.findRenderObject();
@@ -51,7 +52,16 @@ class _TrackListState extends State<TrackList> {
                           color: Colors.white,
                         )));
               }
-              return GestureDetector(
+              return Container(
+                decoration:
+                  const BoxDecoration(border:
+                    //Border.all(color: Colors.black, width: 0.05)),
+                    Border(
+                      top: BorderSide(width: 0.05, color: Colors.black),
+                      bottom: BorderSide(width: 0.05, color: Colors.black),
+                    )
+                  ),
+                child: GestureDetector(
                   onTapDown: (TapDownDetails details) {
                     _tapPosition = details.globalPosition;
                   },
@@ -185,7 +195,8 @@ class _TrackListState extends State<TrackList> {
                       callback(tracks[index]);
                     },
                   )
-                  );
+                  )
+              );
             }
           ));
       }

@@ -12,18 +12,32 @@ class AlbumList extends StatelessWidget {
   Widget build(BuildContext context) {
     return OrientationBuilder(builder: (context, orientation) {
       return GridView.count(
+          childAspectRatio: 0.898,
+          padding: EdgeInsets.only(top: 0.0),
           crossAxisCount: orientation == Orientation.portrait ? 2 : 4,
           children: List<IconButton>.generate(albums.length, (index) {
             return IconButton(
+
               onPressed: () {
                 Navigator.pushNamed(
                   context,
                   ExtractArgumentsAlbumTracks.routeName,
                   arguments: albums[index],
                 );
-                print(albums[index].name + "-" + albums[index].artist.name);
               },
-              icon: albums[index].cover,
+              icon: Column(
+                children: [
+                  albums[index].cover,
+                  Text(
+                    albums[index].name,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ) 
             );
           }));
 

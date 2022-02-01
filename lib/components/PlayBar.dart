@@ -31,11 +31,24 @@ class PlayBar extends StatelessWidget {
                       SizedBox(
                         width: size.width*0.65,
                         height: 50,
-                        child: Text(
-                          trackQueue.current().title,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      )
+                        child: Column(children: [
+                          Text(
+                            trackQueue.current().title,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                              fontSize: 15,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          Text(
+                            trackQueue.current().artist.name,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                              fontSize: 12
+                            ),
+                          )
+                        ]
+                      ))
 
                     ]
                   ),

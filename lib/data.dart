@@ -143,6 +143,23 @@ class Playlist {
   void addTrack(Track track) {
     tracks.add(track);
   }
+
+  static Playlist fromJson(Map<String, dynamic> json) {
+    Playlist p = Playlist(json["name"]);
+    for (var i = 0; i < json["traks"].length; i++) {
+      Track? t = database.containsTrack(json["traks"](i));
+      if (t != null) {
+        p.addTrack(t);
+      }
+    }
+    return p;
+  }
+
+  Map<String, dynamic> toJson() => <String, dynamic>{
+        'id': id,
+        'name': name,
+        'traks': tracks.map((e) => e.id).toList(),
+      };
 }
 
 TrackQueue trackQueue = TrackQueue.instance;
@@ -258,6 +275,7 @@ class Database {
         'tracks': tracks.map((e) => e.toJson()).toList(),
         'artists': artists.map((e) => e.toJson()).toList(),
         'albums': albums.map((e) => e.toJson()).toList(),
+        'playlists': playlists.map((e) => e.toJson()).toList(),
       };
 
   void fromJson(Map<String, dynamic> json) {
@@ -269,6 +287,9 @@ class Database {
         .toList());
     albums = ((json['albums'] as List<dynamic>)
         .map((e) => Album.fromJson(e as Map<String, dynamic>))
+        .toList());
+    playlists = ((json['playlists'] as List<dynamic>)
+        .map((e) => Playlist.fromJson(e as Map<String, dynamic>))
         .toList());
   }
 

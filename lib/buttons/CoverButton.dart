@@ -1,4 +1,5 @@
 import 'dart:typed_data';
+import 'dart:ui';
 
 import 'package:audioplayers/audioplayers.dart';
 import 'package:audiotagger/audiotagger.dart';
@@ -26,22 +27,61 @@ class _CoverButtonState extends State<CoverButton> {
     imageSize = size.width < size.height
         ? (size.width / 100 * 95)
         : (size.height / 100 * 95);
-    return GestureDetector(
-          child: SizedBox(
-            height: imageSize,
-            width: imageSize,
-            child: (() {
-              if (lyricsVisible) {
-                return SingleChildScrollView(
-                  child: Text(trackQueue.current().lyrics),
-                );
-              }
-              return trackQueue.current().album.cover;
-            }()),
-          ),
-          onTap: (() => setState(() {
-                lyricsVisible = !lyricsVisible;
-              })),
+    return  SafeArea(
+      child: 
+        OrientationBuilder(
+          builder: (context, orientation) {
+            return GestureDetector(
+                  child: SizedBox(
+                    height: imageSize,
+                    width: imageSize,
+                    child: (() {
+                      if (lyricsVisible) {
+                        return Stack(
+                          children: [
+                            Center(
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  //color: Colors.grey,
+                                  image: DecorationImage(image: trackQueue.current().album.cover.image),
+                                ),
+                                child: BackdropFilter(
+                                    filter: ImageFilter.blur(sigmaX: 4.0, sigmaY: 4.0),
+                                    child: Container(
+                                      decoration: BoxDecoration(color: Colors.white.withOpacity(0.0)),
+                                    ),
+                                  ),
+                              )
+                              
+                            ),
+                            Container(
+                              decoration: BoxDecoration(
+                                  color: Colors.white.withOpacity(0.4),
+                              ),
+                            ),
+                            SingleChildScrollView(
+                              child: Padding(
+                                padding: const EdgeInsets.only(left: 10),
+                                child: Text(
+                                  trackQueue.current().lyrics,
+                                  style: TextStyle(color: Colors.black),
+                                ),
+                              )
+                            ),
+                            
+                          ],
+                        );
+                      }
+                      return trackQueue.current().album.cover;
+                    }()),
+                  ),
+                  onTap: (() => setState(() {
+                        lyricsVisible = !lyricsVisible;
+                      })),
+            );
+          }
+        )
+    
     );
   }
 }
