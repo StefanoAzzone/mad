@@ -36,15 +36,17 @@ class _MyHomePageState extends State<MyHomePage> {
           body: NestedScrollView(
             headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
               return <Widget>[
+                
                 SliverAppBar(
+                  
                   snap: true,
                   title: Text('MBox'),
                   pinned: true,
                   floating: true,
                   forceElevated: innerBoxIsScrolled,
                   centerTitle: true,
-                  bottom: TabBar(
-                    tabs: const [
+                  bottom:const TabBar(
+                    tabs: [
                       Tab(
                         icon: Icon(Icons.music_note),
                         text: "Tracks",
@@ -66,31 +68,27 @@ class _MyHomePageState extends State<MyHomePage> {
                 ),
               ];
             },
-            body:  Column(
-            children: [
-              Expanded(
-                child: TabBarView(
-                  children: [
-                    TrackList((Track track) async {
-                      player.pause();
-                      trackQueue.reset();
-                      trackQueue.pushFront(track);
-                      player.play();
-                      await Navigator.pushNamed(context, '/playingTrack');
-                      _updatePage();
-                    }, database.tracks),
-                    AlbumList(database.albums),
-                    ArtistList(),
-                    PlaylistList(),
-                  ],
-                ),
-              ),
-              
-            ],
-          ),
+            body:
+                TabBarView(
+                      children: [
+                        TrackList((Track track) async {
+                          player.pause();
+                          trackQueue.reset();
+                          trackQueue.pushFront(track);
+                          player.play();
+                          await Navigator.pushNamed(context, '/playingTrack');
+                          _updatePage();
+                        }, database.tracks),
+                        AlbumList(database.albums),
+                        ArtistList(),
+                        PlaylistList()
+                      ],
+                    ),
+
+                
           ),
           bottomNavigationBar: BottomAppBar(
-            color: Colors.lightBlueAccent,
+            color: Colors.blue,
             child: SizedBox(
               child: PlayBar(),
               height: 50,

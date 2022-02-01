@@ -18,6 +18,7 @@ class _PlaylistListState extends State<PlaylistList> {
       builder: (context, orientation) {
         return Scaffold(
             body: GridView.count(
+                padding: EdgeInsets.only(top: 0.0),
                 childAspectRatio: 10,
                 crossAxisCount: orientation == Orientation.portrait ? 1 : 2,
                 shrinkWrap: true,

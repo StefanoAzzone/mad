@@ -11,6 +11,8 @@ class ArtistList extends StatelessWidget {
   Widget build(BuildContext context) {
     return OrientationBuilder(builder: (context, orientation) {
       return GridView.count(
+          childAspectRatio: 0.7,
+          padding: EdgeInsets.only(top: 0.0),
           crossAxisCount: orientation == Orientation.portrait ? 3 : 5,
           children: List<IconButton>.generate(artists.length, (index) {
             return IconButton(
@@ -22,7 +24,20 @@ class ArtistList extends StatelessWidget {
                 );
                 print(artists[index].name);
               },
-              icon: artists[index].image,
+              icon: Column(
+                children: [
+                  artists[index].image,
+                  Text(
+                    artists[index].name,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+                
+              )
             );
           }));
       },
