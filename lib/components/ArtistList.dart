@@ -9,21 +9,24 @@ class ArtistList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GridView.count(
-        crossAxisCount: 3,
-        children: List<IconButton>.generate(artists.length, (index) {
-          return IconButton(
-            onPressed: () {
-              Navigator.pushNamed(
-                context,
-                ExtractArgumentsArtistAlbums.routeName,
-                arguments: artists[index],
-              );
-              print(artists[index].name);
-            },
-            icon: artists[index].image,
-          );
-        }));
+    return OrientationBuilder(builder: (context, orientation) {
+      return GridView.count(
+          crossAxisCount: orientation == Orientation.portrait ? 3 : 5,
+          children: List<IconButton>.generate(artists.length, (index) {
+            return IconButton(
+              onPressed: () {
+                Navigator.pushNamed(
+                  context,
+                  ExtractArgumentsArtistAlbums.routeName,
+                  arguments: artists[index],
+                );
+                print(artists[index].name);
+              },
+              icon: artists[index].image,
+            );
+          }));
+      },
+    );
   }
 }
 

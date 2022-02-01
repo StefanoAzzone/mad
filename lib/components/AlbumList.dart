@@ -10,20 +10,24 @@ class AlbumList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GridView.count(
-        crossAxisCount: 2,
-        children: List<IconButton>.generate(albums.length, (index) {
-          return IconButton(
-            onPressed: () {
-              Navigator.pushNamed(
-                context,
-                ExtractArgumentsAlbumTracks.routeName,
-                arguments: albums[index],
-              );
-              print(albums[index].name + "-" + albums[index].artist.name);
-            },
-            icon: albums[index].cover,
-          );
-        }));
+    return OrientationBuilder(builder: (context, orientation) {
+      return GridView.count(
+          crossAxisCount: orientation == Orientation.portrait ? 2 : 4,
+          children: List<IconButton>.generate(albums.length, (index) {
+            return IconButton(
+              onPressed: () {
+                Navigator.pushNamed(
+                  context,
+                  ExtractArgumentsAlbumTracks.routeName,
+                  arguments: albums[index],
+                );
+                print(albums[index].name + "-" + albums[index].artist.name);
+              },
+              icon: albums[index].cover,
+            );
+          }));
+
+      },
+    );
   }
 }

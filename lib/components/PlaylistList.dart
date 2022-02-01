@@ -14,52 +14,62 @@ class _PlaylistListState extends State<PlaylistList> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-        body: ListView.builder(
-            shrinkWrap: true,
-            itemCount: playlists.length,
-            itemBuilder: (context, index) {
-              return ListTile(
-                title: Text(playlists[index].name),
-                onTap: () {
-                  Navigator.pushNamed(context, '/showPlaylist',
-                      arguments: playlists[index]);
-                },
-              );
-            }),
-        floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
-        floatingActionButton: FloatingActionButton(
-            child: Icon(Icons.add),
-            onPressed: () {
-              showDialog(
-                  context: context,
-                  builder: (BuildContext context) {
-                    return AlertDialog(
-                      title: const Text('New playlist'),
-                      content: TextFormField(
-                        controller: tec,
-                        decoration: const InputDecoration(
-                          border: OutlineInputBorder(),
-                          labelText: 'Playlist name',
-                        ),
-                      ),
-                      actions: <Widget>[
-                        TextButton(
-                          onPressed: () => Navigator.pop(context, 'Cancel'),
-                          child: const Text('Cancel'),
-                        ),
-                        TextButton(
-                          onPressed: () {
-                            setState(() {
-                              database.createPlaylist(tec.text);
-                            });
-                            Navigator.pop(context, 'OK');
-                          },
-                          child: const Text('OK'),
-                        ),
-                      ],
-                    );
-                  });
-            }));
+    return OrientationBuilder(
+      builder: (context, orientation) {
+        return Scaffold(
+            body: GridView.count(
+                childAspectRatio: 10,
+                crossAxisCount: orientation == Orientation.portrait ? 1 : 2,
+                shrinkWrap: true,
+                children: List.generate(playlists.length, (index) {
+                  return ListTile(
+                    title: Text(
+                      playlists[index].name,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    onTap: () {
+                      Navigator.pushNamed(context, '/showPlaylist',
+                          arguments: playlists[index]);
+                    },
+                  );
+                }),
+            ),
+            floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
+            floatingActionButton: FloatingActionButton(
+                child: Icon(Icons.add),
+                onPressed: () {
+                  showDialog(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return AlertDialog(
+                          title: const Text('New playlist'),
+                          content: TextFormField(
+                            controller: tec,
+                            decoration: const InputDecoration(
+                              border: OutlineInputBorder(),
+                              labelText: 'Playlist name',
+                            ),
+                          ),
+                          actions: <Widget>[
+                            TextButton(
+                              onPressed: () => Navigator.pop(context, 'Cancel'),
+                              child: const Text('Cancel'),
+                            ),
+                            TextButton(
+                              onPressed: () {
+                                setState(() {
+                                  database.createPlaylist(tec.text);
+                                });
+                                Navigator.pop(context, 'OK');
+                              },
+                              child: const Text('OK'),
+                            ),
+                          ],
+                        );
+                      });
+                }));
+
+      },
+    );
   }
 }

@@ -32,22 +32,24 @@ class AlbumInfo extends StatelessWidget {
                     Expanded(
                             child: GridView.count(
                             crossAxisCount: orientation == Orientation.portrait ? 1 : 2,
-                            children: List<ListTile>.generate(
+                            childAspectRatio: 10,
+                            children: List.generate(
                                 loader.getItemsCount(snapshot.data), (index) {
-                              return ListTile(
-                                  title: Text(loader.extractTitleFromTrack(
-                                      loader.getItem(snapshot.data, index))),
-                                  onTap: () async {
+                                  return  ListTile(
+                                      title: Text(
+                                      
+                                              loader.extractTitleFromTrack(
+                                                loader.getItem(snapshot.data, index)),
+                                              overflow: TextOverflow.ellipsis,
+                                              
+                                             ),
+                                      onTap: () async {
 
-                                    String url = await loader.queryYouTubeUrl(
-                                      loader.extractTitleFromTracks(snapshot.data, index)
-                                      + ' ' +
-                                      loader.extractArtistFromTracks(snapshot.data, index));
-                                    if (await canLaunch(url))
-                                      await launch(url);
-                                    else 
-                                      // can't launch url, there is some error
-                                      throw "Could not launch $url";
+                                        String url = await loader.queryYouTubeUrl(
+                                          loader.extractTitleFromTracks(snapshot.data, index)
+                                          + ' ' +
+                                          loader.extractArtistFromTracks(snapshot.data, index));
+                                        await launch(url);
                                   });
                             }))
                             ),
