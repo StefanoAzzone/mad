@@ -40,8 +40,7 @@ class Track {
       //TODO: ID???
       json["title"],
       json["path"],
-      database.containsArtist(json["Artist"]) ??
-          Database.UnknownArtist,
+      database.containsArtist(json["Artist"]) ?? Database.UnknownArtist,
       database.containsAlbum(json["Album"]) ?? Database.UnknownAlbum,
       json["lyrics"],
       json["trackNumber"]);
@@ -111,8 +110,7 @@ class Album {
 
       //TODO: ID???
       json["name"],
-      database.containsArtist(json["Artist"]) ??
-          Database.UnknownArtist,
+      database.containsArtist(json["Artist"]) ?? Database.UnknownArtist,
       img.Image.network(json["image"]));
 
   Map<String, dynamic> toJson() => <String, dynamic>{
@@ -205,13 +203,40 @@ class TrackQueue {
 Database database = Database.instance;
 enum DatabaseState { Uninitialized, Loading, Ready }
 final img.Image defaultImage = img.Image.asset('images/DefaultImage.png');
-
 final img.Image defaultAlbumThumbnail =
     img.Image.asset('images/albumThumb.png');
 
 class Database {
   static const String MUSIC_PATH = "storage/emulated/0/Music";
   static const List<String> SUPPORTED_FORMATS = [".mp3"];
+
+  Future<Directory> get _coversDirectory async {
+    String path = (await getApplicationDocumentsDirectory()).path;
+    Directory dir = Directory(path + "/MBox/Covers");
+    if (!await dir.exists()) {
+      dir.create(recursive: true);
+    }
+    return dir;
+  }
+
+  Future<Directory> get artistsDirectory async {
+    String path = (await getApplicationDocumentsDirectory()).path;
+    Directory dir = Directory(path + "/MBox/Artists");
+    if (!await dir.exists()) {
+      dir.create(recursive: true);
+    }
+    return dir;
+  }
+
+  Future<File> get savedDB async {
+    String path = (await getApplicationDocumentsDirectory()).path;
+    File file = File(path + "/MBox/db");
+    if (!await file.exists()) {
+      file.create(recursive: true);
+    }
+    return file;
+  }
+
   List files = [];
   List<Track> tracks = [];
   List<Artist> artists = [];
@@ -248,14 +273,61 @@ class Database {
   }
 
   void init(Function update) {
+    //loadData();
+    state = DatabaseState.Loading;
     insertAlbum(UnknownAlbum);
     insertArtist(UnknownArtist);
-    state = DatabaseState.Loading;
-    loadData();
     findMusic(update);
   }
 
-  void loadData() {}
+  void loadData() async {
+    String path = (await getApplicationDocumentsDirectory()).path;
+    Directory directory = Directory(path + "/MBox");
+    if (!await directory.exists()) {
+      print("No saved data.");
+      return;
+    }
+    File savedDB = File(directory.path + "/db");
+    if (!await savedDB.exists()) {
+      print("No saved data.");
+      return;
+    }
+
+    try {
+      String JsonDB = await savedDB.readAsString();
+      fromJson(jsonDecode(JsonDB));
+    } catch (e) {
+      print("Error while loading data.");
+    }
+  }
+
+  ///
+  /// Delete saved data and save them anew
+  ///
+  void saveAllData() async {
+    String path = (await getApplicationDocumentsDirectory()).path;
+    Directory directory = Directory(path + "/MBox");
+    if (!await directory.exists()) {
+      directory.create();
+      print("Creating directory " + directory.path);
+    }
+    File savedDB = File(directory.path + "/db");
+
+    if (await savedDB.exists()) {
+      savedDB.delete();
+    }
+    savedDB.create();
+    print("Recreating file " + savedDB.path);
+
+    try {
+      String JsonDB = jsonEncode(toJson());
+      await savedDB.writeAsString(JsonDB, mode: FileMode.write, flush: true);
+    } catch (e) {
+      print("Error while loading data.");
+    }
+  }
+
+  void saveTrack(Track) {}
 
   void findMusic(Function update) async {
     await loader.initialize();
@@ -268,6 +340,16 @@ class Database {
         );
         String? title = tag?.title;
 
+        if (tag != null &&
+            tag.title != null &&
+            tag.album != null &&
+            tag.artist != null &&
+            (containsTrack(hash(tag.title! + tag.artist! + tag.album!)) !=
+                null)) {
+          //If the file was already loaed skip this iteration
+          continue;
+        }
+
         var info = await loader.searchFirstTrack(
             title != null && title != "" ? title : p.basename(files[i].path));
 
@@ -279,8 +361,10 @@ class Database {
               ? Artist(artistName, defaultImage)
               : UnknownArtist;
           String albumName = tag?.album ?? "";
+          Uint8List? cover = await tagger.readArtwork(path: files[i].path);
           Album album = albumName != ""
-              ? Album(albumName, artist, defaultImage)
+              ? Album(albumName, artist,
+                  cover != null ? img.Image.memory(cover) : defaultImage)
               : UnknownAlbum;
           String lyrisc = tag?.lyrics ?? "";
           String trackNumber = tag?.trackNumber ?? "";
@@ -300,10 +384,8 @@ class Database {
         update();
       }
     }
-    // String json = jsonEncode(database.toJson());
-    // Map<String, dynamic> map = jsonDecode(json);
-    // fromJson(map);
     state = DatabaseState.Ready;
+    //saveData();
   }
 
   Future setNewMetadata(Track track, var metadata) async {
@@ -329,7 +411,7 @@ class Database {
     String? albumName = null;
     int? trackNumber = null;
     String? lyrics = null;
-    
+
     if (tag != null) {
       title = tag.title;
       artistName = tag.artist;
@@ -356,7 +438,7 @@ class Database {
     } else {
       //tag present
       var item = await loader.searchArtist(artistName);
-      
+
       artist = (item == null)
           ? Artist(artistName, defaultImage) //Artist not found
           : Artist(
@@ -375,11 +457,11 @@ class Database {
     Album? tmpAlbum;
     if (albumName == "" || albumName == null) {
       //tag missing
-      tmpAlbum = containsAlbum(hash(loader.extractAlbumNameFromTrack(item)
-         + loader.extractArtistNameFromTrack(item)));
+      tmpAlbum = containsAlbum(hash(loader.extractAlbumNameFromTrack(item) +
+          loader.extractArtistNameFromTrack(item)));
       if (tmpAlbum == null) {
         album = await createAlbumFromTrack(item, artist);
-        albums.add(album);
+        insertAlbum(album);
       } else {
         album = tmpAlbum;
       }
@@ -387,15 +469,19 @@ class Database {
       print("album " + album.name + " not in tags; used API instead");
     } else {
       //tag present
-      
-      var item = await loader.searchAlbum(albumName);
-      album = (item == null)
-          ? Album(albumName, artist, defaultImage) //Album not found
-          : Album(loader.extractAlbumTitleFromAlbum(item), artist,
-              loader.extractCoverFromAlbum(item)); //Album found
-      tmpAlbum = containsAlbum(album.id);
+      tmpAlbum = containsAlbum(hash(albumName + artist.name));
       if (tmpAlbum == null) {
-        albums.add(album);
+        Uint8List? cover = await tagger.readArtwork(path: path);
+        if (cover != null) {
+          album = Album(albumName, artist, img.Image.memory(cover));
+        } else {
+          var item = await loader.searchAlbum(albumName);
+          album = (item == null)
+              ? Album(albumName, artist, defaultImage) //Album not found
+              : Album(loader.extractAlbumTitleFromAlbum(item), artist,
+                  loader.extractCoverFromAlbum(item)); //Album found
+        }
+        insertAlbum(album);
       } else {
         album = tmpAlbum;
       }
@@ -423,7 +509,8 @@ class Database {
   }
 
   Future<Album> createAlbum(var item) async {
-    Artist? artist = containsArtist(hash(loader.extractArtistNameFromAlbum(item)));
+    Artist? artist =
+        containsArtist(hash(loader.extractArtistNameFromAlbum(item)));
     if (artist == null) {
       artist = await createArtistFromAlbum(item);
       insertArtist(artist);
@@ -454,17 +541,22 @@ class Database {
   }
 
   Artist? containsArtist(int Id) {
-    for(int i = 0; i < artists.length; i++) {
-      if (artists[i].id == Id) 
-        return artists[i];
+    for (int i = 0; i < artists.length; i++) {
+      if (artists[i].id == Id) return artists[i];
     }
     return null;
   }
 
   Album? containsAlbum(int Id) {
-    for(int i = 0; i < albums.length; i++) {
-      if (albums[i].id == Id) 
-        return albums[i];
+    for (int i = 0; i < albums.length; i++) {
+      if (albums[i].id == Id) return albums[i];
+    }
+    return null;
+  }
+
+  Track? containsTrack(int Id) {
+    for (int i = 0; i < tracks.length; i++) {
+      if (tracks[i].id == Id) return tracks[i];
     }
     return null;
   }
@@ -487,13 +579,15 @@ class Database {
     tracks.add(track);
   }
 
-  void insertAlbum(Album album) {
+  void insertAlbum(Album album) async {
     for (int i = 0; i < albums.length; i++) {
       if (album.name.compareTo(albums[i].name) < 0) {
         albums.insert(i, album);
         return;
       }
     }
+    File file = File((await _coversDirectory).path + '/' + album.id.toString());
+
     albums.add(album);
   }
 
@@ -504,6 +598,7 @@ class Database {
         return;
       }
     }
+
     artists.add(artist);
   }
 

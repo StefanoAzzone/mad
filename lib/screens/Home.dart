@@ -33,72 +33,67 @@ class _MyHomePageState extends State<MyHomePage> {
     return DefaultTabController(
         length: 4,
         child: Scaffold(
-          body: NestedScrollView(
-            headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
-              return <Widget>[
-                SliverAppBar(
-                  snap: true,
-                  title: Text('MBox'),
-                  pinned: true,
-                  floating: true,
-                  forceElevated: innerBoxIsScrolled,
-                  centerTitle: true,
-                  bottom: TabBar(
-                    tabs: const [
-                      Tab(
-                        icon: Icon(Icons.music_note),
-                        text: "Tracks",
-                      ),
-                      Tab(
-                        icon: Icon(Icons.album),
-                        text: "Albums",
-                      ),
-                      Tab(
-                        icon: Icon(Icons.person),
-                        text: "Artists",
-                      ),
-                      Tab(
-                        icon: Icon(Icons.playlist_play),
-                        text: "Playlists",
-                      ),
-                    ],
+            body: NestedScrollView(
+              headerSliverBuilder:
+                  (BuildContext context, bool innerBoxIsScrolled) {
+                return <Widget>[
+                  SliverAppBar(
+                    snap: true,
+                    title: Text('MBox'),
+                    pinned: true,
+                    floating: true,
+                    forceElevated: innerBoxIsScrolled,
+                    centerTitle: true,
+                    bottom: TabBar(
+                      tabs: const [
+                        Tab(
+                          icon: Icon(Icons.music_note),
+                          text: "Tracks",
+                        ),
+                        Tab(
+                          icon: Icon(Icons.album),
+                          text: "Albums",
+                        ),
+                        Tab(
+                          icon: Icon(Icons.person),
+                          text: "Artists",
+                        ),
+                        Tab(
+                          icon: Icon(Icons.playlist_play),
+                          text: "Playlists",
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-              ];
-            },
-            body:  Column(
-            children: [
-              Expanded(
-                child: TabBarView(
-                  children: [
-                    TrackList((Track track) async {
-                      player.pause();
-                      trackQueue.reset();
-                      trackQueue.pushFront(track);
-                      player.play();
-                      await Navigator.pushNamed(context, '/playingTrack');
-                      _updatePage();
-                    }, database.tracks),
-                    AlbumList(database.albums),
-                    ArtistList(),
-                    PlaylistList(),
-                  ],
-                ),
+                ];
+              },
+              body: Column(
+                children: [
+                  Expanded(
+                    child: TabBarView(
+                      children: [
+                        TrackList((Track track) async {
+                          player.pause();
+                          trackQueue.reset();
+                          trackQueue.pushFront(track);
+                          player.play();
+                          await Navigator.pushNamed(context, '/playingTrack');
+                          _updatePage();
+                        }, database.tracks),
+                        AlbumList(database.albums),
+                        ArtistList(),
+                        PlaylistList(),
+                      ],
+                    ),
+                  ),
+                ],
               ),
-              
-            ],
-          ),
-          ),
-          bottomNavigationBar: BottomAppBar(
-            color: Colors.lightBlueAccent,
-            child: SizedBox(
-              child: PlayBar(),
-              height: 50,
-              
-            ) 
-          )
-          
-        )
-      );
+            ),
+            bottomNavigationBar: BottomAppBar(
+                color: Colors.lightBlueAccent,
+                child: SizedBox(
+                  child: PlayBar(),
+                  height: 50,
+                ))));
   }
 }
