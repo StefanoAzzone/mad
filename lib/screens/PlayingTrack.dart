@@ -8,8 +8,16 @@ import 'package:mad/buttons/CoverButton.dart';
 import 'package:mad/buttons/PlayButton.dart';
 import 'package:mad/data.dart';
 
-class PlayingTrack extends StatelessWidget {
-  PlayingTrack();
+
+
+class PlayingTrack extends StatefulWidget {
+  //PlayingTrack();
+  
+  @override
+  State<PlayingTrack> createState() => _PlayingTrackState();
+}
+
+class _PlayingTrackState extends State<PlayingTrack> {
 
   @override
   Widget build(BuildContext context) {
@@ -76,10 +84,21 @@ class PlayingTrack extends StatelessWidget {
                 Expanded(child: CoverButton()),
                 Expanded(child: Column(
                   children: [
+                    SizedBox(height: 50,),
+                    Text(trackQueue.current().title,
+                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                    ),
+                    SizedBox(height: 25,),
+                    Text(
+                      trackQueue.current().artist.name,
+                      style: TextStyle(fontSize: 12),
+                    ),
                     Expanded(child: ProgressBar()),
                     Row(
+                      
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: [
+
                         IconButton(
                             onPressed: () {
                               Navigator.pushNamed(context, "/artistInfo",
@@ -87,11 +106,21 @@ class PlayingTrack extends StatelessWidget {
                             },
                             icon: Icon(Icons.ramen_dining)),
                         IconButton(
-                            onPressed: () => (print("prev")),
+                            onPressed: () {
+                              player.prev();
+                              setState(() {
+                                
+                              });
+                            },
                             icon: Icon(Icons.skip_previous_rounded)),
                         PlayButton(),
                         IconButton(
-                            onPressed: () => (print("next")),
+                            onPressed: () {
+                              player.next();
+                              setState(() {
+                                
+                              });
+                            },
                             icon: Icon(Icons.skip_next_rounded)),
                         IconButton(
                             onPressed: () {
