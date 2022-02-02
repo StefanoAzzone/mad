@@ -42,7 +42,8 @@ class MetadataLoader {
       if (spotifyToken == "") {
         Codec<String, String> stringToBase64 = utf8.fuse(base64);
         //SPOTIFY AUTHENTICATION//
-        http.Response response = await http.post(
+        try {
+          http.Response response = await http.post(
             Uri.parse(accounts + authReqEndPoint),
             headers: <String, String>{
               'Content-Type': 'application/x-www-form-urlencoded',
@@ -56,6 +57,10 @@ class MetadataLoader {
 
         spotifyToken = jsonDecode(response.body)['access_token'];
         print(response.body);
+        } catch (e) {
+          print("disconnected");
+        }
+        
       }
     });
   }
@@ -204,6 +209,14 @@ class MetadataLoader {
     if (jsonDecode(response.body)["images"].length == 0) return null;
     url = jsonDecode(response.body)["images"][0]["url"];
     return (await http.get(Uri.parse(url))).bodyBytes;
+  }
+
+  Future<String> getWikipedia(String query) async {
+    String url = 'https://en.wikipedia.org/w/api.php?action=query&prop=extracts&exintro&format=json&explaintext&titles=' + query;
+    http.Response res = await http.get(Uri.parse(url)).timeout(const Duration(seconds: 1));
+    var json = jsonDecode(res.body) as Map;
+    var ret = json["query"]["pages"].entries.toList()[0].value["extract"];
+    return ret;
   }
 
   Future<http.Response> queryAPI(String query) {
