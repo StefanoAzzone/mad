@@ -294,9 +294,9 @@ class Database {
         insertAlbum(await Album.fromJson(e as Map<String, dynamic>));
       }
 
-      tracks = ((json['tracks'] as List<dynamic>)
-          .map((e) => Track.fromJson(e as Map<String, dynamic>))
-          .toList());
+      for (var e in (json['tracks'] as List<dynamic>)) {
+        insertTrack(await Track.fromJson(e as Map<String, dynamic>));
+      }
 
       playlists = ((json['playlists'] as List<dynamic>)
           .map((e) => Playlist.fromJson(e as Map<String, dynamic>))
@@ -306,10 +306,11 @@ class Database {
 
   void init(Function update) {
     state = DatabaseState.Loading;
-    //loadData(update);
-    insertAlbum(UnknownAlbum);
-    insertArtist(UnknownArtist);
-    findMusic(update);
+    //deleteAll();
+    loadData(update);
+    // insertAlbum(UnknownAlbum);
+    // insertArtist(UnknownArtist);
+    //findMusic(update);
   }
 
   void loadData(Function update) async {
@@ -328,11 +329,10 @@ class Database {
     try {
       String JsonDB = await savedDB.readAsString();
       await fromJson(jsonDecode(JsonDB));
+      update();
     } catch (e) {
       print("Error while loading data.");
     }
-
-    update();
   }
 
   Future deleteAll() async {
@@ -424,14 +424,18 @@ class Database {
           Artist artist = artistName != ""
               ? Artist(artistName, defaultImage)
               : UnknownArtist;
+          insertArtist(artist);
           String albumName = tag?.album ?? "";
           Uint8List? cover = await tagger.readArtwork(path: files[i].path);
           Album album = albumName != ""
               ? Album(albumName, artist,
                   cover != null ? img.Image.memory(cover) : defaultImage)
               : UnknownAlbum;
+          insertAlbum(album);
+          saveAlbumCover(album.id, cover);
           String lyrics = tag?.lyrics ?? "";
           String trackNumber = tag?.trackNumber ?? "";
+
           insertTrack(Track(
               title != "" ? title : p.basename(files[i].path),
               files[i].path,
