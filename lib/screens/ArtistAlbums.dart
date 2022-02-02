@@ -11,12 +11,45 @@ class ArtistAlbums extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    Size size = MediaQuery.of(context).size;
     return Scaffold(
         appBar: AppBar(
           title: Text(artist.name),
           centerTitle: true,
         ),
         body: Column(children: [
+          Row(
+            children: [
+              SizedBox(
+                width: size.width/20,
+                height: size.height/3,
+              ),
+              SizedBox(
+                child: artist.image,
+                width: size.width/2,
+                height: size.height/3,
+              ),
+              SizedBox(
+                width: size.width/20,
+                height: size.height/3,
+              ),
+              Column(
+                children: [
+                  SizedBox(
+                    width: size.width/3 ,
+                    height: size.height/15 ,
+                    child: 
+                      Text(
+                        artist.name,
+                        style: TextStyle(fontSize: 20),
+                        //overflow: TextOverflow.ellipsis,
+                      )
+                    
+                  )
+                ],
+              )
+            ],
+          ),
           Expanded(
             child: AlbumList(artist.albumList),
           ),

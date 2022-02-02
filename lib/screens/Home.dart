@@ -38,8 +38,7 @@ class _MyHomePageState extends State<MyHomePage> {
               return <Widget>[
                 
                 SliverAppBar(
-                  
-                  snap: true,
+                  snap: false,
                   title: Text('MBox'),
                   pinned: true,
                   floating: true,

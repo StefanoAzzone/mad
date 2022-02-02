@@ -104,7 +104,6 @@ class Album {
 
   Album(this.name, this.artist, this.cover) {
     id = hash(name + artist.name);
-    artist.addAlbum(this);
   }
 
   static Album fromJson(Map<String, dynamic> json) => Album(
@@ -282,14 +281,14 @@ class Database {
           Album album = albumName != ""
               ? Album(albumName, artist, defaultImage)
               : UnknownAlbum;
-          String lyrisc = tag?.lyrics ?? "";
+          String lyrics = tag?.lyrics ?? "";
           String trackNumber = tag?.trackNumber ?? "";
           insertTrack(Track(
               title != "" ? title : p.basename(files[i].path),
               files[i].path,
               artist,
               album,
-              lyrisc != "" ? lyrisc : "Unknown lyrics",
+              lyrics != "" ? lyrics : "Unknown lyrics",
               trackNumber != "" ? int.parse(trackNumber) : 0));
           print(title + " not found; generated using tags, if possible.");
         } else {
@@ -396,6 +395,7 @@ class Database {
       tmpAlbum = containsAlbum(album.id);
       if (tmpAlbum == null) {
         albums.add(album);
+        album.artist.addAlbum(album);
       } else {
         album = tmpAlbum;
       }

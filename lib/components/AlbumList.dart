@@ -10,11 +10,13 @@ class AlbumList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    Size size = MediaQuery.of(context).size;
     return OrientationBuilder(builder: (context, orientation) {
+      int ncols = orientation == Orientation.portrait ? 2 : 4;
       return GridView.count(
-          childAspectRatio: 0.898,
+          childAspectRatio: 0.80,
           padding: EdgeInsets.only(top: 0.0),
-          crossAxisCount: orientation == Orientation.portrait ? 2 : 4,
+          crossAxisCount: ncols,
           children: List<IconButton>.generate(albums.length, (index) {
             return IconButton(
 
@@ -27,7 +29,11 @@ class AlbumList extends StatelessWidget {
               },
               icon: Column(
                 children: [
-                  albums[index].cover,
+                  SizedBox(
+                    child: albums[index].cover,
+                    width: size.width/ncols - 10,
+                    height: size.width/ncols - 10 ,
+                  ),
                   Text(
                     albums[index].name,
                     overflow: TextOverflow.ellipsis,
