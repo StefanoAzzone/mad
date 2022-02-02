@@ -250,6 +250,16 @@ class Database {
   void loadData() {}
 
   void findMusic(Function update) async {
+  bool connected = false;
+  try {
+    final result = await InternetAddress.lookup('google.com');
+    if (result.isNotEmpty && result[0].rawAddress.isNotEmpty) {
+      connected = true;
+      print('connected');
+    }
+    } on SocketException catch (_) {
+      print('not connected');
+    }
     await loader.initialize();
 
     List<FileSystemEntity> files = Directory(MUSIC_PATH).listSync();
@@ -259,9 +269,12 @@ class Database {
           path: files[i].path,
         );
         String? title = tag?.title;
-
-        var info = await loader.searchFirstTrack(
+        var info = null;
+        if(connected == true) {
+          info = await loader.searchFirstTrack(
             title != null && title != "" ? title : p.basename(files[i].path));
+        }
+        
 
         if (info == null) {
           //cannot find info: try to use tags

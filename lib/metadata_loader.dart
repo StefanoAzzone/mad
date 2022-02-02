@@ -41,7 +41,8 @@ class MetadataLoader {
       if (spotifyToken == "") {
         Codec<String, String> stringToBase64 = utf8.fuse(base64);
         //SPOTIFY AUTHENTICATION//
-        http.Response response = await http.post(
+        try {
+          http.Response response = await http.post(
             Uri.parse(accounts + authReqEndPoint),
             headers: <String, String>{
               'Content-Type': 'application/x-www-form-urlencoded',
@@ -55,6 +56,10 @@ class MetadataLoader {
 
         spotifyToken = jsonDecode(response.body)['access_token'];
         print(response.body);
+        } catch (e) {
+          print("disconnected");
+        }
+        
       }
     });
   }
