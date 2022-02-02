@@ -1,21 +1,14 @@
 import 'dart:async';
-import 'dart:collection';
 import 'dart:typed_data';
-import 'dart:ui';
 import 'package:flutter/src/widgets/image.dart' as img;
 
 import 'package:audiotagger/audiotagger.dart';
 import 'package:audiotagger/models/tag.dart';
 import 'package:crypto/crypto.dart';
-import 'package:flutter/material.dart';
-import 'package:http/http.dart';
 import 'package:mad/metadata_loader.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as p;
 import 'dart:convert'; // for the utf8.encode method
 import 'dart:io';
-
-import 'package:spotify/spotify.dart';
 
 int hash(String input) {
   return md5.convert(utf8.encode(input)).hashCode;

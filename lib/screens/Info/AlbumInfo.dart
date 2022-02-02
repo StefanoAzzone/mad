@@ -22,11 +22,15 @@ class AlbumInfo extends StatelessWidget {
               future: loader.getTracksOfAlbum(loader.extractId(album)),
               builder: (context, snapshot) {
                 if (!snapshot.hasData) {
-                  return const SizedBox(
-                    width: 50,
-                    height: 50,
-                    child: CircularProgressIndicator(),
-                  );
+                  return const
+                  Center(
+                    child: 
+                      SizedBox(
+                        width: 50,
+                        height: 50,
+                        child: CircularProgressIndicator(),
+                      )
+                  ); 
                 } else {
                   return Column(children: [
                     Expanded(

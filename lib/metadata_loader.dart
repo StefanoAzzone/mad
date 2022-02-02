@@ -201,6 +201,14 @@ class MetadataLoader {
     });
   }
 
+  Future<String> getWikipedia(String query) async {
+    String url = 'https://en.wikipedia.org/w/api.php?action=query&prop=extracts&exintro&format=json&explaintext&titles=' + query;
+    http.Response res = await http.get(Uri.parse(url)).timeout(const Duration(seconds: 1));
+    var json = jsonDecode(res.body) as Map;
+    var ret = json["query"]["pages"].entries.toList()[0].value["extract"];
+    return ret;
+  }
+
   Future<http.Response> queryAPI(String query) {
     String url = base + searchEndPoint + "?" + "q=" + query;
     // print(url);

@@ -15,10 +15,16 @@ class ArtistInfo extends StatelessWidget {
           future: loader.getAlbumsOfArtist(artistName),
           builder: (context, snapshot) {
             if (!snapshot.hasData) {
-              return const SizedBox(
-                width: 50,
-                height: 50,
-                child: CircularProgressIndicator(),
+              return const Scaffold(
+                body:
+                  Center(
+                    child: 
+                      SizedBox(
+                        width: 50,
+                        height: 50,
+                        child: CircularProgressIndicator(),
+                      )
+                  )
               );
             } else {
               return Scaffold(
