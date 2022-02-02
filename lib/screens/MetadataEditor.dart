@@ -57,7 +57,7 @@ class _MetadataEditorState extends State<MetadataEditor> {
                               children: [
                                 thumbnail == null
                                     ? defaultAlbumThumbnail
-                                    : Image.memory(thumbnail!),
+                                    : Image.memory(thumbnail),
                                 Padding(padding: EdgeInsets.all(8)),
                                 Column(
                                   children: [

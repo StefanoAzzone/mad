@@ -40,8 +40,8 @@ class Track {
       //TODO: ID???
       json["title"],
       json["path"],
-      database.containsArtist(json["Artist"]) ?? Database.UnknownArtist,
-      database.containsAlbum(json["Album"]) ?? Database.UnknownAlbum,
+      database.containsArtist(json["artist"]) ?? Database.UnknownArtist,
+      database.containsAlbum(json["album"]) ?? Database.UnknownAlbum,
       json["lyrics"],
       json["trackNumber"]);
 
@@ -71,15 +71,20 @@ class Artist {
     id = hash(name);
   }
 
-  static Artist fromJson(Map<String, dynamic> json) => Artist(
-      //TODO: ID???
-      json["name"],
-      img.Image.network(json["image"]));
+  static Future<Artist> fromJson(Map<String, dynamic> json) async {
+    File file = File(
+        (await database._artistsDirectory).path + '/' + json["id"].toString());
+
+    return Artist(
+        json["name"],
+        await file.exists()
+            ? img.Image.memory(await file.readAsBytes())
+            : defaultImage);
+  }
 
   Map<String, dynamic> toJson() => <String, dynamic>{
         'id': id,
         'name': name,
-        'image': "url",
       };
 
   void addAlbum(Album album) {
@@ -105,18 +110,22 @@ class Album {
     id = hash(name + artist.name);
   }
 
-  static Album fromJson(Map<String, dynamic> json) => Album(
+  static Future<Album> fromJson(Map<String, dynamic> json) async {
+    File file = File(
+        (await database._coversDirectory).path + '/' + json["id"].toString());
 
-      //TODO: ID???
-      json["name"],
-      database.containsArtist(json["Artist"]) ?? Database.UnknownArtist,
-      img.Image.network(json["image"]));
+    return Album(
+        json["name"],
+        database.containsArtist(json["Artist"]) ?? Database.UnknownArtist,
+        await file.exists()
+            ? img.Image.memory(await file.readAsBytes())
+            : defaultImage);
+  }
 
   Map<String, dynamic> toJson() => <String, dynamic>{
         'id': id,
         'name': name,
         'Artist': artist.id,
-        'image': "url",
       };
 
   void addTrack(Track track) {
@@ -231,27 +240,27 @@ class Database {
     Directory dir = Directory(path + "/MBox/Covers");
     if (!await dir.exists()) {
       print("Creating albums cover folder: " + path + "/MBox/Covers");
-      dir.create(recursive: true);
+      await dir.create(recursive: true);
     }
     return dir;
   }
 
-  Future<Directory> get artistsDirectory async {
+  Future<Directory> get _artistsDirectory async {
     String path = (await getApplicationDocumentsDirectory()).path;
     Directory dir = Directory(path + "/MBox/Artists");
     if (!await dir.exists()) {
       print("Creating artists image folder: " + path + "/MBox/Artists");
-      dir.create(recursive: true);
+      await dir.create(recursive: true);
     }
     return dir;
   }
 
-  Future<File> get savedDB async {
+  Future<File> get _savedDB async {
     String path = (await getApplicationDocumentsDirectory()).path;
     File file = File(path + "/MBox/db");
     if (!await file.exists()) {
       print("Creating DB file: " + path + "/MBox/db");
-      file.create(recursive: true);
+      await file.create(recursive: true);
     }
     return file;
   }
@@ -280,30 +289,35 @@ class Database {
         'playlists': playlists.map((e) => e.toJson()).toList(),
       };
 
-  void fromJson(Map<String, dynamic> json) {
-    tracks = ((json['tracks'] as List<dynamic>)
-        .map((e) => Track.fromJson(e as Map<String, dynamic>))
-        .toList());
-    artists = ((json['artists'] as List<dynamic>)
-        .map((e) => Artist.fromJson(e as Map<String, dynamic>))
-        .toList());
-    albums = ((json['albums'] as List<dynamic>)
-        .map((e) => Album.fromJson(e as Map<String, dynamic>))
-        .toList());
-    playlists = ((json['playlists'] as List<dynamic>)
-        .map((e) => Playlist.fromJson(e as Map<String, dynamic>))
-        .toList());
+  Future fromJson(Map<String, dynamic> json) async {
+    return Future(() async {
+      for (var e in (json['artists'] as List<dynamic>)) {
+        insertArtist(await Artist.fromJson(e as Map<String, dynamic>));
+      }
+
+      for (var e in (json['albums'] as List<dynamic>)) {
+        insertAlbum(await Album.fromJson(e as Map<String, dynamic>));
+      }
+
+      tracks = ((json['tracks'] as List<dynamic>)
+          .map((e) => Track.fromJson(e as Map<String, dynamic>))
+          .toList());
+
+      playlists = ((json['playlists'] as List<dynamic>)
+          .map((e) => Playlist.fromJson(e as Map<String, dynamic>))
+          .toList());
+    });
   }
 
   void init(Function update) {
-    //loadData();
     state = DatabaseState.Loading;
+    //loadData(update);
     insertAlbum(UnknownAlbum);
     insertArtist(UnknownArtist);
     findMusic(update);
   }
 
-  void loadData() async {
+  void loadData(Function update) async {
     String path = (await getApplicationDocumentsDirectory()).path;
     Directory directory = Directory(path + "/MBox");
     if (!await directory.exists()) {
@@ -318,22 +332,49 @@ class Database {
 
     try {
       String JsonDB = await savedDB.readAsString();
-      fromJson(jsonDecode(JsonDB));
+      await fromJson(jsonDecode(JsonDB));
     } catch (e) {
       print("Error while loading data.");
     }
+
+    update();
   }
 
-  void saveArtistImage(int id, Uint8List? image) {}
-  void saveAlbumCover(int id, Uint8List? image) {}
+  Future deleteAll() async {
+    (await _artistsDirectory).delete(recursive: true);
+    (await _coversDirectory).delete(recursive: true);
+    (await _savedDB).delete(recursive: true);
+  }
+
+  void saveArtistImage(int id, Uint8List? image) async {
+    if (image != null) {
+      File file = File((await _artistsDirectory).path + '/' + id.toString());
+      if (!await file.exists()) {
+        print("Creating file " + file.path);
+        await file.create();
+      }
+      file.writeAsBytes(image);
+    }
+  }
+
+  void saveAlbumCover(int id, Uint8List? image) async {
+    if (image != null) {
+      File file = File((await _coversDirectory).path + '/' + id.toString());
+      if (!await file.exists()) {
+        print("Creating file " + file.path);
+        await file.create();
+      }
+      file.writeAsBytes(image);
+    }
+  }
 
   ///
-  /// Delete saved data and save them anew
+  /// Delete saved database and save it anew
   ///
   void saveAllData() async {
-    (await savedDB).delete();
+    (await _savedDB).delete();
 
-    File db = await savedDB;
+    File db = await _savedDB;
     print("Recreating file " + db.path);
 
     try {
@@ -361,7 +402,7 @@ class Database {
             tag.artist != null &&
             (containsTrack(hash(tag.title! + tag.artist! + tag.album!)) !=
                 null)) {
-          //If the file was already loaed skip this iteration
+          //If the file was already loaded skip this iteration
           continue;
         }
 
@@ -400,7 +441,7 @@ class Database {
       }
     }
     state = DatabaseState.Ready;
-    //saveData();
+    saveAllData();
   }
 
   Future setNewMetadata(Track track, var metadata) async {
@@ -454,20 +495,19 @@ class Database {
       //tag present
       var item = await loader.searchArtist(artistName);
 
-      Uint8List? image = null;
+      Uint8List? image;
       if (item == null) {
         //Artist not found
         artist = Artist(artistName, defaultImage);
       } else {
         //Artist found
         image = await loader.getArtistImage(loader.extractId(item));
-        artist = image == null
+        artist = (image == null)
             ? Artist(loader.extractArtistNameFromArtist(item), defaultImage)
             : Artist(loader.extractArtistNameFromArtist(item),
                 img.Image.memory(image));
       }
 
-      //TODO : fix the id: we are not using the right id
       tmpArtist = containsArtist(artist.id);
       if (tmpArtist == null) {
         saveArtistImage(artist.id, image);
@@ -540,20 +580,6 @@ class Database {
     return Track(title, path, artist, album, lyrics, trackNumber);
   }
 
-  // Future<Album> createAlbum(var item) async {
-  //   Artist? artist =
-  //       containsArtist(hash(loader.extractArtistNameFromAlbum(item)));
-  //   if (artist == null) {
-  //     artist = await createArtistFromAlbum(item);
-  //     insertArtist(artist);
-  //   }
-  //   Uint8List? cover = await loader.extractCoverFromAlbum(item);
-  //   Album album = Album(loader.extractAlbumTitleFromAlbum(item), artist,
-  //       cover == null ? defaultImage : img.Image.memory(cover));
-  //   saveAlbumCover(album.id, cover);
-  //   return album;
-  // }
-
   Future<Album> createAlbumFromTrack(var item, Artist artist) async {
     Uint8List cover = await loader.extractCoverFromTrack(item);
     Album album = Album(loader.extractAlbumNameFromTrack(item), artist,
@@ -561,13 +587,6 @@ class Database {
     saveAlbumCover(album.id, cover);
     return album;
   }
-
-  // Future<Artist> createArtistFromAlbum(var item) {
-  //   return Future(() async {
-  //     return Artist(loader.extractArtistNameFromAlbum(item),
-  //         await loader.getArtistImage(loader.extractArtistIdFromAlbum(item)));
-  //   });
-  // }
 
   Future<Artist> createArtistFromTrack(var item) async {
     Uint8List? image =
