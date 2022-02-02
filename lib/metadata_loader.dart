@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:typed_data';
 
 import 'package:flutter/cupertino.dart';
 import 'package:mad/data.dart' as data;
@@ -123,8 +124,10 @@ class MetadataLoader {
     return item["artists"][0]["id"];
   }
 
-  image.Image extractCoverFromAlbum(var item) {
-    return image.Image.network(item["images"][0]["url"]);
+  Future<Uint8List> extractCoverFromAlbum(var item) async {
+    String url = item["images"][0]["url"];
+    return (await http.get(Uri.parse(url))).bodyBytes;
+    ;
   }
 
   String extractTitleFromTrack(var item) {
@@ -139,12 +142,14 @@ class MetadataLoader {
     return items[index]["artists"][0]["name"];
   }
 
-  image.Image extractThumbnailUrlFromTracks(var items, int index) {
+  Future<Uint8List?> extractThumbnailUrlFromTracks(var items, int index) async {
     var tmp = items[index]["album"]["images"];
-
-    return tmp.length > 0
-        ? image.Image.network(tmp[tmp.length - 1]["url"])
-        : data.defaultAlbumThumbnail;
+    if (tmp.length == 0) {
+      return null;
+      //DefaulThumbnail
+    }
+    String url = tmp[tmp.length - 1]["url"];
+    return (await http.get(Uri.parse(url))).bodyBytes;
   }
 
   String extractArtistNameFromTrack(var item) {
@@ -167,8 +172,9 @@ class MetadataLoader {
     return item["track_number"];
   }
 
-  image.Image extractCoverFromTrack(var item) {
-    return image.Image.network(item["album"]["images"][0]["url"]);
+  Future<Uint8List> extractCoverFromTrack(var item) async {
+    String url = item["album"]["images"][0]["url"];
+    return (await http.get(Uri.parse(url))).bodyBytes;
   }
 
   Future getTracksOfAlbum(String albumId) async {
@@ -186,7 +192,7 @@ class MetadataLoader {
         extractTitleFromTrack(item) + " " + extractArtistNameFromTrack(item));
   }
 
-  Future<image.Image> getArtistImage(String Id) async {
+  Future<Uint8List?> getArtistImage(String Id) async {
     String url = base + artistsEndPoint + "/" + Id;
     http.Response response =
         await http.get(Uri.parse(url), headers: <String, String>{
@@ -194,11 +200,10 @@ class MetadataLoader {
       'Content-Type': 'application/json',
       'Authorization': 'Bearer ' + spotifyToken,
     });
-    return Future<image.Image>(() {
-      if(jsonDecode(response.body)["images"].length == 0)
-        return data.defaultImage;
-      return image.Image.network(jsonDecode(response.body)["images"][0]["url"]);
-    });
+
+    if (jsonDecode(response.body)["images"].length == 0) return null;
+    url = jsonDecode(response.body)["images"][0]["url"];
+    return (await http.get(Uri.parse(url))).bodyBytes;
   }
 
   Future<http.Response> queryAPI(String query) {
@@ -266,13 +271,13 @@ class MetadataLoader {
   }
 
   Future<String> queryYouTubeUrl(String query) async {
-    String url = youtubeSearchUrl + query;  
+    String url = youtubeSearchUrl + query;
     http.Response response = await http.get(Uri.parse(url));
 
-      int i = response.body.indexOf("/watch?v=");
-      int j = response.body.substring(i).indexOf('"');
+    int i = response.body.indexOf("/watch?v=");
+    int j = response.body.substring(i).indexOf('"');
 
-    return "http://youtube.com" + response.body.substring(i, i+j);
+    return "http://youtube.com" + response.body.substring(i, i + j);
   }
 
   String parseLyrics(var nodes) {

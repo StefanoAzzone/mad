@@ -231,6 +231,7 @@ class Database {
     String path = (await getApplicationDocumentsDirectory()).path;
     Directory dir = Directory(path + "/MBox/Covers");
     if (!await dir.exists()) {
+      print("Creating albums cover folder: " + path + "/MBox/Covers");
       dir.create(recursive: true);
     }
     return dir;
@@ -240,6 +241,7 @@ class Database {
     String path = (await getApplicationDocumentsDirectory()).path;
     Directory dir = Directory(path + "/MBox/Artists");
     if (!await dir.exists()) {
+      print("Creating artists image folder: " + path + "/MBox/Artists");
       dir.create(recursive: true);
     }
     return dir;
@@ -249,6 +251,7 @@ class Database {
     String path = (await getApplicationDocumentsDirectory()).path;
     File file = File(path + "/MBox/db");
     if (!await file.exists()) {
+      print("Creating DB file: " + path + "/MBox/db");
       file.create(recursive: true);
     }
     return file;
@@ -322,33 +325,25 @@ class Database {
     }
   }
 
+  void saveArtistImage(int id, Uint8List? image) {}
+  void saveAlbumCover(int id, Uint8List? image) {}
+
   ///
   /// Delete saved data and save them anew
   ///
   void saveAllData() async {
-    String path = (await getApplicationDocumentsDirectory()).path;
-    Directory directory = Directory(path + "/MBox");
-    if (!await directory.exists()) {
-      directory.create();
-      print("Creating directory " + directory.path);
-    }
-    File savedDB = File(directory.path + "/db");
+    (await savedDB).delete();
 
-    if (await savedDB.exists()) {
-      savedDB.delete();
-    }
-    savedDB.create();
-    print("Recreating file " + savedDB.path);
+    File db = await savedDB;
+    print("Recreating file " + db.path);
 
     try {
       String JsonDB = jsonEncode(toJson());
-      await savedDB.writeAsString(JsonDB, mode: FileMode.write, flush: true);
+      await db.writeAsString(JsonDB, mode: FileMode.write, flush: true);
     } catch (e) {
-      print("Error while loading data.");
+      print("Error while saving data.");
     }
   }
-
-  void saveTrack(Track) {}
 
   void findMusic(Function update) async {
     await loader.initialize();
@@ -460,14 +455,23 @@ class Database {
       //tag present
       var item = await loader.searchArtist(artistName);
 
-      artist = (item == null)
-          ? Artist(artistName, defaultImage) //Artist not found
-          : Artist(
-              loader.extractArtistNameFromArtist(item), //Artist found
-              await loader.getArtistImage(loader.extractId(item)));
+      Uint8List? image = null;
+      if (item == null) {
+        //Artist not found
+        artist = Artist(artistName, defaultImage);
+      } else {
+        //Artist found
+        image = await loader.getArtistImage(loader.extractId(item));
+        artist = image == null
+            ? Artist(loader.extractArtistNameFromArtist(item), defaultImage)
+            : Artist(loader.extractArtistNameFromArtist(item),
+                img.Image.memory(image));
+      }
+
       //TODO : fix the id: we are not using the right id
       tmpArtist = containsArtist(artist.id);
       if (tmpArtist == null) {
+        saveArtistImage(artist.id, image);
         insertArtist(artist);
       } else {
         artist = tmpArtist;
@@ -497,11 +501,19 @@ class Database {
           album = Album(albumName, artist, img.Image.memory(cover));
         } else {
           var item = await loader.searchAlbum(albumName);
-          album = (item == null)
-              ? Album(albumName, artist, defaultImage) //Album not found
-              : Album(loader.extractAlbumTitleFromAlbum(item), artist,
-                  loader.extractCoverFromAlbum(item)); //Album found
+
+          Uint8List? cover = null;
+          if (item == null) {
+            //Album not found
+            album = Album(albumName, artist, defaultImage);
+          } else {
+            //Album found
+            cover = await loader.extractCoverFromAlbum(item);
+            album = Album(loader.extractAlbumTitleFromAlbum(item), artist,
+                img.Image.memory(cover));
+          }
         }
+        saveAlbumCover(album.id, cover);
         insertAlbum(album);
       } else {
         album = tmpAlbum;
@@ -529,36 +541,42 @@ class Database {
     return Track(title, path, artist, album, lyrics, trackNumber);
   }
 
-  Future<Album> createAlbum(var item) async {
-    Artist? artist =
-        containsArtist(hash(loader.extractArtistNameFromAlbum(item)));
-    if (artist == null) {
-      artist = await createArtistFromAlbum(item);
-      insertArtist(artist);
-    }
-    return Album(loader.extractAlbumTitleFromAlbum(item), artist,
-        loader.extractCoverFromAlbum(item));
+  // Future<Album> createAlbum(var item) async {
+  //   Artist? artist =
+  //       containsArtist(hash(loader.extractArtistNameFromAlbum(item)));
+  //   if (artist == null) {
+  //     artist = await createArtistFromAlbum(item);
+  //     insertArtist(artist);
+  //   }
+  //   Uint8List? cover = await loader.extractCoverFromAlbum(item);
+  //   Album album = Album(loader.extractAlbumTitleFromAlbum(item), artist,
+  //       cover == null ? defaultImage : img.Image.memory(cover));
+  //   saveAlbumCover(album.id, cover);
+  //   return album;
+  // }
+
+  Future<Album> createAlbumFromTrack(var item, Artist artist) async {
+    Uint8List cover = await loader.extractCoverFromTrack(item);
+    Album album = Album(loader.extractAlbumNameFromTrack(item), artist,
+        img.Image.memory(cover));
+    saveAlbumCover(album.id, cover);
+    return album;
   }
 
-  Future<Album> createAlbumFromTrack(var item, Artist artist) {
-    return Future(() async {
-      return Album(loader.extractAlbumNameFromTrack(item), artist,
-          loader.extractCoverFromTrack(item));
-    });
-  }
+  // Future<Artist> createArtistFromAlbum(var item) {
+  //   return Future(() async {
+  //     return Artist(loader.extractArtistNameFromAlbum(item),
+  //         await loader.getArtistImage(loader.extractArtistIdFromAlbum(item)));
+  //   });
+  // }
 
-  Future<Artist> createArtistFromAlbum(var item) {
-    return Future(() async {
-      return Artist(loader.extractArtistNameFromAlbum(item),
-          await loader.getArtistImage(loader.extractArtistIdFromAlbum(item)));
-    });
-  }
-
-  Future<Artist> createArtistFromTrack(var item) {
-    return Future(() async {
-      return Artist(loader.extractArtistNameFromTrack(item),
-          await loader.getArtistImage(loader.extractArtistIdFromTrack(item)));
-    });
+  Future<Artist> createArtistFromTrack(var item) async {
+    Uint8List? image =
+        await loader.getArtistImage(loader.extractArtistIdFromTrack(item));
+    Artist artist = Artist(loader.extractArtistNameFromTrack(item),
+        image == null ? defaultImage : img.Image.memory(image));
+    saveArtistImage(artist.id, image);
+    return artist;
   }
 
   Artist? containsArtist(int Id) {

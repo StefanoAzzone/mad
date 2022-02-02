@@ -1,9 +1,12 @@
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import 'package:mad/components/PlayBar.dart';
 import 'package:mad/metadata_loader.dart';
 import 'package:mad/screens/Info/AlbumInfo.dart';
 
 class ArtistInfo extends StatelessWidget {
+  Uint8List cover = Uint8List(0);
   String artistName;
   ArtistInfo(this.artistName, {Key? key}) : super(key: key);
 
@@ -12,48 +15,50 @@ class ArtistInfo extends StatelessWidget {
     return OrientationBuilder(
       builder: (context, orientation) {
         return FutureBuilder(
-          future: loader.getAlbumsOfArtist(artistName),
-          builder: (context, snapshot) {
-            if (!snapshot.hasData) {
-              return const SizedBox(
-                width: 50,
-                height: 50,
-                child: CircularProgressIndicator(),
-              );
-            } else {
-              return Scaffold(
-                  appBar: AppBar(
-                    title: Text(artistName),
-                    centerTitle: true,
-                  ),
-                  body: Column(children: [
-                    Expanded(
-                        child: GridView.count(
-                            crossAxisCount: orientation == Orientation.portrait ? 2 : 4,
-                            children: List<IconButton>.generate(
-                                loader.getItemsCount(snapshot.data), (index) {
-                              return IconButton(
-                                onPressed: () {
-                                  Navigator.pushNamed(
-                                    context,
-                                    ExtractArgumentsAlbumInfo.routeName,
-                                    arguments:
-                                        loader.getItem(snapshot.data, index),
-                                  );
-                                },
-                                icon: loader.extractCoverFromAlbum(
-                                    loader.getItem(snapshot.data, index)),
-                              );
-                            }))
-                            ),
-                    PlayBar(),
-                  ]));
-            }
-        });
+            future: loader.getAlbumsOfArtist(artistName),
+            builder: (context, snapshot) {
+              if (!snapshot.hasData) {
+                return const SizedBox(
+                  width: 50,
+                  height: 50,
+                  child: CircularProgressIndicator(),
+                );
+              } else {
+                return Scaffold(
+                    appBar: AppBar(
+                      title: Text(artistName),
+                      centerTitle: true,
+                    ),
+                    body: Column(children: [
+                      Expanded(
+                          child: GridView.count(
+                              crossAxisCount:
+                                  orientation == Orientation.portrait ? 2 : 4,
+                              children: List<IconButton>.generate(
+                                  loader.getItemsCount(snapshot.data), (index) {
+                                (() async {
+                                  cover = await loader.extractCoverFromAlbum(
+                                      loader.getItem(snapshot.data, index));
+                                }());
 
+                                return IconButton(
+                                  onPressed: () {
+                                    Navigator.pushNamed(
+                                      context,
+                                      ExtractArgumentsAlbumInfo.routeName,
+                                      arguments:
+                                          loader.getItem(snapshot.data, index),
+                                    );
+                                  },
+                                  icon: Image.memory(cover),
+                                );
+                              }))),
+                      PlayBar(),
+                    ]));
+              }
+            });
       },
     );
-
   }
 }
 
