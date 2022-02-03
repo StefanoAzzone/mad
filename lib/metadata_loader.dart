@@ -88,6 +88,9 @@ class MetadataLoader {
   Future searchAlbum(String title) async {
     http.Response response =
         await queryAPI(Uri.encodeFull("album:" + title + "&type=album"));
+    if (response.body == "") {
+      return null;
+    }
 
     var items = jsonDecode(response.body)["albums"]["items"];
 
@@ -95,21 +98,27 @@ class MetadataLoader {
   }
 
   Future searchFirstTrack(String title) async {
-    http.Response response =
-        await queryAPI(Uri.encodeFull(title + "&type=track"));
+    try {
+      http.Response response =
+          await queryAPI(Uri.encodeFull(title + "&type=track"));
 
-    var items = jsonDecode(response.body)["tracks"]["items"];
-
-    return Future(() => items.length != 0 ? items[0] : null);
+      var items = jsonDecode(response.body)["tracks"]["items"];
+      return Future(() => items.length != 0 ? items[0] : null);
+    } catch (e) {
+      return null;
+    }
   }
 
   Future searchAllTracks(String title) async {
-    http.Response response =
-        await queryAPI(Uri.encodeFull("track:" + title + "&type=track"));
+    try {
+      http.Response response =
+          await queryAPI(Uri.encodeFull("track:" + title + "&type=track"));
 
-    var items = jsonDecode(response.body)["tracks"]["items"];
-
-    return Future(() => items.length != 0 ? items : null);
+      var items = jsonDecode(response.body)["tracks"]["items"];
+      return Future(() => items.length != 0 ? items : null);
+    } catch (e) {
+      return null;
+    }
   }
 
   int getItemsCount(var items) {

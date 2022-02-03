@@ -12,45 +12,41 @@ class ArtistList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     Size size = MediaQuery.of(context).size;
-    return OrientationBuilder(builder: (context, orientation) {
-      int ncols = orientation == Orientation.portrait ? 3 : 5;
-      return GridView.count(
-          childAspectRatio: 1,
-          padding: EdgeInsets.only(top: 0.0),
-          crossAxisCount: ncols,
-          children: List<IconButton>.generate(artists.length, (index) {
-            return IconButton(
-              onPressed: () {
-                Navigator.pushNamed(
-                  context,
-                  ExtractArgumentsArtistAlbums.routeName,
-                  arguments: ArtistAlbumsArguments(artists[index], updateHome),
-                );
-                print(artists[index].name);
-              },
-              icon: Column(
-                children: [
-                  SizedBox(
-                    child: artists[index].image,
-                    width: size.width/ncols - 31,
-                    height: size.width/ncols - 31,
-                  ),
-                  Text(
-                    artists[index].name,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                      fontSize: 13,
-                      
-                    ),
-                  ),
-                ],
-                
-              )
-            );
-          }));
+    return OrientationBuilder(
+      builder: (context, orientation) {
+        int ncols = orientation == Orientation.portrait ? 3 : 5;
+        return GridView.count(
+            childAspectRatio: 1,
+            padding: EdgeInsets.only(top: 0.0),
+            crossAxisCount: ncols,
+            children: List<IconButton>.generate(artists.length, (index) {
+              return IconButton(
+                  onPressed: () {
+                    Navigator.pushNamed(
+                      context,
+                      ExtractArgumentsArtistAlbums.routeName,
+                      arguments:
+                          ArtistAlbumsArguments(artists[index], updateHome),
+                    );
+                  },
+                  icon: Column(
+                    children: [
+                      SizedBox(
+                        child: artists[index].image,
+                        width: size.width / ncols - 31,
+                        height: size.width / ncols - 31,
+                      ),
+                      Text(
+                        artists[index].name,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          fontSize: 13,
+                        ),
+                      ),
+                    ],
+                  ));
+            }));
       },
     );
   }
 }
-
-
