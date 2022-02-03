@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:ffi';
 import 'dart:math';
 import 'dart:typed_data';
 import 'package:flutter/src/widgets/image.dart' as img;
@@ -318,27 +319,27 @@ class Database {
 
   void init(Function update) async {
     state = DatabaseState.Loading;
+    // deleteAll();
     await loader.initialize();
-    //deleteAll();
-    loadData(update);
-    fetchNewData(update);
-    //insertAlbum(UnknownAlbum);
-    //insertArtist(UnknownArtist);
-    //findMusic(update);
+    await loadData(update);
+    await fetchNewData(update);
+    insertAlbum(UnknownAlbum);
+    insertArtist(UnknownArtist);
     state = DatabaseState.Ready;
+    update();
   }
 
-  void loadData(Function update) async {
+  Future<bool> loadData(Function update) async {
     String path = (await getApplicationDocumentsDirectory()).path;
     Directory directory = Directory(path + "/MBox");
     if (!await directory.exists()) {
       print("No saved data.");
-      return;
+      return false;
     }
     File savedDB = File(directory.path + "/db");
     if (!await savedDB.exists()) {
       print("No saved data.");
-      return;
+      return false;
     }
 
     try {
@@ -347,7 +348,10 @@ class Database {
       update();
     } catch (e) {
       print("Error while loading data.");
+      return false;
     }
+    print("Data loaded succesfully.");
+    return true;
   }
 
   Future deleteAll() async {
@@ -391,13 +395,13 @@ class Database {
       String JsonDB = jsonEncode(toJson());
       await db.writeAsString(JsonDB, mode: FileMode.write, flush: true);
     } catch (e) {
-      return false;
       print("Error while saving data.");
+      return false;
     }
     return true;
   }
 
-  void fetchNewData(Function update) async {
+  Future<bool> fetchNewData(Function update) async {
     List<bool> checkPresence = List.generate(tracks.length, (index) => false);
     List<int> toAdd = List.generate(0, (index) => 0);
     List<Tag?> tags = List.generate(0, (index) => Tag());
@@ -417,6 +421,10 @@ class Database {
             //The file was already loaded
             checkPresence[tracks.indexOf(track)] = true;
             continue;
+          } else {
+            //The file is new, i.e. it should be added to tracks.
+            toAdd.add(i);
+            tags.add(tag);
           }
         } else {
           //The file is new, i.e. it should be added to tracks.
@@ -427,7 +435,7 @@ class Database {
     }
     for (var i = checkPresence.length - 1; i >= 0; i--) {
       if (!checkPresence[i]) {
-        tracks.removeAt(i);
+        deleteTrack(tracks[i]);
       }
     }
 
@@ -436,15 +444,16 @@ class Database {
       update();
     }
 
-    state = DatabaseState.Ready;
     await saveAllData();
+    return true;
   }
 
   Future<Track> extractTrack(Tag? tag, String path) async {
     String title = tag?.title ?? "";
     String artistName = tag?.artist ?? "";
     String albumName = tag?.album ?? "";
-    int trackNumber = int.parse(tag?.trackNumber ?? "-1");
+    String tn = tag?.trackNumber ?? "";
+    int trackNumber = (tn == "") ? -1 : int.parse(tn);
     String lyrics = tag?.lyrics ?? "";
     var info = null;
 
@@ -452,13 +461,13 @@ class Database {
     if (title == "") {
       //Title tag missing
       if (loader.connected &&
-          (info = loader.searchFirstTrack(p.basename(path))) != null) {
+          (info = await loader.searchFirstTrack(baseName(path))) != null) {
         title =
             loader.extractTitleFromTrack(info); //can be retreived from internet
         print("title " + title + " not in tags; used API instead");
         //await tagger.writeTag(path: path, tagField: "title", value: title);
       } else {
-        title = p.basename(path);
+        title = baseName(path);
       }
     }
 
@@ -466,7 +475,7 @@ class Database {
     if (lyrics == "") {
       //Lyrics tag missing
       if (info == null && loader.connected) {
-        info = loader.searchFirstTrack(p.basename(path));
+        info = await loader.searchFirstTrack(baseName(path));
       }
 
       if (info != null) {
@@ -481,7 +490,7 @@ class Database {
     /***TRACK NUMBER***/
     if (trackNumber == -1) {
       if (info == null && loader.connected) {
-        info = loader.searchFirstTrack(p.basename(path));
+        info = await loader.searchFirstTrack(baseName(path));
       }
 
       if (info != null) {
@@ -497,7 +506,7 @@ class Database {
 
     /***ARTIST***/
     if (info == null && loader.connected) {
-      info = loader.searchFirstTrack(p.basename(path));
+      info = await loader.searchFirstTrack(baseName(path));
     }
     Artist artist = await extractArtist(artistName, info);
 
@@ -570,7 +579,7 @@ class Database {
     //The album was not in the db yet
     if (albumName != "") {
       if (cover == null && info != null) {
-        var alb = loader.searchAlbum(albumName);
+        var alb = await loader.searchAlbum(albumName);
         if (alb != null) {
           //album found
           cover = await loader.extractCoverFromAlbum(alb);
@@ -748,6 +757,14 @@ class Database {
         img.Image.memory(cover));
     saveAlbumCover(album.id, cover);
     return album;
+  }
+
+  String baseName(String path) {
+    path = path.split("/").last;
+    if (path.contains(".mp3")) {
+      return path.split(".mp3")[0];
+    }
+    return path;
   }
 
   Future<Artist> createArtistFromTrack(var item) async {

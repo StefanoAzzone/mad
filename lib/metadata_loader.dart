@@ -96,7 +96,7 @@ class MetadataLoader {
 
   Future searchFirstTrack(String title) async {
     http.Response response =
-        await queryAPI(Uri.encodeFull("track:" + title + "&type=track"));
+        await queryAPI(Uri.encodeFull(title + "&type=track"));
 
     var items = jsonDecode(response.body)["tracks"]["items"];
 
