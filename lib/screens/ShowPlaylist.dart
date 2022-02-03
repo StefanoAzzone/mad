@@ -33,8 +33,9 @@ class _ShowPlaylistState extends State<ShowPlaylist> {
           child: const Icon(Icons.add),
           onPressed: () async {
             await Navigator.pushNamed(context, '/select',
-                arguments: (Track track) {
-              playlist.addTrack(track);
+                arguments: (List<Track> tracks, index) {
+              playlist.addTrack(tracks[index]);
+              database.saveAllData();
             });
             setState(() {});
           }),

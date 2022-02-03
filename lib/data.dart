@@ -11,6 +11,7 @@ import 'package:mad/metadata_loader.dart';
 import 'package:path/path.dart' as p;
 import 'dart:convert'; // for the utf8.encode method
 import 'dart:io';
+import 'package:permission_handler/permission_handler.dart';
 
 import 'package:path_provider/path_provider.dart';
 
@@ -148,13 +149,18 @@ class Playlist {
   }
 
   void addTrack(Track track) {
-    tracks.add(track);
+    if (!tracks.contains(track)) {
+      tracks.add(track);
+    }
   }
 
   static Playlist fromJson(Map<String, dynamic> json) {
     Playlist p = Playlist(json["name"]);
+    print(json["traks"].length);
+    print(json["traks"][0]);
+
     for (var i = 0; i < json["traks"].length; i++) {
-      Track? t = database.containsTrack(json["traks"](i));
+      Track? t = database.containsTrack(json["traks"][i]);
       if (t != null) {
         p.addTrack(t);
       }
@@ -290,12 +296,27 @@ class Database {
   }
   Database._internal();
 
-  Map<String, dynamic> toJson() => <String, dynamic>{
-        'tracks': tracks.map((e) => e.toJson()).toList(),
-        'artists': artists.map((e) => e.toJson()).toList(),
-        'albums': albums.map((e) => e.toJson()).toList(),
-        'playlists': playlists.map((e) => e.toJson()).toList(),
-      };
+  Map<String, dynamic> toJson() {
+    List<Album> alb = List.generate(0, (index) => UnknownAlbum);
+    List<Artist> art = List.generate(0, (index) => UnknownArtist);
+    for (var i = 0; i < artists.length; i++) {
+      if (artists[i].id != UnknownArtist.id) {
+        art.add(artists[i]);
+      }
+    }
+    for (var i = 0; i < albums.length; i++) {
+      if (albums[i].id != UnknownAlbum.id) {
+        alb.add(albums[i]);
+      }
+    }
+
+    return <String, dynamic>{
+      'tracks': tracks.map((e) => e.toJson()).toList(),
+      'artists': art.map((e) => e.toJson()).toList(),
+      'albums': alb.map((e) => e.toJson()).toList(),
+      'playlists': playlists.map((e) => e.toJson()).toList(),
+    };
+  }
 
   Future fromJson(Map<String, dynamic> json) async {
     return Future(() async {
@@ -311,20 +332,35 @@ class Database {
         insertTrack(await Track.fromJson(e as Map<String, dynamic>));
       }
 
-      playlists = ((json['playlists'] as List<dynamic>)
-          .map((e) => Playlist.fromJson(e as Map<String, dynamic>))
-          .toList());
+      for (var e in (json['playlists'] as List<dynamic>)) {
+        insertPlaylist(await Playlist.fromJson(e as Map<String, dynamic>));
+      }
     });
   }
 
   void init(Function update) async {
+    var status = await Permission.camera.status;
+    if (status.isDenied) {
+      // print("yessss");
+      // We didn't ask for permission yet or the permission has been denied before but not permanently.
+    }
+
+// // You can can also directly ask the permission about its status.
+//     if (await Permission.location.isRestricted) {
+//       print("nooooo");
+//       // The OS restricts access, for example because of parental controls.
+//     }
+
+    await Permission.manageExternalStorage.request();
     state = DatabaseState.Loading;
     // deleteAll();
     await loader.initialize();
     await loadData(update);
-    await fetchNewData(update);
-    insertAlbum(UnknownAlbum);
     insertArtist(UnknownArtist);
+
+    insertAlbum(UnknownAlbum);
+
+    await fetchNewData(update);
     state = DatabaseState.Ready;
     update();
   }
@@ -465,7 +501,7 @@ class Database {
         title =
             loader.extractTitleFromTrack(info); //can be retreived from internet
         print("title " + title + " not in tags; used API instead");
-        //await tagger.writeTag(path: path, tagField: "title", value: title);
+        await tagger.writeTag(path: path, tagField: "title", value: title);
       } else {
         title = baseName(path);
       }
@@ -481,7 +517,7 @@ class Database {
       if (info != null) {
         lyrics = await loader.getLyricsFromTrack(info);
         print("lyrics not in tags; used API instead");
-        //await tagger.writeTag(path: path, tagField: "lyrics", value: lyrics);
+        await tagger.writeTag(path: path, tagField: "lyrics", value: lyrics);
       } else {
         lyrics = "Unknown lyrics";
       }
@@ -498,7 +534,8 @@ class Database {
         print("trackNumber " +
             trackNumber.toString() +
             " not in tags; used API instead");
-        //await tagger.writeTag(path: path, tagField: "trackNumber", value: trackNumber.toString());
+        await tagger.writeTag(
+            path: path, tagField: "trackNumber", value: trackNumber.toString());
       } else {
         trackNumber = 0;
       }
@@ -508,11 +545,11 @@ class Database {
     if (info == null && loader.connected) {
       info = await loader.searchFirstTrack(baseName(path));
     }
-    Artist artist = await extractArtist(artistName, info);
+    Artist artist = await extractArtist(artistName, path, info);
 
     /***ALBUM***/
     Album album = await extractAlbum(
-        albumName, artist, await tagger.readArtwork(path: path), info);
+        albumName, path, artist, await tagger.readArtwork(path: path), info);
 
     return Track(title, path, artist, album, lyrics, trackNumber);
   }
@@ -520,13 +557,14 @@ class Database {
   ///
   /// Get artist and, if new, save it to db and storage
   ///
-  Future<Artist> extractArtist(String name, var info) async {
+  Future<Artist> extractArtist(String name, String path, var info) async {
     String artistName = name;
     if (artistName == "") {
       if (info != null) {
         artistName = loader.extractArtistNameFromTrack(info);
         print("artist " + artistName + " not in tags; used API instead");
-        //await tagger.writeTag(path: path, tagField: "artist", value: artistName);
+        await tagger.writeTag(
+            path: path, tagField: "artist", value: artistName);
       }
     }
 
@@ -559,14 +597,14 @@ class Database {
   ///
   /// Get album and, if new, save it to db and storage
   ///
-  Future<Album> extractAlbum(
-      String name, Artist artist, Uint8List? cover, var info) async {
+  Future<Album> extractAlbum(String name, String path, Artist artist,
+      Uint8List? cover, var info) async {
     String albumName = name;
     if (albumName == "") {
       if (info != null) {
         albumName = loader.extractAlbumNameFromTrack(info);
         print("album " + albumName + " not in tags; used API instead");
-        //await tagger.writeTag(path: path, tagField: "album", value: albumName);
+        await tagger.writeTag(path: path, tagField: "album", value: albumName);
       }
     }
 
@@ -597,159 +635,37 @@ class Database {
     return UnknownAlbum;
   }
 
-  Future setNewMetadata(Track track, var metadata) async {
-    //TODO: delete old artist and album if not useful
-    return Future(() async {
-      String path = track.path;
-      deleteTrack(track);
+  Future<bool> setNewMetadata(Track track, var metadata) async {
+    String path = track.path;
+    deleteTrack(track);
 
-      /***TITLE***/
-      String title = loader.extractTitleFromTrack(metadata);
+    /***TITLE***/
+    String title = loader.extractTitleFromTrack(metadata);
+    await tagger.writeTag(path: path, tagField: "title", value: title);
 
-      /***LYRICS***/
-      String lyrics = await loader.getLyricsFromTrack(metadata);
+    /***LYRICS***/
+    String lyrics = await loader.getLyricsFromTrack(metadata);
+    await tagger.writeTag(path: path, tagField: "lyrics", value: lyrics);
 
-      /***TRACK NUMBER***/
-      int trackNumber = loader.extractTrackNumberFromTrack(metadata);
+    /***TRACK NUMBER***/
+    int trackNumber = loader.extractTrackNumberFromTrack(metadata);
+    await tagger.writeTag(
+        path: path, tagField: "trackNumber", value: trackNumber.toString());
 
-      /***ARTIST***/
-      Artist artist = await extractArtist("", metadata);
+    /***ARTIST***/
+    Artist artist = await extractArtist("", path, metadata);
+    await tagger.writeTag(path: path, tagField: "artist", value: artist.name);
 
-      /***ALBUM***/
-      Album album = await extractAlbum("", artist, null, metadata);
+    /***ALBUM***/
+    Album album = await extractAlbum("", path, artist, null, metadata);
+    await tagger.writeTag(path: path, tagField: "album", value: album.name);
 
-      Track newtrack = Track(title, path, artist, album, lyrics, trackNumber);
+    Track newtrack = Track(title, path, artist, album, lyrics, trackNumber);
 
-      insertTrack(track);
-    });
+    insertTrack(newtrack);
+    saveAllData();
+    return true;
   }
-
-  // Future getCover(String path) async {
-  //   final Uint8List? bytes = await tagger.readArtwork(path: path);
-
-  //   return Future(() {
-  //     return bytes != null ? img.Image.memory(bytes) : defaultImage;
-  //   });
-  // }
-
-  // Future<Track> createTrack(var item, Tag? tag, String path) async {
-  //   String? title = null;
-  //   String? artistName = null;
-  //   String? albumName = null;
-  //   int? trackNumber = null;
-  //   String? lyrics = null;
-
-  //   if (tag != null) {
-  //     title = tag.title;
-  //     artistName = tag.artist;
-  //     albumName = tag.album;
-  //     trackNumber = int.parse(tag.trackNumber ?? "-1");
-  //     lyrics = tag.lyrics;
-  //   }
-
-  //   print(path + " found:");
-
-  //   Artist artist;
-  //   Artist? tmpArtist;
-  //   if (artistName == "" || artistName == null) {
-  //     //tag missing
-  //     tmpArtist = containsArtist(hash(loader.extractArtistNameFromTrack(item)));
-  //     if (tmpArtist == null) {
-  //       artist = await createArtistFromTrack(item);
-  //       insertArtist(artist);
-  //     } else {
-  //       artist = tmpArtist;
-  //     }
-  //     //await tagger.writeTag(path: path, tagField: "artist", value: artist.name);
-  //     print("artist " + artist.name + " not in tags; used API instead");
-  //   } else {
-  //     //tag present
-  //     var item = await loader.searchArtist(artistName);
-
-  //     Uint8List? image;
-  //     if (item == null) {
-  //       //Artist not found
-  //       artist = Artist(artistName, defaultImage);
-  //     } else {
-  //       //Artist found
-  //       image = await loader.getArtistImage(loader.extractId(item));
-  //       artist = (image == null)
-  //           ? Artist(loader.extractArtistNameFromArtist(item), defaultImage)
-  //           : Artist(loader.extractArtistNameFromArtist(item),
-  //               img.Image.memory(image));
-  //     }
-
-  //     tmpArtist = containsArtist(artist.id);
-  //     if (tmpArtist == null) {
-  //       saveArtistImage(artist.id, image);
-  //       insertArtist(artist);
-  //     } else {
-  //       artist = tmpArtist;
-  //     }
-  //   }
-
-  //   Album album;
-  //   Album? tmpAlbum;
-  //   if (albumName == "" || albumName == null) {
-  //     //tag missing
-  //     tmpAlbum = containsAlbum(hash(loader.extractAlbumNameFromTrack(item) +
-  //         loader.extractArtistNameFromTrack(item)));
-  //     if (tmpAlbum == null) {
-  //       album = await createAlbumFromTrack(item, artist);
-  //       insertAlbum(album);
-  //     } else {
-  //       album = tmpAlbum;
-  //     }
-  //     //await tagger.writeTag(path: path, tagField: "album", value: album.name);
-  //     print("album " + album.name + " not in tags; used API instead");
-  //   } else {
-  //     //tag present
-  //     tmpAlbum = containsAlbum(hash(albumName + artist.name));
-  //     if (tmpAlbum == null) {
-  //       Uint8List? cover = await tagger.readArtwork(path: path);
-  //       if (cover != null) {
-  //         album = Album(albumName, artist, img.Image.memory(cover));
-  //       } else {
-  //         var item = await loader.searchAlbum(albumName);
-
-  //         Uint8List? cover = null;
-  //         if (item == null) {
-  //           //Album not found
-  //           album = Album(albumName, artist, defaultImage);
-  //         } else {
-  //           //Album found
-  //           cover = await loader.extractCoverFromAlbum(item);
-  //           album = Album(loader.extractAlbumTitleFromAlbum(item), artist,
-  //               img.Image.memory(cover));
-  //         }
-  //       }
-  //       saveAlbumCover(album.id, cover);
-  //       insertAlbum(album);
-  //     } else {
-  //       album = tmpAlbum;
-  //     }
-  //   }
-
-  //   if (title == null || title == "") {
-  //     title = loader.extractTitleFromTrack(item);
-  //     //await tagger.writeTag(path: path, tagField: "title", value: title);
-  //     print("title " + title + " not in tags; used API instead");
-  //   }
-  //   if (lyrics == null || lyrics == "") {
-  //     lyrics = await loader.getLyricsFromTrack(item);
-  //     //await tagger.writeTag(path: path, tagField: "lyrics", value: lyrics);
-  //     print("lyrics not in tags; used API instead");
-  //   }
-  //   if (trackNumber == null || trackNumber == -1) {
-  //     trackNumber = loader.extractTrackNumberFromTrack(item);
-  //     //await tagger.writeTag(path: path, tagField: "trackNumber", value: trackNumber.toString());
-  //     print("trackNumber " +
-  //         trackNumber.toString() +
-  //         " not in tags; used API instead");
-  //   }
-
-  //   return Track(title, path, artist, album, lyrics, trackNumber);
-  // }
 
   Future<Album> createAlbumFromTrack(var item, Artist artist) async {
     Uint8List cover = await loader.extractCoverFromTrack(item);
@@ -859,7 +775,14 @@ class Database {
     artists.add(artist);
   }
 
-  void createPlaylist(String name) {
-    playlists.add(Playlist(name));
+  void insertPlaylist(Playlist playlist) {
+    for (int i = 0; i < playlists.length; i++) {
+      if (playlist.name.compareTo(playlists[i].name) < 0) {
+        playlists.insert(i, playlist);
+        return;
+      }
+    }
+
+    playlists.add(playlist);
   }
 }

@@ -25,7 +25,7 @@ class _TrackListState extends State<TrackList> {
         : tracks.length + 2;
     return OrientationBuilder(builder: (context, orientation) {
       var ncols = orientation == Orientation.portrait ? 1 : 2;
-      
+
       return GridView.count(
           padding: EdgeInsets.only(top: 0.0),
           crossAxisCount: ncols,
@@ -34,7 +34,7 @@ class _TrackListState extends State<TrackList> {
           children: List.generate(count, (index) {
             RenderObject? overlay =
                 Overlay.of(context)?.context.findRenderObject();
-            if (index == tracks.length + 1) {
+            if (index >= tracks.length + 1) {
               Size size = MediaQuery.of(context).size;
               return Center(
                   child: SizedBox(
@@ -49,33 +49,27 @@ class _TrackListState extends State<TrackList> {
                         color: Colors.white,
                       )));
             }
-            if(index == 0) {
+            if (index <= 0) {
               return ListTile(
                 title: InkWell(
-                  onTap: () async {
-                    trackQueue.reset();
-                    trackQueue.addList(tracks);
-                    trackQueue.shuffle();
-                    player.play();
-                    await Navigator.pushNamed(context, '/playingTrack');
-                    setState(() {
-                      
-                    });
-                  },
-                  child: Padding(
-                    padding: EdgeInsets.all(15.0),
-                    child: 
-                      Row(
-                        children: const [
-                          Expanded(
-                            child: Text("Shuffle"),
-                          ),
-                          Icon(Icons.shuffle),
-                        ],
-                      )
-                  )
-                ),
-                 
+                    onTap: () async {
+                      trackQueue.reset();
+                      trackQueue.addList(tracks);
+                      trackQueue.shuffle();
+                      player.play();
+                      await Navigator.pushNamed(context, '/playingTrack');
+                      setState(() {});
+                    },
+                    child: Padding(
+                        padding: EdgeInsets.all(15.0),
+                        child: Row(
+                          children: const [
+                            Expanded(
+                              child: Text("Shuffle"),
+                            ),
+                            Icon(Icons.shuffle),
+                          ],
+                        ))),
               );
             }
             return Container(
@@ -127,7 +121,8 @@ class _TrackListState extends State<TrackList> {
                                         )),
                                     TextButton(
                                         onPressed: () {
-                                          trackQueue.pushLast(tracks[index - 1]);
+                                          trackQueue
+                                              .pushLast(tracks[index - 1]);
                                           Navigator.pop(context);
                                         },
                                         child: const Text(
@@ -161,9 +156,9 @@ class _TrackListState extends State<TrackList> {
                                                                 database
                                                                     .playlists[
                                                                         i]
-                                                                    .addTrack(
-                                                                        tracks[
-                                                                            index - 1]);
+                                                                    .addTrack(tracks[
+                                                                        index -
+                                                                            1]);
                                                                 Navigator.pop(
                                                                     context);
                                                                 Navigator.pop(

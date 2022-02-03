@@ -18,24 +18,25 @@ class _PlaylistListState extends State<PlaylistList> {
       builder: (context, orientation) {
         return Scaffold(
             body: GridView.count(
-                padding: EdgeInsets.only(top: 0.0),
-                childAspectRatio: 10,
-                crossAxisCount: orientation == Orientation.portrait ? 1 : 2,
-                shrinkWrap: true,
-                children: List.generate(playlists.length, (index) {
-                  return ListTile(
-                    title: Text(
-                      playlists[index].name,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    onTap: () {
-                      Navigator.pushNamed(context, '/showPlaylist',
-                          arguments: playlists[index]);
-                    },
-                  );
-                }),
+              padding: EdgeInsets.only(top: 0.0),
+              childAspectRatio: 10,
+              crossAxisCount: orientation == Orientation.portrait ? 1 : 2,
+              shrinkWrap: true,
+              children: List.generate(playlists.length, (index) {
+                return ListTile(
+                  title: Text(
+                    playlists[index].name,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  onTap: () {
+                    Navigator.pushNamed(context, '/showPlaylist',
+                        arguments: playlists[index]);
+                  },
+                );
+              }),
             ),
-            floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
+            floatingActionButtonLocation:
+                FloatingActionButtonLocation.endDocked,
             floatingActionButton: FloatingActionButton(
                 child: Icon(Icons.add),
                 onPressed: () {
@@ -57,10 +58,11 @@ class _PlaylistListState extends State<PlaylistList> {
                               child: const Text('Cancel'),
                             ),
                             TextButton(
-                              onPressed: () {
+                              onPressed: () async {
                                 setState(() {
-                                  database.createPlaylist(tec.text);
+                                  database.insertPlaylist(Playlist(tec.text));
                                 });
+                                await database.saveAllData();
                                 Navigator.pop(context, 'OK');
                               },
                               child: const Text('OK'),
@@ -69,7 +71,6 @@ class _PlaylistListState extends State<PlaylistList> {
                         );
                       });
                 }));
-
       },
     );
   }
