@@ -6,7 +6,6 @@ import 'package:mad/metadata_loader.dart';
 import 'package:mad/screens/Info/AlbumInfo.dart';
 
 class ArtistInfo extends StatelessWidget {
-  Uint8List cover = Uint8List(0);
   String artistName;
   ArtistInfo(this.artistName, {Key? key}) : super(key: key);
 
@@ -47,7 +46,28 @@ class ArtistInfo extends StatelessWidget {
                                           loader.getItem(snapshot.data, index),
                                     );
                                   },
-                                  icon: Image.memory(cover),
+                                  icon: FutureBuilder(
+                                    future:
+                                      loader.extractCoverFromAlbum(
+                                      loader.getItem(snapshot.data, index)
+                                    ),
+                              
+                                    builder: (context, snapshot) {
+                                      if(!snapshot.hasData) {
+                                        return const Center(
+                                          child: SizedBox(
+                                            width: 50,
+                                            height: 50,
+                                            child: CircularProgressIndicator(),
+                                          ),
+                                        );
+                                      } else {
+                                        return Image.memory(snapshot.data as Uint8List);
+                                      }
+                                    },
+                                  )
+                                
+                                  
                                 );
                               }))),
                       PlayBar(),

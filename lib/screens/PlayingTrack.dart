@@ -32,14 +32,14 @@ class _PlayingTrackState extends State<PlayingTrack> {
                  Column(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
-                    SizedBox(height: 50,),
+                    const SizedBox(height: 50,),
                     Text(trackQueue.current().title,
-                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                      style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                     ),
-                    SizedBox(height: 25,),
+                    const SizedBox(height: 25,),
                     Text(
                       trackQueue.current().artist.name,
-                      style: TextStyle(fontSize: 12),
+                      style: const TextStyle(fontSize: 12),
                     ),
                 Expanded(child: CoverButton()),
                 Column(
@@ -53,20 +53,32 @@ class _PlayingTrackState extends State<PlayingTrack> {
                               Navigator.pushNamed(context, "/artistInfo",
                                   arguments: trackQueue.current().artist.name);
                             },
-                            icon: Icon(Icons.ramen_dining)),
+                            icon: const Icon(Icons.art_track)),
                         IconButton(
-                            onPressed: () => (print("prev")),
-                            icon: Icon(Icons.skip_previous_rounded)),
+                            onPressed: (){
+                              player.prev();
+                              setState(() {
+                                
+                              });
+                            },
+                            icon: const Icon(Icons.skip_previous_rounded)),
                         PlayButton(),
                         IconButton(
-                            onPressed: () => (print("next")),
-                            icon: Icon(Icons.skip_next_rounded)),
-                        IconButton(
                             onPressed: () {
-                              print("queue");
-                              Navigator.pushNamed(context, '/queue');
+                              player.next();
+                              setState(() {
+                                
+                              });
                             },
-                            icon: Icon(Icons.view_list)),
+                            icon: const Icon(Icons.skip_next_rounded)),
+                        IconButton(
+                            onPressed: () async {
+                              await Navigator.pushNamed(context, '/queue');
+                              setState(() {
+                                
+                              });
+                            },
+                            icon: const Icon(Icons.view_list)),
                       ]
                     )
                     
@@ -84,14 +96,14 @@ class _PlayingTrackState extends State<PlayingTrack> {
                 Expanded(child: CoverButton()),
                 Expanded(child: Column(
                   children: [
-                    SizedBox(height: 50,),
+                    const SizedBox(height: 50,),
                     Text(trackQueue.current().title,
-                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                      style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                     ),
-                    SizedBox(height: 25,),
+                    const SizedBox(height: 25,),
                     Text(
                       trackQueue.current().artist.name,
-                      style: TextStyle(fontSize: 12),
+                      style: const TextStyle(fontSize: 12),
                     ),
                     Expanded(child: ProgressBar()),
                     Row(
@@ -104,7 +116,7 @@ class _PlayingTrackState extends State<PlayingTrack> {
                               Navigator.pushNamed(context, "/artistInfo",
                                   arguments: trackQueue.current().artist.name);
                             },
-                            icon: Icon(Icons.ramen_dining)),
+                            icon: const Icon(Icons.art_track)),
                         IconButton(
                             onPressed: () {
                               player.prev();
@@ -112,7 +124,7 @@ class _PlayingTrackState extends State<PlayingTrack> {
                                 
                               });
                             },
-                            icon: Icon(Icons.skip_previous_rounded)),
+                            icon: const Icon(Icons.skip_previous_rounded)),
                         PlayButton(),
                         IconButton(
                             onPressed: () {
@@ -121,13 +133,15 @@ class _PlayingTrackState extends State<PlayingTrack> {
                                 
                               });
                             },
-                            icon: Icon(Icons.skip_next_rounded)),
+                            icon: const Icon(Icons.skip_next_rounded)),
                         IconButton(
-                            onPressed: () {
-                              print("queue");
-                              Navigator.pushNamed(context, '/queue');
+                            onPressed: () async {
+                               await Navigator.pushNamed(context, '/queue');
+                              setState(() {
+                                
+                              });
                             },
-                            icon: Icon(Icons.view_list)),
+                            icon: const Icon(Icons.view_list)),
                       ]
                     )
                     

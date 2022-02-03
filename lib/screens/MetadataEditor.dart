@@ -41,10 +41,13 @@ class _MetadataEditorState extends State<MetadataEditor> {
                     future: loader.extractThumbnailUrlFromTracks(result, index),
                     builder: (context, snapshot) {
                       if (!snapshot.hasData) {
-                        return const SizedBox(
-                          width: 50,
-                          height: 50,
-                          child: CircularProgressIndicator(),
+                        return const Center(
+                          child: SizedBox(
+                            //TODO FIX
+                              width: 50,
+                              height: 50,
+                              child: CircularProgressIndicator(),
+                            )
                         );
                       } else {
                         Uint8List? thumbnail = snapshot.data as Uint8List?;

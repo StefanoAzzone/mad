@@ -17,9 +17,6 @@ samples, guidance on mobile development, and a full API reference.
 
 
 TODOs:
--when playing a song, go back to home page and start another. The new track is paused.
 -what happens when there are no tracks on the phone?
--album nullable
--horizontal/vertical layout
 -tests
--allow to use w/o internet 
+-allow to use w/o internet

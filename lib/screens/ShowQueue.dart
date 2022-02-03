@@ -37,14 +37,14 @@ class _ShowQueueState extends State<ShowQueue> {
               itemBuilder: (context, index) {
                 return ListTile(
                   title: Text(
-                      queue[index].title + " - " + queue[index].artist.name),
-                  onTap: () {
+                      (index - trackQueue.currentIndex).toString() + ". " + queue[index].title + " - " + queue[index].artist.name),
+                  onTap: () async {
                     if (index != trackQueue.currentIndex) {
                       player.pause();
                       trackQueue.setCurrent(index);
                       player.play();
                     }
-                    Navigator.pushNamed(context, '/playingTrack');
+                    Navigator.pop(context);
                   },
                 );
               }),
@@ -54,8 +54,8 @@ class _ShowQueueState extends State<ShowQueue> {
           child: Icon(Icons.add),
           onPressed: () async {
             await Navigator.pushNamed(context, '/select',
-                arguments: (Track track) {
-              trackQueue.pushLast(track);
+                arguments: (List<Track> tracks, int index) {
+              trackQueue.pushLast(tracks[index]);
             });
             _update();
           }),

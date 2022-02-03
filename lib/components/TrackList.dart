@@ -194,7 +194,7 @@ class _TrackListState extends State<TrackList> {
                         ],
                       ),
                       onTap: () {
-                        callback(tracks[index]);
+                        callback(tracks, index);
                       },
                     )));
           }));

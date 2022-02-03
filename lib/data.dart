@@ -32,7 +32,6 @@ class Track {
   }
 
   static Track fromJson(Map<String, dynamic> json) => Track(
-      //TODO: ID???
       json["title"],
       json["path"],
       database.containsArtist(json["artist"]) ?? Database.UnknownArtist,
@@ -217,6 +216,10 @@ class TrackQueue {
     return queue[currentIndex];
   }
 
+  void addList(List<Track> tracks) {
+    queue.addAll(tracks);
+  }
+
   trackQueue() {}
 }
 
@@ -304,12 +307,13 @@ class Database {
     });
   }
 
-  void init(Function update) {
+  void init(Function update) async {
     state = DatabaseState.Loading;
+    await loader.initialize();
     //deleteAll();
     loadData(update);
-    // insertAlbum(UnknownAlbum);
-    // insertArtist(UnknownArtist);
+    //insertAlbum(UnknownAlbum);
+    //insertArtist(UnknownArtist);
     //findMusic(update);
   }
 
@@ -391,7 +395,7 @@ class Database {
     } on SocketException catch (_) {
       print('not connected');
     }
-    await loader.initialize();
+    
 
     List<FileSystemEntity> files = Directory(MUSIC_PATH).listSync();
     for (var i = 0; i < files.length; i++) {

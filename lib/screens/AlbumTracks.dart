@@ -17,10 +17,11 @@ class AlbumTracks extends StatelessWidget {
         ),
         body: Column(children: [
           Expanded(
-            child: TrackList((Track track) async {
+            child: TrackList((List<Track> tracks, int index) async {
               player.pause();
               trackQueue.reset();
-              trackQueue.pushFront(track);
+              trackQueue.addList(tracks);
+              trackQueue.currentIndex = index;
               player.play();
               await Navigator.pushNamed(context, '/playingTrack');
             }, album.trackList),

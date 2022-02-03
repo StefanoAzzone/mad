@@ -69,10 +69,11 @@ class _MyHomePageState extends State<MyHomePage> {
               },
               body: TabBarView(
                 children: [
-                  TrackList((Track track) async {
+                  TrackList((List<Track> tracks, int index) async {
                     player.pause();
                     trackQueue.reset();
-                    trackQueue.pushFront(track);
+                    trackQueue.addList(tracks);
+                    trackQueue.currentIndex = index;
                     player.play();
                     await Navigator.pushNamed(context, '/playingTrack');
                     _updatePage();
