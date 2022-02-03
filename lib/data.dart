@@ -227,7 +227,11 @@ class TrackQueue {
   }
 
   Track current() {
-    return queue[currentIndex];
+    if(queue.length > 0) {
+      return queue[currentIndex];
+    } else {
+      return Track("UnknownTrack", "path", Database.UnknownArtist, Database.UnknownAlbum, "lyrics", 0);
+    }
   }
 
   void addList(List<Track> tracks) {
@@ -320,8 +324,7 @@ class Database {
     };
   }
 
-  Future fromJson(Map<String, dynamic> json) async {
-    return Future(() async {
+  Future<bool> fromJson(Map<String, dynamic> json) async {
       for (var e in (json['artists'] as List<dynamic>)) {
         insertArtist(await Artist.fromJson(e as Map<String, dynamic>));
       }
@@ -337,7 +340,7 @@ class Database {
       for (var e in (json['playlists'] as List<dynamic>)) {
         insertPlaylist(await Playlist.fromJson(e as Map<String, dynamic>));
       }
-    });
+    return true;
   }
 
   void init(Function update) async {
