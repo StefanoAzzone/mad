@@ -74,8 +74,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   TrackList((List<Track> tracks, int index) async {
                     player.pause();
                     trackQueue.reset();
-                    trackQueue.addList(tracks);
-                    trackQueue.currentIndex = index;
+                    trackQueue.pushFront(tracks[index]);
                     player.play();
                     await Navigator.pushNamed(context, '/playingTrack');
                     _updatePage();
@@ -87,10 +86,13 @@ class _MyHomePageState extends State<MyHomePage> {
               ),
             ),
             bottomNavigationBar: BottomAppBar(
-                color: Colors.blue,
                 child: SizedBox(
                   child: PlayBar(),
                   height: 50,
-                ))));
+                )
+            )
+                
+        )
+      );
   }
 }

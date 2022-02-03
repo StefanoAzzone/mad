@@ -41,33 +41,42 @@ class _CoverButtonState extends State<CoverButton> {
                           children: [
                             Center(
                               child: Container(
+                                height: size.height/2,
                                 decoration: BoxDecoration(
                                   //color: Colors.grey,
                                   image: DecorationImage(image: trackQueue.current().album.cover.image),
                                 ),
-                                child: BackdropFilter(
-                                    filter: ImageFilter.blur(sigmaX: 4.0, sigmaY: 4.0),
-                                    child: Container(
-                                      decoration: BoxDecoration(color: Colors.white.withOpacity(0.0)),
-                                    ),
-                                  ),
+                                child: ClipRect(
+                                  child: BackdropFilter(
+                                        filter: ImageFilter.blur(sigmaX: 4.0, sigmaY: 4.0),
+                                        child: Container(
+                                          
+                                          decoration: BoxDecoration(color: Colors.white.withOpacity(0.0)),
+                                        ),
+                                      ),
+                                )
                               )
                               
                             ),
                             Container(
                               decoration: BoxDecoration(
-                                  color: Colors.white.withOpacity(0.4),
+                                  color: Colors.white.withOpacity(0.5),
                               ),
                             ),
-                            SingleChildScrollView(
-                              child: Padding(
-                                padding: const EdgeInsets.only(left: 10),
-                                child: Text(
-                                  trackQueue.current().lyrics,
-                                  style: TextStyle(color: Colors.black),
-                                ),
-                              )
-                            ),
+                            Center(
+                              child: Container(
+                                  height: size.height/1.7,
+                                  child: SingleChildScrollView(
+                                      child: Padding(
+                                        padding: const EdgeInsets.only(left: 10),
+                                        child: Text(
+                                          trackQueue.current().lyrics,
+                                          style: TextStyle(color: Colors.black),
+                                        ),
+                                      )
+                                    ),
+                                )
+                            )
                             
                           ],
                         );

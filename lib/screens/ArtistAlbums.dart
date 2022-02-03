@@ -68,8 +68,13 @@ class _ArtistAlbumsState extends State<ArtistAlbums> {
                         
                         ),
                       ),
-                      PlayBar(),
                     ])
+            ),
+            bottomNavigationBar: BottomAppBar(
+                child: SizedBox(
+                  child: PlayBar(),
+                  height: 50,
+                )
             )
           );
 

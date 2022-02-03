@@ -39,8 +39,14 @@ _AlbumTracksState(this.album, this.updateHome);
               
             }, album.trackList),
           ),
-          PlayBar(),
-        ]));
+        ]),
+        bottomNavigationBar: BottomAppBar(
+                child: SizedBox(
+                  child: PlayBar(),
+                  height: 50,
+                )
+            )
+      );
   }
 }
 

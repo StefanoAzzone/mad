@@ -41,7 +41,7 @@ class AlbumInfo extends StatelessWidget {
                                 loader.getItemsCount(snapshot.data), (index) {
                                   return  ListTile(
                                       title: Text(
-                                      
+                                              loader.extractTrackNumberFromTrack(loader.getItem(snapshot.data, index)).toString() + '. ' +
                                               loader.extractTitleFromTrack(
                                                 loader.getItem(snapshot.data, index)),
                                               overflow: TextOverflow.ellipsis,

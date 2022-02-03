@@ -51,7 +51,7 @@ class _TrackListState extends State<TrackList> {
             }
             if(index == 0) {
               return ListTile(
-                title: GestureDetector(
+                title: InkWell(
                   onTap: () async {
                     trackQueue.reset();
                     trackQueue.addList(tracks);
@@ -62,15 +62,18 @@ class _TrackListState extends State<TrackList> {
                       
                     });
                   },
-                  child: 
-                    Row(
-                      children: const [
-                        Expanded(
-                          child: Text("Random reproduction"),
-                        ),
-                        Icon(Icons.ramen_dining),
-                      ],
-                    )
+                  child: Padding(
+                    padding: EdgeInsets.all(15.0),
+                    child: 
+                      Row(
+                        children: const [
+                          Expanded(
+                            child: Text("Shuffle"),
+                          ),
+                          Icon(Icons.shuffle),
+                        ],
+                      )
+                  )
                 ),
                  
               );
