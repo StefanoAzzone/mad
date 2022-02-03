@@ -98,7 +98,13 @@ class MetadataLoader {
     http.Response response =
         await queryAPI(Uri.encodeFull(title + "&type=track"));
 
-    var items = jsonDecode(response.body)["tracks"]["items"];
+    var items;
+    if(response.body == "") {
+      items = [];
+    } else {
+      items = jsonDecode(response.body)["tracks"]["items"];
+
+    }
 
     return Future(() => items.length != 0 ? items[0] : null);
   }
