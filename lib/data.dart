@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:ffi';
 import 'dart:typed_data';
 import 'package:flutter/src/widgets/image.dart' as img;
 
@@ -49,9 +50,8 @@ class Track {
         'trackNumber': trackNumber,
       };
 
-  void delete() {
-    album.deleteTrack(this);
-    database.tracks.remove(this);
+  Future<bool> delete() async {
+    return await album.deleteTrack(this);
   }
 }
 
@@ -85,11 +85,12 @@ class Artist {
     albumList.add(album);
   }
 
-  void deleteAlbum(Album album) {
+  Future<bool> deleteAlbum(Album album) async {
     albumList.remove(album);
     if (albumList.isEmpty) {
-      database.deleteArtist(this);
+      return await database.deleteArtist(this);
     }
+    return false;
   }
 }
 
@@ -126,9 +127,12 @@ class Album {
     trackList.add(track);
   }
 
-  void deleteTrack(Track track) {
-    if (trackList.remove(track) && trackList.isEmpty)
-      database.deleteAlbum(this);
+  Future<bool> deleteTrack(Track track) async {
+    if (trackList.remove(track) && trackList.isEmpty) {
+      artist.deleteAlbum(this);
+      return await database.deleteAlbum(this);
+    }
+    return false;
   }
 }
 
@@ -312,6 +316,7 @@ class Database {
     await loader.initialize();
     //deleteAll();
     loadData(update);
+    fetchNewData(update);
     //insertAlbum(UnknownAlbum);
     //insertArtist(UnknownArtist);
     //findMusic(update);
@@ -370,7 +375,7 @@ class Database {
   ///
   /// Delete saved database and save it anew
   ///
-  void saveAllData() async {
+  Future<bool> saveAllData() async {
     (await _savedDB).delete();
 
     File db = await _savedDB;
@@ -380,221 +385,356 @@ class Database {
       String JsonDB = jsonEncode(toJson());
       await db.writeAsString(JsonDB, mode: FileMode.write, flush: true);
     } catch (e) {
+      return false;
       print("Error while saving data.");
     }
+    return true;
   }
 
-  void findMusic(Function update) async {
-    bool connected = false;
-    try {
-      final result = await InternetAddress.lookup('google.com');
-      if (result.isNotEmpty && result[0].rawAddress.isNotEmpty) {
-        connected = true;
-        print('connected');
-      }
-    } on SocketException catch (_) {
-      print('not connected');
-    }
-    
-
+  void fetchNewData(Function update) async {
+    List<bool> checkPresence = List.generate(tracks.length, (index) => false);
+    List<int> toAdd = List.generate(0, (index) => 0);
+    List<Tag?> tags = List.generate(0, (index) => Tag());
     List<FileSystemEntity> files = Directory(MUSIC_PATH).listSync();
     for (var i = 0; i < files.length; i++) {
       if (SUPPORTED_FORMATS.contains(p.extension(files[i].path))) {
         Tag? tag = await tagger.readTags(
           path: files[i].path,
         );
-        String? title = tag?.title;
-
         if (tag != null &&
             tag.title != null &&
             tag.album != null &&
-            tag.artist != null &&
-            (containsTrack(hash(tag.title! + tag.artist! + tag.album!)) !=
-                null)) {
-          //If the file was already loaded skip this iteration
-          continue;
-        }
-
-        var info = null;
-        if (connected == true) {
-          info = await loader.searchFirstTrack(
-              title != null && title != "" ? title : p.basename(files[i].path));
-        }
-
-        if (info == null) {
-          //cannot find info: try to use tags
-          String title = tag?.title ?? "";
-          String artistName = tag?.artist ?? "";
-          Artist artist = artistName != ""
-              ? Artist(artistName, defaultImage)
-              : UnknownArtist;
-          insertArtist(artist);
-          String albumName = tag?.album ?? "";
-          Uint8List? cover = await tagger.readArtwork(path: files[i].path);
-          Album album = albumName != ""
-              ? Album(albumName, artist,
-                  cover != null ? img.Image.memory(cover) : defaultImage)
-              : UnknownAlbum;
-          insertAlbum(album);
-          saveAlbumCover(album.id, cover);
-          String lyrics = tag?.lyrics ?? "";
-          String trackNumber = tag?.trackNumber ?? "";
-
-          insertTrack(Track(
-              title != "" ? title : p.basename(files[i].path),
-              files[i].path,
-              artist,
-              album,
-              lyrics != "" ? lyrics : "Unknown lyrics",
-              trackNumber != "" ? int.parse(trackNumber) : 0));
-          print(title + " not found; generated using tags, if possible.");
+            tag.artist != null) {
+          Track? track =
+              containsTrack(hash(tag.title! + tag.artist! + tag.album!));
+          if (track != null) {
+            //The file was already loaded
+            checkPresence[tracks.indexOf(track)] = true;
+            continue;
+          }
         } else {
-          //info found
-          insertTrack(await createTrack(info, tag, files[i].path));
+          //The file is new, i.e. it should be added to tracks.
+          toAdd.add(i);
+          tags.add(tag);
         }
-
-        update();
       }
     }
+    for (var i = checkPresence.length - 1; i >= 0; i--) {
+      if (!checkPresence[i]) {
+        tracks.removeAt(i);
+      }
+    }
+
+    for (var i = 0; i < toAdd.length; i++) {
+      insertTrack(await extractTrack(tags[i], files[toAdd[i]].path));
+      update();
+    }
+
     state = DatabaseState.Ready;
-    saveAllData();
+    await saveAllData();
+  }
+
+  Future<Track> extractTrack(Tag? tag, String path) async {
+    String title = tag?.title ?? "";
+    String artistName = tag?.artist ?? "";
+    String albumName = tag?.album ?? "";
+    int trackNumber = int.parse(tag?.trackNumber ?? "-1");
+    String lyrics = tag?.lyrics ?? "";
+    var info = null;
+
+    /***TITLE***/
+    if (title == "") {
+      //Title tag missing
+      if (loader.connected &&
+          (info = loader.searchFirstTrack(p.basename(path))) != null) {
+        title =
+            loader.extractTitleFromTrack(info); //can be retreived from internet
+        print("title " + title + " not in tags; used API instead");
+        //await tagger.writeTag(path: path, tagField: "title", value: title);
+      } else {
+        title = p.basename(path);
+      }
+    }
+
+    /***LYRICS***/
+    if (lyrics == "") {
+      //Lyrics tag missing
+      if (info == null && loader.connected) {
+        info = loader.searchFirstTrack(p.basename(path));
+      }
+
+      if (info != null) {
+        lyrics = await loader.getLyricsFromTrack(info);
+        print("lyrics not in tags; used API instead");
+        //await tagger.writeTag(path: path, tagField: "lyrics", value: lyrics);
+      } else {
+        lyrics = "Unknown lyrics";
+      }
+    }
+
+    /***TRACK NUMBER***/
+    if (trackNumber == -1) {
+      if (info == null && loader.connected) {
+        info = loader.searchFirstTrack(p.basename(path));
+      }
+
+      if (info != null) {
+        trackNumber = loader.extractTrackNumberFromTrack(info);
+        print("trackNumber " +
+            trackNumber.toString() +
+            " not in tags; used API instead");
+        //await tagger.writeTag(path: path, tagField: "trackNumber", value: trackNumber.toString());
+      } else {
+        trackNumber = 0;
+      }
+    }
+
+    /***ARTIST***/
+    if (info == null && loader.connected) {
+      info = loader.searchFirstTrack(p.basename(path));
+    }
+    Artist artist = await extractArtist(artistName, info);
+
+    /***ALBUM***/
+    Album album = await extractAlbum(
+        albumName, artist, await tagger.readArtwork(path: path), info);
+
+    return Track(title, path, artist, album, lyrics, trackNumber);
+  }
+
+  ///
+  /// Get artist and, if new, save it to db and storage
+  ///
+  Future<Artist> extractArtist(String name, var info) async {
+    String artistName = name;
+    if (artistName == "") {
+      if (info != null) {
+        artistName = loader.extractArtistNameFromTrack(info);
+        print("artist " + artistName + " not in tags; used API instead");
+        //await tagger.writeTag(path: path, tagField: "artist", value: artistName);
+      }
+    }
+
+    Artist? tmp = containsArtist(hash(artistName));
+    if (tmp != null) {
+      //The artist was already in the db
+      return tmp;
+    }
+
+    //The artist was not in the db yet
+    if (artistName != "") {
+      //artist found
+      Uint8List? image;
+      if (info != null) {
+        image =
+            await loader.getArtistImage(loader.extractArtistIdFromTrack(info));
+      }
+
+      Artist artist = Artist(
+          artistName, image == null ? defaultImage : img.Image.memory(image));
+
+      saveArtistImage(artist.id, image);
+      insertArtist(artist);
+      return artist;
+    }
+    //Unable to find artist
+    return UnknownArtist;
+  }
+
+  ///
+  /// Get album and, if new, save it to db and storage
+  ///
+  Future<Album> extractAlbum(
+      String name, Artist artist, Uint8List? cover, var info) async {
+    String albumName = name;
+    if (albumName == "") {
+      if (info != null) {
+        albumName = loader.extractAlbumNameFromTrack(info);
+        print("album " + albumName + " not in tags; used API instead");
+        //await tagger.writeTag(path: path, tagField: "album", value: albumName);
+      }
+    }
+
+    Album? tmp = containsAlbum(hash(albumName + artist.name));
+    if (tmp != null) {
+      //The album was already in the db
+      return tmp;
+    }
+
+    //The album was not in the db yet
+    if (albumName != "") {
+      if (cover == null && info != null) {
+        var alb = loader.searchAlbum(albumName);
+        if (alb != null) {
+          //album found
+          cover = await loader.extractCoverFromAlbum(alb);
+        }
+      }
+
+      Album album = Album(albumName, artist,
+          cover != null ? img.Image.memory(cover) : defaultImage);
+      saveAlbumCover(album.id, cover);
+      insertAlbum(album);
+      return album;
+    }
+
+    //Unable to find album
+    return UnknownAlbum;
   }
 
   Future setNewMetadata(Track track, var metadata) async {
     //TODO: delete old artist and album if not useful
     return Future(() async {
       String path = track.path;
-      track.delete();
-      insertTrack(await createTrack(metadata, null, path));
+      deleteTrack(track);
+
+      /***TITLE***/
+      String title = loader.extractTitleFromTrack(metadata);
+
+      /***LYRICS***/
+      String lyrics = await loader.getLyricsFromTrack(metadata);
+
+      /***TRACK NUMBER***/
+      int trackNumber = loader.extractTrackNumberFromTrack(metadata);
+
+      /***ARTIST***/
+      Artist artist = await extractArtist("", metadata);
+
+      /***ALBUM***/
+      Album album = await extractAlbum("", artist, null, metadata);
+
+      Track newtrack = Track(title, path, artist, album, lyrics, trackNumber);
+
+      insertTrack(track);
     });
   }
 
-  Future getCover(String path) async {
-    final Uint8List? bytes = await tagger.readArtwork(path: path);
+  // Future getCover(String path) async {
+  //   final Uint8List? bytes = await tagger.readArtwork(path: path);
 
-    return Future(() {
-      return bytes != null ? img.Image.memory(bytes) : defaultImage;
-    });
-  }
+  //   return Future(() {
+  //     return bytes != null ? img.Image.memory(bytes) : defaultImage;
+  //   });
+  // }
 
-  Future<Track> createTrack(var item, Tag? tag, String path) async {
-    String? title = null;
-    String? artistName = null;
-    String? albumName = null;
-    int? trackNumber = null;
-    String? lyrics = null;
+  // Future<Track> createTrack(var item, Tag? tag, String path) async {
+  //   String? title = null;
+  //   String? artistName = null;
+  //   String? albumName = null;
+  //   int? trackNumber = null;
+  //   String? lyrics = null;
 
-    if (tag != null) {
-      title = tag.title;
-      artistName = tag.artist;
-      albumName = tag.album;
-      trackNumber = int.parse(tag.trackNumber ?? "-1");
-      lyrics = tag.lyrics;
-    }
+  //   if (tag != null) {
+  //     title = tag.title;
+  //     artistName = tag.artist;
+  //     albumName = tag.album;
+  //     trackNumber = int.parse(tag.trackNumber ?? "-1");
+  //     lyrics = tag.lyrics;
+  //   }
 
-    print(path + " found:");
+  //   print(path + " found:");
 
-    Artist artist;
-    Artist? tmpArtist;
-    if (artistName == "" || artistName == null) {
-      //tag missing
-      tmpArtist = containsArtist(hash(loader.extractArtistNameFromTrack(item)));
-      if (tmpArtist == null) {
-        artist = await createArtistFromTrack(item);
-        insertArtist(artist);
-      } else {
-        artist = tmpArtist;
-      }
-      //await tagger.writeTag(path: path, tagField: "artist", value: artist.name);
-      print("artist " + artist.name + " not in tags; used API instead");
-    } else {
-      //tag present
-      var item = await loader.searchArtist(artistName);
+  //   Artist artist;
+  //   Artist? tmpArtist;
+  //   if (artistName == "" || artistName == null) {
+  //     //tag missing
+  //     tmpArtist = containsArtist(hash(loader.extractArtistNameFromTrack(item)));
+  //     if (tmpArtist == null) {
+  //       artist = await createArtistFromTrack(item);
+  //       insertArtist(artist);
+  //     } else {
+  //       artist = tmpArtist;
+  //     }
+  //     //await tagger.writeTag(path: path, tagField: "artist", value: artist.name);
+  //     print("artist " + artist.name + " not in tags; used API instead");
+  //   } else {
+  //     //tag present
+  //     var item = await loader.searchArtist(artistName);
 
-      Uint8List? image;
-      if (item == null) {
-        //Artist not found
-        artist = Artist(artistName, defaultImage);
-      } else {
-        //Artist found
-        image = await loader.getArtistImage(loader.extractId(item));
-        artist = (image == null)
-            ? Artist(loader.extractArtistNameFromArtist(item), defaultImage)
-            : Artist(loader.extractArtistNameFromArtist(item),
-                img.Image.memory(image));
-      }
+  //     Uint8List? image;
+  //     if (item == null) {
+  //       //Artist not found
+  //       artist = Artist(artistName, defaultImage);
+  //     } else {
+  //       //Artist found
+  //       image = await loader.getArtistImage(loader.extractId(item));
+  //       artist = (image == null)
+  //           ? Artist(loader.extractArtistNameFromArtist(item), defaultImage)
+  //           : Artist(loader.extractArtistNameFromArtist(item),
+  //               img.Image.memory(image));
+  //     }
 
-      tmpArtist = containsArtist(artist.id);
-      if (tmpArtist == null) {
-        saveArtistImage(artist.id, image);
-        insertArtist(artist);
-      } else {
-        artist = tmpArtist;
-      }
-    }
+  //     tmpArtist = containsArtist(artist.id);
+  //     if (tmpArtist == null) {
+  //       saveArtistImage(artist.id, image);
+  //       insertArtist(artist);
+  //     } else {
+  //       artist = tmpArtist;
+  //     }
+  //   }
 
-    Album album;
-    Album? tmpAlbum;
-    if (albumName == "" || albumName == null) {
-      //tag missing
-      tmpAlbum = containsAlbum(hash(loader.extractAlbumNameFromTrack(item) +
-          loader.extractArtistNameFromTrack(item)));
-      if (tmpAlbum == null) {
-        album = await createAlbumFromTrack(item, artist);
-        insertAlbum(album);
-      } else {
-        album = tmpAlbum;
-      }
-      //await tagger.writeTag(path: path, tagField: "album", value: album.name);
-      print("album " + album.name + " not in tags; used API instead");
-    } else {
-      //tag present
-      tmpAlbum = containsAlbum(hash(albumName + artist.name));
-      if (tmpAlbum == null) {
-        Uint8List? cover = await tagger.readArtwork(path: path);
-        if (cover != null) {
-          album = Album(albumName, artist, img.Image.memory(cover));
-        } else {
-          var item = await loader.searchAlbum(albumName);
+  //   Album album;
+  //   Album? tmpAlbum;
+  //   if (albumName == "" || albumName == null) {
+  //     //tag missing
+  //     tmpAlbum = containsAlbum(hash(loader.extractAlbumNameFromTrack(item) +
+  //         loader.extractArtistNameFromTrack(item)));
+  //     if (tmpAlbum == null) {
+  //       album = await createAlbumFromTrack(item, artist);
+  //       insertAlbum(album);
+  //     } else {
+  //       album = tmpAlbum;
+  //     }
+  //     //await tagger.writeTag(path: path, tagField: "album", value: album.name);
+  //     print("album " + album.name + " not in tags; used API instead");
+  //   } else {
+  //     //tag present
+  //     tmpAlbum = containsAlbum(hash(albumName + artist.name));
+  //     if (tmpAlbum == null) {
+  //       Uint8List? cover = await tagger.readArtwork(path: path);
+  //       if (cover != null) {
+  //         album = Album(albumName, artist, img.Image.memory(cover));
+  //       } else {
+  //         var item = await loader.searchAlbum(albumName);
 
-          Uint8List? cover = null;
-          if (item == null) {
-            //Album not found
-            album = Album(albumName, artist, defaultImage);
-          } else {
-            //Album found
-            cover = await loader.extractCoverFromAlbum(item);
-            album = Album(loader.extractAlbumTitleFromAlbum(item), artist,
-                img.Image.memory(cover));
-          }
-        }
-        saveAlbumCover(album.id, cover);
-        insertAlbum(album);
-      } else {
-        album = tmpAlbum;
-      }
-    }
+  //         Uint8List? cover = null;
+  //         if (item == null) {
+  //           //Album not found
+  //           album = Album(albumName, artist, defaultImage);
+  //         } else {
+  //           //Album found
+  //           cover = await loader.extractCoverFromAlbum(item);
+  //           album = Album(loader.extractAlbumTitleFromAlbum(item), artist,
+  //               img.Image.memory(cover));
+  //         }
+  //       }
+  //       saveAlbumCover(album.id, cover);
+  //       insertAlbum(album);
+  //     } else {
+  //       album = tmpAlbum;
+  //     }
+  //   }
 
-    if (title == null || title == "") {
-      title = loader.extractTitleFromTrack(item);
-      //await tagger.writeTag(path: path, tagField: "title", value: title);
-      print("title " + title + " not in tags; used API instead");
-    }
-    if (lyrics == null || lyrics == "") {
-      lyrics = await loader.getLyricsFromTrack(item);
-      //await tagger.writeTag(path: path, tagField: "lyrics", value: lyrics);
-      print("lyrics not in tags; used API instead");
-    }
-    if (trackNumber == null || trackNumber == -1) {
-      trackNumber = loader.extractTrackNumberFromTrack(item);
-      //await tagger.writeTag(path: path, tagField: "trackNumber", value: trackNumber.toString());
-      print("trackNumber " +
-          trackNumber.toString() +
-          " not in tags; used API instead");
-    }
+  //   if (title == null || title == "") {
+  //     title = loader.extractTitleFromTrack(item);
+  //     //await tagger.writeTag(path: path, tagField: "title", value: title);
+  //     print("title " + title + " not in tags; used API instead");
+  //   }
+  //   if (lyrics == null || lyrics == "") {
+  //     lyrics = await loader.getLyricsFromTrack(item);
+  //     //await tagger.writeTag(path: path, tagField: "lyrics", value: lyrics);
+  //     print("lyrics not in tags; used API instead");
+  //   }
+  //   if (trackNumber == null || trackNumber == -1) {
+  //     trackNumber = loader.extractTrackNumberFromTrack(item);
+  //     //await tagger.writeTag(path: path, tagField: "trackNumber", value: trackNumber.toString());
+  //     print("trackNumber " +
+  //         trackNumber.toString() +
+  //         " not in tags; used API instead");
+  //   }
 
-    return Track(title, path, artist, album, lyrics, trackNumber);
-  }
+  //   return Track(title, path, artist, album, lyrics, trackNumber);
+  // }
 
   Future<Album> createAlbumFromTrack(var item, Artist artist) async {
     Uint8List cover = await loader.extractCoverFromTrack(item);
@@ -634,12 +774,32 @@ class Database {
     return null;
   }
 
-  void deleteAlbum(Album album) {
-    albums.remove(album);
+  Future<bool> deleteAlbum(Album album) async {
+    bool res = albums.remove(album);
+    File f = File((await _coversDirectory).path + "/" + album.id.toString());
+    if (await f.exists()) {
+      f.delete();
+    }
+
+    return res;
   }
 
-  void deleteArtist(Artist artist) {
-    artists.remove(artist);
+  Future<bool> deleteArtist(Artist artist) async {
+    bool res = artists.remove(artist);
+    File f = File((await _artistsDirectory).path + "/" + artist.id.toString());
+    if (await f.exists()) {
+      await f.delete();
+    }
+
+    return res;
+  }
+
+  Future<bool> deleteTrack(Track track) async {
+    track.delete();
+    bool res = tracks.remove(track);
+    await saveAllData();
+
+    return res;
   }
 
   void insertTrack(Track track) {

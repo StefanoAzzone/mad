@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:flutter/cupertino.dart';
@@ -12,6 +13,7 @@ import 'package:html/parser.dart' as parser;
 MetadataLoader loader = MetadataLoader.instance;
 
 class MetadataLoader {
+  bool connected = false;
   String base = "https://api.spotify.com";
   String genius = "https://api.genius.com";
   String accounts = "https://accounts.spotify.com";
@@ -38,29 +40,38 @@ class MetadataLoader {
   MetadataLoader._internal();
 
   Future initialize() async {
+    try {
+      final result = await InternetAddress.lookup('google.com');
+      if (result.isNotEmpty && result[0].rawAddress.isNotEmpty) {
+        connected = true;
+        print('connected');
+      }
+    } on SocketException catch (_) {
+      print('not connected');
+    }
+
     return Future(() async {
       if (spotifyToken == "") {
         Codec<String, String> stringToBase64 = utf8.fuse(base64);
         //SPOTIFY AUTHENTICATION//
         try {
           http.Response response = await http.post(
-            Uri.parse(accounts + authReqEndPoint),
-            headers: <String, String>{
-              'Content-Type': 'application/x-www-form-urlencoded',
-              'Authorization': 'Basic ' +
-                  stringToBase64
-                      .encode(clientIdSpotify + ":" + clientSecretSpotify),
-            },
-            body: <String, String>{
-              'grant_type': 'client_credentials',
-            });
+              Uri.parse(accounts + authReqEndPoint),
+              headers: <String, String>{
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'Authorization': 'Basic ' +
+                    stringToBase64
+                        .encode(clientIdSpotify + ":" + clientSecretSpotify),
+              },
+              body: <String, String>{
+                'grant_type': 'client_credentials',
+              });
 
-        spotifyToken = jsonDecode(response.body)['access_token'];
-        print(response.body);
+          spotifyToken = jsonDecode(response.body)['access_token'];
+          print(response.body);
         } catch (e) {
           print("disconnected");
         }
-        
       }
     });
   }
@@ -132,7 +143,6 @@ class MetadataLoader {
   Future<Uint8List> extractCoverFromAlbum(var item) async {
     String url = item["images"][0]["url"];
     return (await http.get(Uri.parse(url))).bodyBytes;
-    ;
   }
 
   String extractTitleFromTrack(var item) {
@@ -212,8 +222,11 @@ class MetadataLoader {
   }
 
   Future<String> getWikipedia(String query) async {
-    String url = 'https://en.wikipedia.org/w/api.php?action=query&prop=extracts&exintro&format=json&explaintext&titles=' + query;
-    http.Response res = await http.get(Uri.parse(url)).timeout(const Duration(seconds: 1));
+    String url =
+        'https://en.wikipedia.org/w/api.php?action=query&prop=extracts&exintro&format=json&explaintext&titles=' +
+            query;
+    http.Response res =
+        await http.get(Uri.parse(url)).timeout(const Duration(seconds: 1));
     var json = jsonDecode(res.body) as Map;
     var ret = json["query"]["pages"].entries.toList()[0].value["extract"];
     return ret;
