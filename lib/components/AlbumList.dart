@@ -4,9 +4,21 @@ import 'dart:io';
 import 'package:mad/data.dart';
 import 'package:mad/screens/AlbumTracks.dart';
 
-class AlbumList extends StatelessWidget {
+class AlbumList extends StatefulWidget {
+
   List<Album> albums;
-  AlbumList(this.albums);
+  Function updateHome;
+  AlbumList(this.albums, this.updateHome);
+  @override
+  State<AlbumList> createState() => _AlbumListState(albums, updateHome);
+}
+
+class _AlbumListState extends State<AlbumList> {
+
+  List<Album> albums;
+  Function updateHome;
+
+  _AlbumListState(this.albums, this.updateHome);
 
   @override
   Widget build(BuildContext context) {
@@ -20,12 +32,16 @@ class AlbumList extends StatelessWidget {
           children: List<IconButton>.generate(albums.length, (index) {
             return IconButton(
 
-              onPressed: () {
-                Navigator.pushNamed(
+              onPressed: () async {
+                await Navigator.pushNamed(
                   context,
                   ExtractArgumentsAlbumTracks.routeName,
-                  arguments: albums[index],
+                  arguments: AlbumTracksArguments(albums[index], updateHome),
                 );
+                updateHome;
+                setState(() {
+                  
+                });
               },
               icon: Column(
                 children: [

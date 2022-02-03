@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mad/Player.dart';
 import 'package:mad/data.dart';
 
 class TrackList extends StatefulWidget {
@@ -20,19 +21,20 @@ class _TrackListState extends State<TrackList> {
   Widget build(BuildContext context) {
     Size size = MediaQuery.of(context).size;
     int count = database.state == DatabaseState.Ready
-        ? tracks.length
-        : tracks.length + 1;
+        ? tracks.length + 1
+        : tracks.length + 2;
     return OrientationBuilder(builder: (context, orientation) {
       var ncols = orientation == Orientation.portrait ? 1 : 2;
+      
       return GridView.count(
           padding: EdgeInsets.only(top: 0.0),
           crossAxisCount: ncols,
           shrinkWrap: true,
           childAspectRatio: 6.5,
-          children: List.generate(tracks.length, (index) {
+          children: List.generate(count, (index) {
             RenderObject? overlay =
                 Overlay.of(context)?.context.findRenderObject();
-            if (index == tracks.length) {
+            if (index == tracks.length + 1) {
               Size size = MediaQuery.of(context).size;
               return Center(
                   child: SizedBox(
@@ -46,6 +48,32 @@ class _TrackListState extends State<TrackList> {
                         backgroundColor: Colors.blue,
                         color: Colors.white,
                       )));
+            }
+            if(index == 0) {
+              return ListTile(
+                title: GestureDetector(
+                  onTap: () async {
+                    trackQueue.reset();
+                    trackQueue.addList(tracks);
+                    trackQueue.shuffle();
+                    player.play();
+                    await Navigator.pushNamed(context, '/playingTrack');
+                    setState(() {
+                      
+                    });
+                  },
+                  child: 
+                    Row(
+                      children: const [
+                        Expanded(
+                          child: Text("Random reproduction"),
+                        ),
+                        Icon(Icons.ramen_dining),
+                      ],
+                    )
+                ),
+                 
+              );
             }
             return Container(
                 decoration: const BoxDecoration(
@@ -84,7 +112,7 @@ class _TrackListState extends State<TrackList> {
                                                   context, '/editMetadata');
                                           if (metadata != null) {
                                             await database.setNewMetadata(
-                                                tracks[index], metadata);
+                                                tracks[index - 1], metadata);
                                             setState(() {
                                               //tracks = database.tracks;
                                             });
@@ -96,7 +124,7 @@ class _TrackListState extends State<TrackList> {
                                         )),
                                     TextButton(
                                         onPressed: () {
-                                          trackQueue.pushLast(tracks[index]);
+                                          trackQueue.pushLast(tracks[index - 1]);
                                           Navigator.pop(context);
                                         },
                                         child: const Text(
@@ -132,7 +160,7 @@ class _TrackListState extends State<TrackList> {
                                                                         i]
                                                                     .addTrack(
                                                                         tracks[
-                                                                            index]);
+                                                                            index - 1]);
                                                                 Navigator.pop(
                                                                     context);
                                                                 Navigator.pop(
@@ -159,7 +187,7 @@ class _TrackListState extends State<TrackList> {
                           SizedBox(
                             width: size.width * 0.15,
                             height: 50,
-                            child: tracks[index].album.cover,
+                            child: tracks[index - 1].album.cover,
                           ),
                           const SizedBox(
                             height: 50,
@@ -175,7 +203,7 @@ class _TrackListState extends State<TrackList> {
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
                                   Text(
-                                    tracks[index].title,
+                                    tracks[index - 1].title,
                                     overflow: TextOverflow.ellipsis,
                                     textAlign: TextAlign.left,
                                     style: const TextStyle(
@@ -183,7 +211,7 @@ class _TrackListState extends State<TrackList> {
                                     ),
                                   ),
                                   Text(
-                                    tracks[index].artist.name,
+                                    tracks[index - 1].artist.name,
                                     overflow: TextOverflow.ellipsis,
                                     style: const TextStyle(
                                       fontSize: 11,
@@ -194,7 +222,7 @@ class _TrackListState extends State<TrackList> {
                         ],
                       ),
                       onTap: () {
-                        callback(tracks, index);
+                        callback(tracks, index - 1);
                       },
                     )));
           }));

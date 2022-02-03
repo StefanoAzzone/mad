@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math';
 import 'dart:typed_data';
 import 'package:flutter/src/widgets/image.dart' as img;
 
@@ -167,6 +168,7 @@ class Playlist {
 TrackQueue trackQueue = TrackQueue.instance;
 
 class TrackQueue {
+  Random rng = Random();
   List<Track> queue = [];
   int currentIndex = 0;
   static final TrackQueue instance = TrackQueue._internal();
@@ -218,6 +220,10 @@ class TrackQueue {
 
   void addList(List<Track> tracks) {
     queue.addAll(tracks);
+  }
+
+  void shuffle() {
+    queue.shuffle();
   }
 
   trackQueue() {}
@@ -315,6 +321,7 @@ class Database {
     //insertAlbum(UnknownAlbum);
     //insertArtist(UnknownArtist);
     //findMusic(update);
+    state = DatabaseState.Ready;
   }
 
   void loadData(Function update) async {
