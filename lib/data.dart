@@ -154,10 +154,12 @@ class Playlist {
     }
   }
 
+  void removeTrack(Track track) {
+    tracks.remove(track);
+  }
+
   static Playlist fromJson(Map<String, dynamic> json) {
     Playlist p = Playlist(json["name"]);
-    print(json["traks"].length);
-    print(json["traks"][0]);
 
     for (var i = 0; i < json["traks"].length; i++) {
       Track? t = database.containsTrack(json["traks"][i]);
@@ -341,15 +343,13 @@ class Database {
   void init(Function update) async {
     var status = await Permission.camera.status;
     if (status.isDenied) {
-      // print("yessss");
       // We didn't ask for permission yet or the permission has been denied before but not permanently.
     }
-
-// // You can can also directly ask the permission about its status.
-//     if (await Permission.location.isRestricted) {
-//       print("nooooo");
-//       // The OS restricts access, for example because of parental controls.
-//     }
+    // You can can also directly ask the permission about its status.
+    if (await Permission.location.isRestricted) {
+      print("nooooo");
+      // The OS restricts access, for example because of parental controls.
+    }
 
     await Permission.manageExternalStorage.request();
     state = DatabaseState.Loading;
@@ -617,11 +617,12 @@ class Database {
     //The album was not in the db yet
     if (albumName != "") {
       if (cover == null && info != null) {
-        var alb = await loader.searchAlbum(albumName);
-        if (alb != null) {
-          //album found
-          cover = await loader.extractCoverFromAlbum(alb);
-        }
+        cover = await loader.extractCoverFromTrack(info);
+        // var alb = await loader.searchAlbum(albumName);
+        // if (alb != null) {
+        //   //album found
+        //   cover = await loader.extractCoverFromAlbum(alb);
+        // }
       }
 
       Album album = Album(albumName, artist,
@@ -736,9 +737,18 @@ class Database {
   Future<bool> deleteTrack(Track track) async {
     track.delete();
     bool res = tracks.remove(track);
+    await deleteFromPlaylists(track);
+
     await saveAllData();
 
     return res;
+  }
+
+  Future<bool> deleteFromPlaylists(Track track) async {
+    for (var i = 0; i < playlists.length; i++) {
+      playlists[i].removeTrack(track);
+    }
+    return true;
   }
 
   void insertTrack(Track track) {
