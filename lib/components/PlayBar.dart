@@ -30,58 +30,80 @@ class _PlayBarState extends State<PlayBar> {
   @override
   Widget build(BuildContext context) {
     Size size = MediaQuery.of(context).size;
-    if (trackQueue.length > 0) {
-      return Align(
-          alignment: Alignment.bottomCenter,
-          child: Row(
-            children: [
-              Expanded(
-                child: IconButton(
-                  icon: Row(
-                    children: [
-                      SizedBox(
-                        width: size.width*0.15,
-                        height: 50,
-                        child: trackQueue.current().album.cover,
-                      ),
-                      SizedBox(
-                        width: size.width*0.01,
-                        height: 50,
-                      ),
-                      SizedBox(
-                        width: size.width*0.65,
-                        height: 50,
-                        child: Column(children: [
-                          Text(
-                            trackQueue.current().title,
-                            overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(
-                              fontSize: 15,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          Text(
-                            trackQueue.current().artist.name,
-                            overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(
-                              fontSize: 12
-                            ),
-                          )
-                        ]
-                      ))
+    return Align(
+        alignment: Alignment.bottomCenter,
+        child: Container(
+          decoration: BoxDecoration(border: Border.all(color: Colors.black54)),
+          child: 
+            Row(
+              children: [
+                Expanded(
+                  child: IconButton(
+                    icon: Row(
+                      children: [
+                        SizedBox(
+                          width: size.width*0.15,
+                          height: 50,
+                          child: trackQueue.length > 0 ? trackQueue.current().album.cover : defaultImage,
+                        ),
+                        SizedBox(
+                          width: size.width*0.01,
+                          height: 50,
+                        ),
+                        SizedBox(
+                          width: size.width*0.65,
+                          height: 50,
+                          child: Column(children: () {
+                            if(trackQueue.length > 0) {
+                              return 
+                                [
+                                  Text(
+                                    trackQueue.current().title,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: const TextStyle(
+                                      fontSize: 15,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  Text(
+                                    trackQueue.current().artist.name,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: const TextStyle(
+                                      fontSize: 12
+                                    ),
+                                  )
+                                ];
+                            } else return [
+                              Center(
+                                child: Text("Nothing in queue"),
+                              )
+                              
+                            ];
+                          }()
+                        ))
 
-                    ]
-                  ),
-                  onPressed: () {
-                    Navigator.pushNamed(context, '/playingTrack');
-                  },
+                      ]
+                    ),
+                    onPressed: () {
+                      if(trackQueue.length > 0) {
+                        Navigator.pushNamed(context, '/playingTrack'); 
+                      }
+                    },
 
-                )
-              ),
-              PlayButton(),
-            ],
-          ));
-    }
-    return SizedBox.shrink();
+                  )
+                ),
+                () {
+                  if(trackQueue.length > 0) {
+                    return PlayButton();
+
+                  }
+                  else return SizedBox.shrink();
+                } (),
+                
+              ],
+            )
+        )
+      );
+
   }
 }
