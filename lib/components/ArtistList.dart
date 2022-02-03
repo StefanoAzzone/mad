@@ -6,6 +6,8 @@ import 'package:mad/screens/ArtistAlbums.dart';
 
 class ArtistList extends StatelessWidget {
   List<Artist> artists = Database.instance.artists;
+  Function updateHome;
+  ArtistList(this.updateHome);
 
   @override
   Widget build(BuildContext context) {
@@ -22,7 +24,7 @@ class ArtistList extends StatelessWidget {
                 Navigator.pushNamed(
                   context,
                   ExtractArgumentsArtistAlbums.routeName,
-                  arguments: artists[index],
+                  arguments: ArtistAlbumsArguments(artists[index], updateHome),
                 );
                 print(artists[index].name);
               },

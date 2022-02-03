@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mad/components/PlayBar.dart';
 import 'dart:io';
 
 import 'package:mad/data.dart';
@@ -7,6 +8,7 @@ import 'package:audioplayers/audioplayers.dart';
 Player player = Player.instance;
 
 class Player {
+  PlayBar? playBar;
   static final Player instance = Player._internal();
   factory Player() {
     return instance;
@@ -19,7 +21,7 @@ class Player {
   AudioPlayer audioPlayer = AudioPlayer();
 
   void toggle() async {
-    if (!_isPlaying()) {
+    if (!isPlaying()) {
       play();
     } else {
       pause();
@@ -47,11 +49,11 @@ class Player {
   void prev() async {
     if (trackQueue.currentIndex == 0) {
       await audioPlayer.seek(Duration.zero);
-      if (!_isPlaying()) {
+      if (!isPlaying()) {
         play();
       }
     } else {
-      if (_isPlaying()) {
+      if (isPlaying()) {
         pause();
       }
       trackQueue.currentIndex--;
@@ -64,7 +66,7 @@ class Player {
       await audioPlayer.seek(Duration.zero);
       pause();
     } else {
-      if (_isPlaying()) {
+      if (isPlaying()) {
         pause();
       }
       trackQueue.currentIndex++;
@@ -72,7 +74,8 @@ class Player {
     }
   }
 
-  bool _isPlaying() {
+  bool isPlaying() {
     return audioPlayer.state == PlayerState.PLAYING;
   }
+
 }

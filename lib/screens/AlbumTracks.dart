@@ -4,10 +4,18 @@ import 'package:mad/components/PlayBar.dart';
 import 'package:mad/components/TrackList.dart';
 import 'package:mad/data.dart';
 
-class AlbumTracks extends StatelessWidget {
+class AlbumTracks extends StatefulWidget {
   Album album;
-  AlbumTracks(this.album, {Key? key}) : super(key: key);
+  Function updateHome;
+  AlbumTracks(this.album, this.updateHome);
+  @override
+  State<AlbumTracks> createState() => _AlbumTracksState(album, updateHome);
 
+}
+class _AlbumTracksState extends State<AlbumTracks>{
+  Album album;
+  Function updateHome;
+_AlbumTracksState(this.album, this.updateHome);
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -23,7 +31,12 @@ class AlbumTracks extends StatelessWidget {
               trackQueue.addList(tracks);
               trackQueue.currentIndex = index;
               player.play();
+              updateHome;
               await Navigator.pushNamed(context, '/playingTrack');
+              setState(() {
+                
+              });
+              
             }, album.trackList),
           ),
           PlayBar(),
@@ -38,8 +51,15 @@ class ExtractArgumentsAlbumTracks extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final album = ModalRoute.of(context)!.settings.arguments as Album;
+    final args = ModalRoute.of(context)!.settings.arguments as AlbumTracksArguments;
 
-    return AlbumTracks(album);
+    return AlbumTracks(args.album, args.updateHome);
   }
+}
+
+class AlbumTracksArguments {
+  final Album album;
+  final Function updateHome;
+
+  AlbumTracksArguments(this.album, this.updateHome);
 }

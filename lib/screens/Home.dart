@@ -13,16 +13,18 @@ class MyHomePage extends StatefulWidget {
   const MyHomePage({Key? key, required this.title}) : super(key: key);
   final String title;
 
+
   @override
   State<MyHomePage> createState() => _MyHomePageState();
 }
 
 class _MyHomePageState extends State<MyHomePage> {
   int _counter = 0;
-  String allArtists = "";
 
   void _updatePage() {
-    setState(() {});
+    setState(() {
+      
+    });
   }
 
   @override
@@ -78,8 +80,8 @@ class _MyHomePageState extends State<MyHomePage> {
                     await Navigator.pushNamed(context, '/playingTrack');
                     _updatePage();
                   }, database.tracks),
-                  AlbumList(database.albums),
-                  ArtistList(),
+                  AlbumList(database.albums, _updatePage),
+                  ArtistList(_updatePage),
                   PlaylistList()
                 ],
               ),
