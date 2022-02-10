@@ -3,6 +3,7 @@ import 'dart:ffi';
 import 'dart:math';
 import 'dart:typed_data';
 import 'package:flutter/src/widgets/image.dart' as img;
+import 'package:image/image.dart';
 
 import 'package:audiotagger/audiotagger.dart';
 import 'package:audiotagger/models/tag.dart';
@@ -102,21 +103,28 @@ class Album {
   String name;
   Artist artist;
   img.Image cover;
+  img.Image thumbnail;
 
-  Album(this.name, this.artist, this.cover) {
+  Album(this.name, this.artist, this.cover, this.thumbnail) {
     id = hash(name + artist.name);
   }
 
   static Future<Album> fromJson(Map<String, dynamic> json) async {
-    File file = File(
+    File coverFile = File(
         (await database._coversDirectory).path + '/' + json["id"].toString());
+    File thumbnailFile = File(
+        (await database._coversDirectory).path + '/' + json["id"].toString() + '_thumb.png');
 
     return Album(
         json["name"],
         database.containsArtist(json["Artist"]) ?? Database.UnknownArtist,
-        await file.exists()
-            ? img.Image.memory(await file.readAsBytes())
-            : defaultImage);
+        await coverFile.exists()
+            ? img.Image.memory(await coverFile.readAsBytes())
+            : defaultImage,
+        await thumbnailFile.exists()
+            ? img.Image.memory(await thumbnailFile.readAsBytes())
+            : defaultAlbumThumbnail
+            );
   }
 
   Map<String, dynamic> toJson() => <String, dynamic>{
@@ -296,7 +304,7 @@ class Database {
   static final Database instance = Database._internal();
   static final Artist UnknownArtist = Artist("Unknown Artist", defaultImage);
   static final Album UnknownAlbum =
-      Album("Unknown Album", UnknownArtist, defaultImage);
+      Album("Unknown Album", UnknownArtist, defaultImage, defaultAlbumThumbnail);
 
   factory Database() {
     return instance;
@@ -357,7 +365,7 @@ class Database {
 
     await Permission.manageExternalStorage.request();
     state = DatabaseState.Loading;
-    // deleteAll();
+    //deleteAll();
     await loader.initialize();
     await loadData(update);
     insertArtist(UnknownArtist);
@@ -414,6 +422,17 @@ class Database {
   void saveAlbumCover(int id, Uint8List? image) async {
     if (image != null) {
       File file = File((await _coversDirectory).path + '/' + id.toString());
+      if (!await file.exists()) {
+        print("Creating file " + file.path);
+        await file.create();
+      }
+      file.writeAsBytes(image);
+    }
+  }
+
+  void saveAlbumThumbnail(int id, Uint8List? image) async {
+    if (image != null) {
+      File file = File((await _coversDirectory).path + '/' + id.toString() + '_thumb.png');
       if (!await file.exists()) {
         print("Creating file " + file.path);
         await file.create();
@@ -628,10 +647,20 @@ class Database {
         //   cover = await loader.extractCoverFromAlbum(alb);
         // }
       }
-
-      Album album = Album(albumName, artist,
-          cover != null ? img.Image.memory(cover) : defaultImage);
+      Uint8List? thumbnailList;
+      img.Image thumbnailImage;
+      img.Image coverImage;
+      if(cover != null) {
+        thumbnailList = encodePng(copyResize(decodeImage(cover)!, width: 120)) as Uint8List;
+        coverImage = img.Image.memory(cover);
+        thumbnailImage = img.Image.memory(thumbnailList);
+      } else {
+        coverImage = defaultImage;
+        thumbnailImage = defaultAlbumThumbnail;
+      }
+      Album album = Album(albumName, artist, coverImage, thumbnailImage);
       saveAlbumCover(album.id, cover);
+      saveAlbumThumbnail(album.id, thumbnailList);
       insertAlbum(album);
       return album;
     }
@@ -672,13 +701,13 @@ class Database {
     return true;
   }
 
-  Future<Album> createAlbumFromTrack(var item, Artist artist) async {
-    Uint8List cover = await loader.extractCoverFromTrack(item);
-    Album album = Album(loader.extractAlbumNameFromTrack(item), artist,
-        img.Image.memory(cover));
-    saveAlbumCover(album.id, cover);
-    return album;
-  }
+  // Future<Album> createAlbumFromTrack(var item, Artist artist) async {
+  //   Uint8List cover = await loader.extractCoverFromTrack(item);
+  //   Album album = Album(loader.extractAlbumNameFromTrack(item), artist,
+  //       img.Image.memory(cover));
+  //   saveAlbumCover(album.id, cover);
+  //   return album;
+  // }
 
   String baseName(String path) {
     path = path.split("/").last;
