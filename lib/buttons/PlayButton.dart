@@ -26,9 +26,9 @@ class _PlayButtonState extends State<PlayButton> {
         },
         icon: (() {
           if (state == PlayerState.PLAYING) {
-            return Icon(Icons.pause);
+            return const Icon(Icons.pause);
           }
-          return Icon(Icons.play_arrow);
+          return const Icon(Icons.play_arrow);
         }()));
   }
 }

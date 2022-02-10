@@ -25,10 +25,10 @@ void main() {
   database.insertArtist(Artist3);
   database.insertArtist(Artist4);
 
-  var Album4 = Album("Album4", Artist4, defaultImage);
-  var Album3 = Album("Album3", Artist3, defaultImage);
-  var Album1 = Album("Album1", Artist1, defaultImage);
-  var Album2 = Album("Album2", Artist2, defaultImage);
+  var Album4 = Album("Album4", Artist4, defaultImage, defaultAlbumThumbnail);
+  var Album3 = Album("Album3", Artist3, defaultImage, defaultAlbumThumbnail);
+  var Album1 = Album("Album1", Artist1, defaultImage, defaultAlbumThumbnail);
+  var Album2 = Album("Album2", Artist2, defaultImage, defaultAlbumThumbnail);
 
   database.insertAlbum(Album1);
   database.insertAlbum(Album2);
