@@ -4,10 +4,11 @@ import 'package:flutter/material.dart';
 import 'package:mad/data.dart';
 import 'package:mad/screens/AlbumTracks.dart';
 import 'package:mad/screens/ArtistAlbums.dart';
+import 'package:mad/screens/Editor/ArtistEditor.dart';
 import 'package:mad/screens/Home.dart';
 import 'package:mad/screens/Info/AlbumInfo.dart';
 import 'package:mad/screens/Info/ArtistInfo.dart';
-import 'package:mad/screens/MetadataEditor.dart';
+import 'package:mad/screens/Editor/MetadataEditor.dart';
 import 'package:mad/screens/PlayingTrack.dart';
 import 'package:mad/screens/SelectTracks.dart';
 import 'package:mad/screens/ShowPlaylist.dart';
@@ -34,6 +35,7 @@ class MyApp extends StatelessWidget {
         ExtractArgumentsSelectTracks.routeName: (context) =>
             const ExtractArgumentsSelectTracks(),
         '/editMetadata': (context) => MetadataEditor(),
+        '/artistEditor': (context) => ArtistEditor(),
         ExtractArgumentsAlbumTracks.routeName: (context) =>
             const ExtractArgumentsAlbumTracks(),
         ExtractArgumentsArtistAlbums.routeName: (context) =>

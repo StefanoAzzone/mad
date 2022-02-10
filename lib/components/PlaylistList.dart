@@ -11,6 +11,7 @@ class _PlaylistListState extends State<PlaylistList> {
   List<Playlist> playlists = database.playlists;
   String newName = "";
   TextEditingController tec = TextEditingController();
+  late Offset _tapPosition;
 
   @override
   Widget build(BuildContext context) {
@@ -23,16 +24,52 @@ class _PlaylistListState extends State<PlaylistList> {
               crossAxisCount: orientation == Orientation.portrait ? 1 : 2,
               shrinkWrap: true,
               children: List.generate(playlists.length, (index) {
-                return ListTile(
-                  title: Text(
-                    playlists[index].name,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  onTap: () {
-                    Navigator.pushNamed(context, '/showPlaylist',
-                        arguments: playlists[index]);
-                  },
-                );
+                return GestureDetector(
+                    onTapDown: (TapDownDetails details) {
+                      _tapPosition = details.globalPosition;
+                    },
+                    onLongPress: () {
+                      RenderObject? overlay =
+                          Overlay.of(context)?.context.findRenderObject();
+                      Size? size = overlay?.semanticBounds.size;
+                      if (size != null) {
+                        showMenu(
+                            context: context,
+                            position: RelativeRect.fromRect(
+                                _tapPosition &
+                                    const Size(
+                                        40, 40), // smaller rect, the touch area
+                                Offset.zero &
+                                    size // Bigger rect, the entire screen
+                                ),
+                            items: <PopupMenuEntry<String>>[
+                              PopupMenuItem<String>(
+                                  value: 'Value1',
+                                  child: Column(children: [
+                                    TextButton(
+                                        onPressed: () async {
+                                          Navigator.pop(context);
+                                          database.playlists.removeAt(index);
+                                          setState(() {});
+                                        },
+                                        child: const Text(
+                                          "Delete playlist",
+                                          style: TextStyle(color: Colors.black),
+                                        )),
+                                  ]))
+                            ]);
+                      }
+                    },
+                    child: ListTile(
+                      title: Text(
+                        playlists[index].name,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      onTap: () {
+                        Navigator.pushNamed(context, '/showPlaylist',
+                            arguments: playlists[index]);
+                      },
+                    ));
               }),
             ),
             floatingActionButtonLocation:

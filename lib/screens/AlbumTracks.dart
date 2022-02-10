@@ -6,16 +6,14 @@ import 'package:mad/data.dart';
 
 class AlbumTracks extends StatefulWidget {
   Album album;
-  Function updateHome;
-  AlbumTracks(this.album, this.updateHome);
+  AlbumTracks(this.album);
   @override
-  State<AlbumTracks> createState() => _AlbumTracksState(album, updateHome);
-
+  State<AlbumTracks> createState() => _AlbumTracksState(album);
 }
-class _AlbumTracksState extends State<AlbumTracks>{
+
+class _AlbumTracksState extends State<AlbumTracks> {
   Album album;
-  Function updateHome;
-_AlbumTracksState(this.album, this.updateHome);
+  _AlbumTracksState(this.album);
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -31,22 +29,16 @@ _AlbumTracksState(this.album, this.updateHome);
               trackQueue.addList(tracks);
               trackQueue.currentIndex = index;
               player.play();
-              updateHome;
               await Navigator.pushNamed(context, '/playingTrack');
-              setState(() {
-                
-              });
-              
+              setState(() {});
             }, album.trackList),
           ),
         ]),
         bottomNavigationBar: BottomAppBar(
-                child: SizedBox(
-                  child: PlayBar(),
-                  height: 50,
-                )
-            )
-      );
+            child: SizedBox(
+          child: PlayBar(),
+          height: 50,
+        )));
   }
 }
 
@@ -57,15 +49,8 @@ class ExtractArgumentsAlbumTracks extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final args = ModalRoute.of(context)!.settings.arguments as AlbumTracksArguments;
+    final album = ModalRoute.of(context)!.settings.arguments as Album;
 
-    return AlbumTracks(args.album, args.updateHome);
+    return AlbumTracks(album);
   }
-}
-
-class AlbumTracksArguments {
-  final Album album;
-  final Function updateHome;
-
-  AlbumTracksArguments(this.album, this.updateHome);
 }

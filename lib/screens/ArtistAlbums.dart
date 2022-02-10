@@ -6,21 +6,15 @@ import 'package:mad/components/PlayBar.dart';
 import 'package:mad/data.dart';
 
 class ArtistAlbums extends StatefulWidget {
-  Function updateHome;
   Artist artist;
-  ArtistAlbums(this.artist, this.updateHome);
+  ArtistAlbums(this.artist, {Key? key}) : super(key: key);
   @override
-  State<ArtistAlbums> createState() => _ArtistAlbumsState(artist, updateHome);
+  State<ArtistAlbums> createState() => _ArtistAlbumsState(artist);
 }
 
 class _ArtistAlbumsState extends State<ArtistAlbums> {
-  Function updateHome;
   Artist artist;
-  _ArtistAlbumsState(this.artist, this.updateHome);
-
-  _update() {
-    setState(() {});
-  }
+  _ArtistAlbumsState(this.artist);
 
   @override
   Widget build(BuildContext context) {
@@ -41,19 +35,14 @@ class _ArtistAlbumsState extends State<ArtistAlbums> {
                         } else {
                           return LanArtistCard(artist);
                         }
-                      }()
-                          //
-                          ),
+                      }()),
                     ),
                   )
                 ];
               },
               body: Column(children: [
                 Expanded(
-                  child: AlbumList(artist.albumList, () {
-                    updateHome;
-                    _update();
-                  }),
+                  child: AlbumList(artist.albumList),
                 ),
               ])),
           bottomNavigationBar: BottomAppBar(
@@ -72,16 +61,8 @@ class ExtractArgumentsArtistAlbums extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final args =
-        ModalRoute.of(context)!.settings.arguments as ArtistAlbumsArguments;
+    final artist = ModalRoute.of(context)!.settings.arguments as Artist;
 
-    return ArtistAlbums(args.artist, args.updateHome);
+    return ArtistAlbums(artist);
   }
-}
-
-class ArtistAlbumsArguments {
-  final Artist artist;
-  final Function updateHome;
-
-  ArtistAlbumsArguments(this.artist, this.updateHome);
 }

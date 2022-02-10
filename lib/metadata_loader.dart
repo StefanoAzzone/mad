@@ -121,6 +121,30 @@ class MetadataLoader {
     }
   }
 
+  Future searchAllCovers(String title) async {
+    try {
+      http.Response response =
+          await queryAPI(Uri.encodeFull("album:" + title + "&type=album"));
+
+      var items = jsonDecode(response.body)["albums"]["items"];
+      return Future(() => items.length != 0 ? items : null);
+    } catch (e) {
+      return null;
+    }
+  }
+
+  Future searchAllArtists(String title) async {
+    try {
+      http.Response response =
+          await queryAPI(Uri.encodeFull("artist:" + title + "&type=artist"));
+
+      var items = jsonDecode(response.body)["artists"]["items"];
+      return Future(() => items.length != 0 ? items : null);
+    } catch (e) {
+      return null;
+    }
+  }
+
   int getItemsCount(var items) {
     return items != null ? items.length : 0;
   }
@@ -217,17 +241,21 @@ class MetadataLoader {
   }
 
   Future<Uint8List?> getArtistImage(String Id) async {
-    String url = base + artistsEndPoint + "/" + Id;
-    http.Response response =
-        await http.get(Uri.parse(url), headers: <String, String>{
-      "Accept": "application/json",
-      'Content-Type': 'application/json',
-      'Authorization': 'Bearer ' + spotifyToken,
-    });
+    try {
+      String url = base + artistsEndPoint + "/" + Id;
+      http.Response response =
+          await http.get(Uri.parse(url), headers: <String, String>{
+        "Accept": "application/json",
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + spotifyToken,
+      });
 
-    if (jsonDecode(response.body)["images"].length == 0) return null;
-    url = jsonDecode(response.body)["images"][0]["url"];
-    return (await http.get(Uri.parse(url))).bodyBytes;
+      if (jsonDecode(response.body)["images"].length == 0) return null;
+      url = jsonDecode(response.body)["images"][0]["url"];
+      return (await http.get(Uri.parse(url))).bodyBytes;
+    } catch (e) {
+      return null;
+    }
   }
 
   Future<String> getWikipedia(String query) async {

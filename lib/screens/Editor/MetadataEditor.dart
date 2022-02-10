@@ -20,15 +20,43 @@ class _MetadataEditorState extends State<MetadataEditor> {
 
   @override
   Widget build(BuildContext context) {
+    if (!loader.connected) {
+      return const Center(
+        child: Text(
+            "Cannot access server.\nTry to check your internet connection."),
+      );
+    }
+
     size = MediaQuery.of(context).size;
     return Scaffold(
         appBar: AppBar(
-          title: TextFormField(onChanged: (value) async {
-            var res = await loader.searchAllTracks(value);
-            setState(() {
-              result = res;
-            });
-          }),
+          title: TextFormField(
+            onChanged: (value) async {
+              var res = await loader.searchAllTracks(value);
+              setState(() {
+                result = res;
+              });
+            },
+            decoration: InputDecoration(
+              labelText: "Enter Name",
+              floatingLabelBehavior: FloatingLabelBehavior.never,
+              fillColor: Colors.white,
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(30.0),
+                borderSide: BorderSide(
+                  color: Colors.lightBlue,
+                  width: 2.0,
+                ),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(30.0),
+                borderSide: BorderSide(
+                  color: Colors.lightBlue,
+                  width: 3.0,
+                ),
+              ),
+            ),
+          ),
           centerTitle: true,
         ),
         body: Column(children: [
@@ -42,13 +70,12 @@ class _MetadataEditorState extends State<MetadataEditor> {
                     builder: (context, snapshot) {
                       if (!snapshot.hasData) {
                         return const Center(
-                          child: SizedBox(
-                            //TODO FIX
-                              width: 50,
-                              height: 50,
-                              child: CircularProgressIndicator(),
-                            )
-                        );
+                            child: SizedBox(
+                          //TODO FIX
+                          width: 50,
+                          height: 50,
+                          child: CircularProgressIndicator(),
+                        ));
                       } else {
                         Uint8List? thumbnail = snapshot.data as Uint8List?;
                         return ListTile(

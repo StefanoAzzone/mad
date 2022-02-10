@@ -13,7 +13,7 @@ class TrackList extends StatefulWidget {
 class _TrackListState extends State<TrackList> {
   Function callback;
   List<Track> tracks;
-  var _tapPosition;
+  late Offset _tapPosition;
 
   _TrackListState(this.callback, this.tracks);
 
@@ -152,13 +152,15 @@ class _TrackListState extends State<TrackList> {
                                                                       .playlists[
                                                                           i]
                                                                       .name),
-                                                              onTap: () {
+                                                              onTap: () async {
                                                                 database
                                                                     .playlists[
                                                                         i]
                                                                     .addTrack(tracks[
                                                                         index -
                                                                             1]);
+                                                                await database
+                                                                    .saveAllData();
                                                                 Navigator.pop(
                                                                     context);
                                                                 Navigator.pop(

@@ -227,10 +227,11 @@ class TrackQueue {
   }
 
   Track current() {
-    if(queue.length > 0) {
+    if (queue.length > 0) {
       return queue[currentIndex];
     } else {
-      return Track("UnknownTrack", "path", Database.UnknownArtist, Database.UnknownAlbum, "lyrics", 0);
+      return Track("UnknownTrack", "path", Database.UnknownArtist,
+          Database.UnknownAlbum, "lyrics", 0);
     }
   }
 
@@ -325,21 +326,21 @@ class Database {
   }
 
   Future<bool> fromJson(Map<String, dynamic> json) async {
-      for (var e in (json['artists'] as List<dynamic>)) {
-        insertArtist(await Artist.fromJson(e as Map<String, dynamic>));
-      }
+    for (var e in (json['artists'] as List<dynamic>)) {
+      insertArtist(await Artist.fromJson(e as Map<String, dynamic>));
+    }
 
-      for (var e in (json['albums'] as List<dynamic>)) {
-        insertAlbum(await Album.fromJson(e as Map<String, dynamic>));
-      }
+    for (var e in (json['albums'] as List<dynamic>)) {
+      insertAlbum(await Album.fromJson(e as Map<String, dynamic>));
+    }
 
-      for (var e in (json['tracks'] as List<dynamic>)) {
-        insertTrack(await Track.fromJson(e as Map<String, dynamic>));
-      }
+    for (var e in (json['tracks'] as List<dynamic>)) {
+      insertTrack(await Track.fromJson(e as Map<String, dynamic>));
+    }
 
-      for (var e in (json['playlists'] as List<dynamic>)) {
-        insertPlaylist(await Playlist.fromJson(e as Map<String, dynamic>));
-      }
+    for (var e in (json['playlists'] as List<dynamic>)) {
+      insertPlaylist(await Playlist.fromJson(e as Map<String, dynamic>));
+    }
     return true;
   }
 
@@ -751,7 +752,18 @@ class Database {
     for (var i = 0; i < playlists.length; i++) {
       playlists[i].removeTrack(track);
     }
+    await saveAllData();
+
     return true;
+  }
+
+  Future<bool> deletePlaylists(Playlist playlist) async {
+    if (playlists.remove(playlist)) {
+      await saveAllData();
+      return false;
+    }
+
+    return false;
   }
 
   void insertTrack(Track track) {
