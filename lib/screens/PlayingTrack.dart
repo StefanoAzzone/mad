@@ -11,13 +11,18 @@ import 'package:mad/data.dart';
 
 
 class PlayingTrack extends StatefulWidget {
-  //PlayingTrack();
-  
   @override
   State<PlayingTrack> createState() => _PlayingTrackState();
 }
 
 class _PlayingTrackState extends State<PlayingTrack> {
+  _PlayingTrackState() {
+    player.audioPlayer.onDurationChanged.listen((event) {
+      setState(() {
+        
+      });
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -32,7 +37,18 @@ class _PlayingTrackState extends State<PlayingTrack> {
                  Column(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
-                    const SizedBox(height: 50,),
+                    Row(
+                      children: [
+                        const SizedBox(height: 50,),
+                        IconButton(
+                          onPressed: () {
+                            Navigator.pop(context);
+                            return;
+                          },
+                          icon: const Icon(Icons.keyboard_arrow_down),
+                        ),
+                      ],
+                    ),
                     Text(trackQueue.current().title,
                       style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                     ),
@@ -96,7 +112,18 @@ class _PlayingTrackState extends State<PlayingTrack> {
                 Expanded(child: CoverButton()),
                 Expanded(child: Column(
                   children: [
-                    const SizedBox(height: 50,),
+                    Row(
+                      children: [
+                        const Expanded(child: SizedBox(height: 50,),),
+                        IconButton(
+                          onPressed: () {
+                            Navigator.pop(context);
+                            return;
+                          },
+                          icon: const Icon(Icons.keyboard_arrow_down),
+                        ),
+                      ],
+                    ),
                     Text(trackQueue.current().title,
                       style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                     ),

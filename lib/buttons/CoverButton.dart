@@ -41,7 +41,7 @@ class _CoverButtonState extends State<CoverButton> {
                           children: [
                             Center(
                               child: Container(
-                                height: size.height/2,
+                                height: MediaQuery.of(context).orientation == Orientation.portrait ? size.height/2 : size.height,
                                 decoration: BoxDecoration(
                                   //color: Colors.grey,
                                   image: DecorationImage(image: trackQueue.current().album.cover.image),
@@ -65,7 +65,7 @@ class _CoverButtonState extends State<CoverButton> {
                             ),
                             Center(
                               child: Container(
-                                  height: size.height/1.7,
+                                  height: MediaQuery.of(context).orientation == Orientation.portrait ? size.height/1.7 : size.height,
                                   child: SingleChildScrollView(
                                       child: Padding(
                                         padding: const EdgeInsets.only(left: 10),

@@ -185,7 +185,7 @@ class _TrackListState extends State<TrackList> {
                           SizedBox(
                             width: size.width * 0.15,
                             height: 50,
-                            child: tracks[index - 1].album.cover,
+                            child: tracks[index - 1].album.thumbnail,
                           ),
                           const SizedBox(
                             height: 50,
