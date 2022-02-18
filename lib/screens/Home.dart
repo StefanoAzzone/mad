@@ -37,8 +37,25 @@ class _MyHomePageState extends State<MyHomePage> {
                   (BuildContext context, bool innerBoxIsScrolled) {
                 return <Widget>[
                   SliverAppBar(
+                    flexibleSpace: Container(
+                      decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                              begin: Alignment.topRight,
+                              end: Alignment.bottomLeft,
+                              colors: [Colors.indigo, Colors.lightBlue])),
+                    ),
                     snap: false,
-                    title: Text('MBox'),
+                    title: Row(
+                      children: [
+                        Expanded(
+                            child: Text(
+                          '  MBox',
+                        )),
+                        IconButton(
+                            onPressed: () => print("search"),
+                            icon: Icon(Icons.search))
+                      ],
+                    ),
                     pinned: true,
                     floating: true,
                     forceElevated: innerBoxIsScrolled,
