@@ -24,7 +24,7 @@ class _AlbumListState extends State<AlbumList> {
       builder: (context, orientation) {
         int ncols = orientation == Orientation.portrait ? 2 : 4;
         return GridView.count(
-            childAspectRatio: 0.80,
+            childAspectRatio: 0.81,
             padding: EdgeInsets.only(top: 0.0),
             crossAxisCount: ncols,
             children: List.generate(albums.length, (index) {
@@ -37,24 +37,39 @@ class _AlbumListState extends State<AlbumList> {
                     );
                     setState(() {});
                   },
-                  icon: Column(
-                    children: [
-                      SizedBox(
-                        child: albums[index].cover,
-                        width: size.width / ncols - 10,
-                        height: size.width / ncols - 10,
-                      ),
-                      Text(
-                        albums[index].name,
-                        overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.bold,
+                  icon: Card(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        SizedBox(
+                          child: albums[index].cover,
+                          width: size.width / ncols - 10,
+                          height: size.width / ncols - 10,
                         ),
-                      ),
-                    ],
-                  ));
-            }));
+                        Text(
+                          ' ' + albums[index].name,
+                          overflow: TextOverflow.ellipsis,
+                          textAlign: TextAlign.left,
+                          style: const TextStyle(
+                            fontSize: 14,
+
+                          ),
+                        ),
+                        Text(
+                          ' ' + albums[index].artist.name,
+                          overflow: TextOverflow.ellipsis,
+                          textAlign: TextAlign.left,
+                          style: const TextStyle(
+                            fontSize: 12,
+
+                          ),
+                        ),
+                      ],
+                    )
+                  ),
+              );
+            })
+        );
       },
     );
   }

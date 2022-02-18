@@ -103,7 +103,8 @@ class _ShowQueueState extends State<ShowQueue> {
                                 ),
                               ],
                             ),
-                            width: MediaQuery.of(context).size.width - 130,
+                            width: MediaQuery.of(context).orientation == Orientation.portrait ?
+                            MediaQuery.of(context).size.width - 130 : MediaQuery.of(context).size.width/2 - 110,
                           )
 
                         ],
