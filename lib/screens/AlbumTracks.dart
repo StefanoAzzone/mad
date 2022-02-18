@@ -27,7 +27,7 @@ class _AlbumTracksState extends State<AlbumTracks> {
               player.pause();
               trackQueue.reset();
               trackQueue.addList(tracks);
-              trackQueue.currentIndex = index;
+              trackQueue.setCurrent(index);
               player.play();
               await Navigator.pushNamed(context, '/playingTrack');
               setState(() {});
