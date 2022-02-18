@@ -23,7 +23,7 @@ class _ArtistListState extends State<ArtistList> {
       builder: (context, orientation) {
         int ncols = orientation == Orientation.portrait ? 3 : 5;
         return GridView.count(
-            childAspectRatio: 1,
+            childAspectRatio: 0.9,
             padding: EdgeInsets.only(top: 0.0),
             crossAxisCount: ncols,
             children: List.generate(artists.length, (index) {
@@ -79,22 +79,27 @@ class _ArtistListState extends State<ArtistList> {
                           arguments: artists[index],
                         );
                       },
-                      icon: Column(
-                        children: [
-                          SizedBox(
-                            child: artists[index].image,
-                            width: size.width / ncols - 31,
-                            height: size.width / ncols - 31,
-                          ),
-                          Text(
-                            artists[index].name,
-                            overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(
-                              fontSize: 13,
+                      icon: Card(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            SizedBox(
+                              child: artists[index].image,
+                              width: size.width / ncols - 31,
+                              height: size.width / ncols - 31,
                             ),
-                          ),
-                        ],
-                      )));
+                            Text(
+                              ' ' + artists[index].name,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(
+                                fontSize: 13,
+                              ),
+                            ),
+                          ],
+                        )
+                      ),
+              )
+              );
             }));
       },
     );

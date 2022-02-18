@@ -34,29 +34,61 @@ class AlbumInfo extends StatelessWidget {
                 } else {
                   return Column(children: [
                     Expanded(
-                            child: GridView.count(
-                            crossAxisCount: orientation == Orientation.portrait ? 1 : 2,
-                            childAspectRatio: 10,
-                            children: List.generate(
-                                loader.getItemsCount(snapshot.data), (index) {
-                                  return  ListTile(
-                                      title: Text(
-                                              loader.extractTrackNumberFromTrack(loader.getItem(snapshot.data, index)).toString() + '. ' +
-                                              loader.extractTitleFromTrack(
-                                                loader.getItem(snapshot.data, index)),
-                                              overflow: TextOverflow.ellipsis,
-                                              
-                                             ),
-                                      onTap: () async {
+                            child: Container(
+                                decoration: const BoxDecoration(
+                                  color: Colors.grey,
+                                ),
+                              child: GridView.builder(
+                                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                                    crossAxisSpacing: 0.5,
+                                    mainAxisSpacing: 0.5,
+                                    crossAxisCount: orientation == Orientation.portrait ? 1 : 2,
+                                    childAspectRatio: 7,
 
-                                        String url = await loader.queryYouTubeUrl(
-                                          loader.extractTitleFromTracks(snapshot.data, index)
-                                          + ' ' +
-                                          loader.extractArtistFromTracks(snapshot.data, index));
-                                        await launch(url);
-                                  });
-                            }))
+                                  ),
+                                  itemCount: loader.getItemsCount(snapshot.data),
+                                  itemBuilder: (context, index) {
+                                    return Container(
+                                      decoration: const BoxDecoration(
+                                        color: Colors.white,
+                                      ),
+                                      child: ListTile(
+
+                                          title: Row(
+                                            children: [
+                                              SizedBox(
+                                                child: Text(
+                                                  loader.extractTrackNumberFromTrack(loader.getItem(snapshot.data, index)).toString(),
+                                                  overflow: TextOverflow.ellipsis,
+                                                  textAlign: TextAlign.right,
+                                                ),
+                                                width: 20,
+                                              ),
+
+                                              Text(
+                                                '  ' + loader.extractTitleFromTrack(
+                                                    loader.getItem(snapshot.data, index)),
+                                                overflow: TextOverflow.ellipsis,
+                                              ),
+
+                                            ],
+                                          ),
+
+                                          onTap: () async {
+
+                                            String url = await loader.queryYouTubeUrl(
+                                                loader.extractTitleFromTracks(snapshot.data, index)
+                                                    + ' ' +
+                                                    loader.extractArtistFromTracks(snapshot.data, index));
+                                            await launch(url);
+                                          }),
+                                    );
+
+                                  })
                             ),
+
+                ),
+
                     PlayBar(),
                   ]);
                 }
