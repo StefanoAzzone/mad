@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:collection';
 import 'dart:typed_data';
 
@@ -10,14 +11,20 @@ import 'package:mad/data.dart';
 import 'package:mad/metadata_loader.dart';
 
 class ArtistEditor extends StatefulWidget {
+  String artistName;
+  ArtistEditor(this.artistName);
+
   @override
-  State<ArtistEditor> createState() => _ArtistEditorState();
+  State<ArtistEditor> createState() => _ArtistEditorState(artistName);
 }
 
 class _ArtistEditorState extends State<ArtistEditor> {
-  final int MAX_IMAGES = 12;
-  var result;
+  final int MAX_IMAGES = 10;
   Size size = Size.zero;
+  String artistName;
+  Timer timer = Timer(Duration.zero, () => 0);
+
+  _ArtistEditorState(this.artistName);
 
   @override
   Widget build(BuildContext context) {
@@ -27,14 +34,19 @@ class _ArtistEditorState extends State<ArtistEditor> {
             "Cannot access server.\nTry to check your internet connection."),
       );
     }
+
     size = MediaQuery.of(context).size;
     return Scaffold(
         appBar: AppBar(
           title: TextFormField(
-            onChanged: (value) async {
-              var res = await loader.searchAllArtists(value);
-              setState(() {
-                result = res;
+            initialValue: artistName,
+            onChanged: (value) {
+              timer.cancel();
+              timer = Timer(Duration(milliseconds: 500), () {
+                print("updated");
+                setState(() {
+                  artistName = value;
+                });
               });
             },
             decoration: InputDecoration(
@@ -59,50 +71,71 @@ class _ArtistEditorState extends State<ArtistEditor> {
           ),
           centerTitle: true,
         ),
-        body: Column(children: [
-          Expanded(
-              child: GridView.count(
-            childAspectRatio: 1,
-            padding: EdgeInsets.only(top: 0.0),
-            crossAxisCount: 2,
-            shrinkWrap: true,
-            children: List.generate(
-              loader.getItemsCount(result) <= MAX_IMAGES
-                  ? loader.getItemsCount(result)
-                  : MAX_IMAGES,
-              (index) {
-                return FutureBuilder(
-                    future: loader.getArtistImage(
-                        loader.extractId(loader.getItem(result, index))),
-                    builder: (context, snapshot) {
-                      if (!snapshot.hasData) {
-                        return const Center(
-                            child: SizedBox(
-                          //TODO FIX
-                          width: 50,
-                          height: 50,
-                          child: CircularProgressIndicator(),
-                        ));
-                      } else {
-                        Uint8List? image = snapshot.data as Uint8List?;
-                        return ListTile(
-                          title: Container(
-                            color: index % 2 == 0
-                                ? Colors.white
-                                : Colors.grey[200],
-                            child: image == null
-                                ? defaultImage
-                                : Image.memory(image),
-                          ),
-                          onTap: () {
-                            Navigator.pop(context, image);
-                          },
-                        );
-                      }
-                    });
-              },
-            ),
-          ))
-        ]));
+        body: FutureBuilder(
+          future: loader.searchAllArtists(artistName),
+          builder: (context, altSnapshot) {
+            if (!altSnapshot.hasData) {
+              return const Center(child: Text("No artist found."));
+            }
+            return Column(children: [
+              Expanded(
+                  child: GridView.count(
+                childAspectRatio: 1,
+                padding: EdgeInsets.only(top: 0.0),
+                crossAxisCount: 2,
+                shrinkWrap: true,
+                children: List.generate(
+                  loader.getItemsCount(altSnapshot.data) <= MAX_IMAGES
+                      ? loader.getItemsCount(altSnapshot.data)
+                      : MAX_IMAGES,
+                  (index) {
+                    return FutureBuilder(
+                        future: loader.getArtistImage(loader.extractId(
+                            loader.getItem(altSnapshot.data, index))),
+                        builder: (context, snapshot) {
+                          if (!snapshot.hasData) {
+                            return const Center(
+                                child: SizedBox(
+                              //TODO FIX
+                              width: 50,
+                              height: 50,
+                              child: CircularProgressIndicator(),
+                            ));
+                          } else {
+                            Uint8List? image = snapshot.data as Uint8List?;
+                            return ListTile(
+                              title: Container(
+                                color: index % 2 == 0
+                                    ? Colors.white
+                                    : Colors.grey[200],
+                                child: image == null
+                                    ? defaultImage
+                                    : Image.memory(image),
+                              ),
+                              onTap: () {
+                                Navigator.pop(context, image);
+                              },
+                            );
+                          }
+                        });
+                  },
+                ),
+              ))
+            ]);
+          },
+        ));
+  }
+}
+
+class ExtractArgumentsArtistEditor extends StatelessWidget {
+  const ExtractArgumentsArtistEditor({Key? key}) : super(key: key);
+
+  static const routeName = '/artistEditor';
+
+  @override
+  Widget build(BuildContext context) {
+    final artistName = ModalRoute.of(context)!.settings.arguments;
+
+    return ArtistEditor(artistName as String);
   }
 }

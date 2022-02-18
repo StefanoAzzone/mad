@@ -35,7 +35,8 @@ class MyApp extends StatelessWidget {
         ExtractArgumentsSelectTracks.routeName: (context) =>
             const ExtractArgumentsSelectTracks(),
         '/editMetadata': (context) => MetadataEditor(),
-        '/artistEditor': (context) => ArtistEditor(),
+        ExtractArgumentsArtistEditor.routeName: (context) =>
+            const ExtractArgumentsArtistEditor(),
         ExtractArgumentsAlbumTracks.routeName: (context) =>
             const ExtractArgumentsAlbumTracks(),
         ExtractArgumentsArtistAlbums.routeName: (context) =>

@@ -52,7 +52,8 @@ class _ArtistListState extends State<ArtistList> {
                                   TextButton(
                                       onPressed: () async {
                                         var image = await Navigator.pushNamed(
-                                            context, '/artistEditor');
+                                            context, '/artistEditor',
+                                            arguments: artists[index].name);
                                         if (image != null) {
                                           artists[index].image =
                                               Image.memory(image as Uint8List);

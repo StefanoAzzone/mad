@@ -29,9 +29,8 @@ class Player {
   }
 
   void play() async {
-    int result = await audioPlayer.play(
-        trackQueue.current().path,
-        isLocal: true);
+    int result =
+        await audioPlayer.play(trackQueue.current().path, isLocal: true);
   }
 
   void toEnd() async {
@@ -56,7 +55,7 @@ class Player {
       if (isPlaying()) {
         pause();
       }
-      trackQueue.currentIndex--;
+      trackQueue.prev();
       play();
     }
   }
@@ -69,7 +68,7 @@ class Player {
       if (isPlaying()) {
         pause();
       }
-      trackQueue.currentIndex++;
+      trackQueue.next();
       play();
     }
   }
@@ -77,5 +76,4 @@ class Player {
   bool isPlaying() {
     return audioPlayer.state == PlayerState.PLAYING;
   }
-
 }

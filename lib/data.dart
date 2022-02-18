@@ -112,8 +112,10 @@ class Album {
   static Future<Album> fromJson(Map<String, dynamic> json) async {
     File coverFile = File(
         (await database._coversDirectory).path + '/' + json["id"].toString());
-    File thumbnailFile = File(
-        (await database._coversDirectory).path + '/' + json["id"].toString() + '_thumb.png');
+    File thumbnailFile = File((await database._coversDirectory).path +
+        '/' +
+        json["id"].toString() +
+        '_thumb.png');
 
     return Album(
         json["name"],
@@ -123,8 +125,7 @@ class Album {
             : defaultImage,
         await thumbnailFile.exists()
             ? img.Image.memory(await thumbnailFile.readAsBytes())
-            : defaultAlbumThumbnail
-            );
+            : defaultAlbumThumbnail);
   }
 
   Map<String, dynamic> toJson() => <String, dynamic>{
@@ -200,38 +201,107 @@ class TrackQueue {
     return queue.length;
   }
 
-  void pushFront(Track track) {
-    queue.insert(currentIndex, track);
+  Future<File> get _savedQueue async {
+    String path = (await getApplicationDocumentsDirectory()).path;
+    File file = File(path + "/MBox/queue");
+    if (!await file.exists()) {
+      print("Creating queue file: " + path + "/MBox/queue");
+      await file.create(recursive: true);
+    }
+    return file;
   }
 
-  void pushNext(Track track) {
+  void fromJson(Map<String, dynamic> json) {
+    for (var i = 0; i < json["queue"].length; i++) {
+      Track? track = database.containsTrack(json["queue"][i]);
+      if (track != null) {
+        pushLast(track);
+      }
+    }
+    currentIndex = json["currentIndex"];
+    if (currentIndex >= queue.length) {
+      currentIndex = queue.length - 1;
+    }
+  }
+
+  Map<String, dynamic> toJson() => <String, dynamic>{
+        'currentIndex': currentIndex,
+        'queue': queue.map((e) => e.id).toList(),
+      };
+
+  Future<bool> saveQueue() async {
+    File saved = await _savedQueue;
+    try {
+      String JsonQueue = jsonEncode(toJson());
+      await saved.writeAsString(JsonQueue, mode: FileMode.write, flush: true);
+    } catch (e) {
+      print("Error while saving data.");
+      return false;
+    }
+    return true;
+  }
+
+  Future<bool> loadQueue() async {
+    File saved = await _savedQueue;
+
+    try {
+      String JsonQueue = await saved.readAsString();
+      fromJson(jsonDecode(JsonQueue));
+    } catch (e) {
+      print("Error while loading queue.");
+      return false;
+    }
+    print("Queue loaded succesfully.");
+    return true;
+  }
+
+  void pushFront(Track track) async {
+    queue.insert(currentIndex, track);
+    await saveQueue();
+  }
+
+  void pushNext(Track track) async {
     if (queue.isNotEmpty) {
       queue.insert(currentIndex + 1, track);
     } else {
       pushFront(track);
     }
+    await saveQueue();
   }
 
-  void pushLast(Track track) {
+  void pushLast(Track track) async {
     queue.add(track);
+    await saveQueue();
   }
 
-  void setCurrent(int index) {
+  void setCurrent(int index) async {
     currentIndex = index;
+    await saveQueue();
   }
 
-  void reset() {
+  void reset() async {
     currentIndex = 0;
     queue = [];
+    await saveQueue();
   }
 
-  void remove(int index) {
+  void remove(int index) async {
     queue.removeAt(index);
+    await saveQueue();
   }
 
-  Track next() {
-    currentIndex++;
-    return queue[currentIndex];
+  void next() async {
+    if (currentIndex < queue.length - 1) {
+      currentIndex++;
+      await saveQueue();
+    }
+  }
+
+  void prev() async {
+    if (currentIndex > 0) {
+      currentIndex--;
+      await saveQueue();
+    }
   }
 
   Track current() {
@@ -243,12 +313,14 @@ class TrackQueue {
     }
   }
 
-  void addList(List<Track> tracks) {
+  void addList(List<Track> tracks) async {
     queue.addAll(tracks);
+    await saveQueue();
   }
 
-  void shuffle() {
+  void shuffle() async {
     queue.shuffle();
+    await saveQueue();
   }
 
   trackQueue() {}
@@ -303,8 +375,8 @@ class Database {
   DatabaseState state = DatabaseState.Uninitialized;
   static final Database instance = Database._internal();
   static final Artist UnknownArtist = Artist("Unknown Artist", defaultImage);
-  static final Album UnknownAlbum =
-      Album("Unknown Album", UnknownArtist, defaultImage, defaultAlbumThumbnail);
+  static final Album UnknownAlbum = Album(
+      "Unknown Album", UnknownArtist, defaultImage, defaultAlbumThumbnail);
 
   factory Database() {
     return instance;
@@ -368,9 +440,11 @@ class Database {
     //deleteAll();
     await loader.initialize();
     await loadData(update);
-    insertArtist(UnknownArtist);
 
+    insertArtist(UnknownArtist);
     insertAlbum(UnknownAlbum);
+
+    await trackQueue.loadQueue();
 
     await fetchNewData(update);
     state = DatabaseState.Ready;
@@ -432,7 +506,8 @@ class Database {
 
   void saveAlbumThumbnail(int id, Uint8List? image) async {
     if (image != null) {
-      File file = File((await _coversDirectory).path + '/' + id.toString() + '_thumb.png');
+      File file = File(
+          (await _coversDirectory).path + '/' + id.toString() + '_thumb.png');
       if (!await file.exists()) {
         print("Creating file " + file.path);
         await file.create();
@@ -445,10 +520,10 @@ class Database {
   /// Delete saved database and save it anew
   ///
   Future<bool> saveAllData() async {
-    (await _savedDB).delete();
+    //(await _savedDB).delete();
 
     File db = await _savedDB;
-    print("Recreating file " + db.path);
+    //print("Recreating file " + db.path);
 
     try {
       String JsonDB = jsonEncode(toJson());
@@ -650,8 +725,9 @@ class Database {
       Uint8List? thumbnailList;
       img.Image thumbnailImage;
       img.Image coverImage;
-      if(cover != null) {
-        thumbnailList = encodePng(copyResize(decodeImage(cover)!, width: 120)) as Uint8List;
+      if (cover != null) {
+        thumbnailList =
+            encodePng(copyResize(decodeImage(cover)!, width: 120)) as Uint8List;
         coverImage = img.Image.memory(cover);
         thumbnailImage = img.Image.memory(thumbnailList);
       } else {
