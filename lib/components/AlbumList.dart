@@ -43,8 +43,8 @@ class _AlbumListState extends State<AlbumList> {
                       children: [
                         SizedBox(
                           child: albums[index].cover,
-                          width: size.width / ncols - 10,
-                          height: size.width / ncols - 10,
+                          width: size.width / ncols - 20,
+                          height: size.width / ncols - 20,
                         ),
                         Text(
                           ' ' + albums[index].name,

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:mad/buttons/LanArtistCard.dart';
-import 'package:mad/buttons/PorArtistCard.dart';
+import 'package:mad/buttons/ArtistCard.dart';
 import 'package:mad/components/AlbumList.dart';
 import 'package:mad/components/PlayBar.dart';
 import 'package:mad/data.dart';
@@ -30,11 +29,7 @@ class _ArtistAlbumsState extends State<ArtistAlbums> {
                       backgroundColor: Colors.lightBlue[100],
                       expandedHeight: 200,
                       flexibleSpace: FlexibleSpaceBar(background: () {
-                        if (orientation == Orientation.portrait) {
-                          return PorArtistCard(artist);
-                        } else {
-                          return LanArtistCard(artist);
-                        }
+                        return ArtistCard(artist);
                       }()),
                     ),
                   )
