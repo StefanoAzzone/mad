@@ -16,10 +16,11 @@ class MetadataEditor extends StatefulWidget {
 
 class _MetadataEditorState extends State<MetadataEditor> {
   var result;
-  Size size = Size.zero;
 
   @override
   Widget build(BuildContext context) {
+    Orientation orientation = MediaQuery.of(context).orientation;
+
     if (!loader.connected) {
       return const Center(
         child: Text(
@@ -27,7 +28,7 @@ class _MetadataEditorState extends State<MetadataEditor> {
       );
     }
 
-    size = MediaQuery.of(context).size;
+    Size size = MediaQuery.of(context).size;
     return Scaffold(
         appBar: AppBar(
           flexibleSpace: Container(
@@ -68,7 +69,11 @@ class _MetadataEditorState extends State<MetadataEditor> {
         ),
         body: Column(children: [
           Expanded(
-            child: ListView.builder(
+            child: GridView.builder(
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: orientation == Orientation.portrait ? 1 : 2,
+                childAspectRatio: 6.5,
+              ),
               shrinkWrap: true,
               itemCount: loader.getItemsCount(result),
               itemBuilder: (context, index) {
@@ -87,47 +92,62 @@ class _MetadataEditorState extends State<MetadataEditor> {
                         Uint8List? thumbnail = snapshot.data as Uint8List?;
                         return ListTile(
                           title: Container(
-                            color: index % 2 == 0
-                                ? Colors.white
-                                : Colors.grey[200],
+                            decoration: const BoxDecoration(
+                                border:
+                                //Border.all(color: Colors.black, width: 0.05)),
+                                Border(
+                                  top: BorderSide(width: 0.05, color: Colors.black),
+                                  bottom: BorderSide(width: 0.05, color: Colors.black),
+                                )),
+
                             child: Row(
-                              children: [
-                                thumbnail == null
-                                    ? defaultAlbumThumbnail
-                                    : Image.memory(thumbnail),
-                                Padding(padding: EdgeInsets.all(8)),
-                                Column(
-                                  children: [
-                                    SizedBox(
-                                        height: size.height / 15,
-                                        width: size.width - 112,
-                                        child: Center(
-                                          child: Text(
-                                            loader.extractTitleFromTracks(
-                                                result, index),
-                                            textAlign: TextAlign.center,
-                                            overflow: TextOverflow.fade,
-                                          ),
-                                        )),
-                                    SizedBox(
-                                      height: size.height / 25,
-                                      width: size.width - 112,
-                                      child: Center(
+                                children: [
+                                  SizedBox(
+                                    width: 50,
+                                    child: thumbnail == null
+                                        ? defaultAlbumThumbnail
+                                        : Image.memory(thumbnail),
+                                  ),
+
+                                  const Padding(padding: EdgeInsets.all(8)),
+                                  Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      SizedBox(
+                                        width: orientation == Orientation.portrait
+                                            ? size.width * 0.7
+                                            : size.width * 0.29,
                                         child: Text(
-                                          loader.extractArtistFromTracks(
-                                              result, index),
-                                          overflow: TextOverflow.fade,
+                                          loader.extractTitleFromTracks(result, index),
+                                          textAlign: TextAlign.left,
+                                          overflow: TextOverflow.ellipsis,
                                           style: const TextStyle(
-                                            fontSize: 12,
+                                            fontSize: 15,
                                           ),
                                         ),
                                       ),
-                                    )
-                                  ],
-                                )
-                              ],
-                            ),
+                                      SizedBox(
+                                        width: orientation == Orientation.portrait
+                                            ? size.width * 0.7
+                                            : size.width * 0.29,
+                                        child: Text(
+                                          loader.extractArtistFromTracks(result, index),
+                                          textAlign: TextAlign.left,
+                                          overflow: TextOverflow.ellipsis,
+                                          style: const TextStyle(
+                                            fontSize: 11,
+                                          ),
+                                        ),
+                                      ),
+
+                                    ],
+                                  )
+                                ],
+                              ),
+
                           ),
+
                           onTap: () {
                             Navigator.pop(
                                 context, loader.getItem(result, index));
