@@ -1,7 +1,6 @@
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
-import 'package:mad/components/SelectImage.dart';
 import 'dart:io';
 
 import 'package:mad/data.dart';
@@ -73,34 +72,32 @@ class _ArtistListState extends State<ArtistList> {
                     }
                   },
                   child: IconButton(
-                      onPressed: () {
-                        Navigator.pushNamed(
-                          context,
-                          ExtractArgumentsArtistAlbums.routeName,
-                          arguments: artists[index],
-                        );
-                      },
-                      icon: Card(
+                    onPressed: () {
+                      Navigator.pushNamed(
+                        context,
+                        ExtractArgumentsArtistAlbums.routeName,
+                        arguments: artists[index],
+                      );
+                    },
+                    icon: Card(
                         child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            SizedBox(
-                              child: artists[index].image,
-                              width: size.width / ncols - 31,
-                              height: size.width / ncols - 31,
-                            ),
-                            Text(
-                              ' ' + artists[index].name,
-                              overflow: TextOverflow.ellipsis,
-                              style: const TextStyle(
-                                fontSize: 13,
-                              ),
-                            ),
-                          ],
-                        )
-                      ),
-              )
-              );
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        SizedBox(
+                          child: artists[index].image,
+                          width: size.width / ncols - 31,
+                          height: size.width / ncols - 31,
+                        ),
+                        Text(
+                          ' ' + artists[index].name,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            fontSize: 13,
+                          ),
+                        ),
+                      ],
+                    )),
+                  ));
             }));
       },
     );
