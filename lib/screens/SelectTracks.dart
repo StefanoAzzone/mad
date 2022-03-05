@@ -18,6 +18,13 @@ class SelectTracks extends StatelessWidget {
     list = database.tracks;
     return Scaffold(
         appBar: AppBar(
+          flexibleSpace: Container(
+            decoration: BoxDecoration(
+                gradient: LinearGradient(
+                    begin: Alignment.topRight,
+                    end: Alignment.bottomLeft,
+                    colors: [Colors.indigo, Colors.lightBlue])),
+          ),
           title: Text("Select the tracks:"),
           centerTitle: true,
         ),

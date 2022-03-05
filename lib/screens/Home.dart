@@ -8,6 +8,7 @@ import 'package:mad/components/TrackList.dart';
 import 'package:mad/data.dart';
 import 'package:mad/metadata_loader.dart';
 import 'package:mad/screens/PlayingTrack.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class MyHomePage extends StatefulWidget {
   const MyHomePage({Key? key, required this.title}) : super(key: key);
@@ -52,7 +53,17 @@ class _MyHomePageState extends State<MyHomePage> {
                           '  MBox',
                         )),
                         IconButton(
-                            onPressed: () => print("search"),
+                            onPressed: () async {
+                              var result = await Navigator.pushNamed(
+                                  context, '/editMetadata');
+                              if (result != null) {
+                                String url = await loader.queryYouTubeUrl(loader
+                                        .extractTitleFromTrack(result) +
+                                    ' ' +
+                                    loader.extractArtistNameFromTrack(result));
+                                await launch(url);
+                              }
+                            },
                             icon: Icon(Icons.search))
                       ],
                     ),

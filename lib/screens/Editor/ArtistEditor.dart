@@ -38,6 +38,13 @@ class _ArtistEditorState extends State<ArtistEditor> {
     size = MediaQuery.of(context).size;
     return Scaffold(
         appBar: AppBar(
+          flexibleSpace: Container(
+            decoration: BoxDecoration(
+                gradient: LinearGradient(
+                    begin: Alignment.topRight,
+                    end: Alignment.bottomLeft,
+                    colors: [Colors.indigo, Colors.lightBlue])),
+          ),
           title: TextFormField(
             initialValue: artistName,
             onChanged: (value) {

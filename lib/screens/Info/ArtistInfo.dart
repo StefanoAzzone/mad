@@ -27,6 +27,13 @@ class ArtistInfo extends StatelessWidget {
               } else {
                 return Scaffold(
                     appBar: AppBar(
+                      flexibleSpace: Container(
+                        decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                                begin: Alignment.topRight,
+                                end: Alignment.bottomLeft,
+                                colors: [Colors.indigo, Colors.lightBlue])),
+                      ),
                       title: Text(artistName),
                       centerTitle: true,
                     ),
@@ -38,37 +45,33 @@ class ArtistInfo extends StatelessWidget {
                               children: List<IconButton>.generate(
                                   loader.getItemsCount(snapshot.data), (index) {
                                 return IconButton(
-                                  onPressed: () {
-                                    Navigator.pushNamed(
-                                      context,
-                                      ExtractArgumentsAlbumInfo.routeName,
-                                      arguments:
-                                          loader.getItem(snapshot.data, index),
-                                    );
-                                  },
-                                  icon: FutureBuilder(
-                                    future:
-                                      loader.extractCoverFromAlbum(
-                                      loader.getItem(snapshot.data, index)
-                                    ),
-                              
-                                    builder: (context, snapshot) {
-                                      if(!snapshot.hasData) {
-                                        return const Center(
-                                          child: SizedBox(
-                                            width: 50,
-                                            height: 50,
-                                            child: CircularProgressIndicator(),
-                                          ),
-                                        );
-                                      } else {
-                                        return Image.memory(snapshot.data as Uint8List);
-                                      }
+                                    onPressed: () {
+                                      Navigator.pushNamed(
+                                        context,
+                                        ExtractArgumentsAlbumInfo.routeName,
+                                        arguments: loader.getItem(
+                                            snapshot.data, index),
+                                      );
                                     },
-                                  )
-                                
-                                  
-                                );
+                                    icon: FutureBuilder(
+                                      future: loader.extractCoverFromAlbum(
+                                          loader.getItem(snapshot.data, index)),
+                                      builder: (context, snapshot) {
+                                        if (!snapshot.hasData) {
+                                          return const Center(
+                                            child: SizedBox(
+                                              width: 50,
+                                              height: 50,
+                                              child:
+                                                  CircularProgressIndicator(),
+                                            ),
+                                          );
+                                        } else {
+                                          return Image.memory(
+                                              snapshot.data as Uint8List);
+                                        }
+                                      },
+                                    ));
                               }))),
                       PlayBar(),
                     ]));

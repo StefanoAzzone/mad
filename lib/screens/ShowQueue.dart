@@ -23,31 +23,40 @@ class _ShowQueueState extends State<ShowQueue> {
     queue = trackQueue.queue;
     return Scaffold(
       appBar: AppBar(
-        title:
-            Row(
-              children: [
-                const Expanded(
-                  child: Text("Queue"),
-                ),
-                IconButton(
-                    icon: const Icon(Icons.add),
-                    onPressed: () async {
-                      await Navigator.pushNamed(context, '/select',
-                          arguments: (List<Track> tracks, int index) {
-                            trackQueue.pushLast(tracks[index]);
-                          });
-                      _update();
-                    },
-                ),
-              ],
+        flexibleSpace: Container(
+          decoration: BoxDecoration(
+              gradient: LinearGradient(
+                  begin: Alignment.topRight,
+                  end: Alignment.bottomLeft,
+                  colors: [Colors.indigo, Colors.lightBlue])),
+        ),
+        title: Row(
+          children: [
+            const Expanded(
+              child: Text("Queue"),
             ),
+            IconButton(
+              icon: const Icon(Icons.add),
+              onPressed: () async {
+                await Navigator.pushNamed(context, '/select',
+                    arguments: (List<Track> tracks, int index) {
+                  trackQueue.pushLast(tracks[index]);
+                });
+                _update();
+              },
+            ),
+          ],
+        ),
         centerTitle: true,
       ),
       body: Column(children: [
         Expanded(
           child: GridView.builder(
               gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: MediaQuery.of(context).orientation == Orientation.portrait ? 1 : 2,
+                crossAxisCount:
+                    MediaQuery.of(context).orientation == Orientation.portrait
+                        ? 1
+                        : 2,
                 childAspectRatio: 7,
               ),
               controller: ScrollController(
@@ -60,15 +69,12 @@ class _ShowQueueState extends State<ShowQueue> {
                 return Container(
                     decoration: const BoxDecoration(
                         border:
-                        //Border.all(color: Colors.black, width: 0.05)),
-                        Border(
-                          top: BorderSide(width: 0.05, color: Colors.black),
-                          bottom: BorderSide(width: 0.05, color: Colors.black),
-                        )),
-
-
+                            //Border.all(color: Colors.black, width: 0.05)),
+                            Border(
+                      top: BorderSide(width: 0.05, color: Colors.black),
+                      bottom: BorderSide(width: 0.05, color: Colors.black),
+                    )),
                     child: ListTile(
-
                       title: Row(
                         crossAxisAlignment: CrossAxisAlignment.center,
                         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -76,14 +82,14 @@ class _ShowQueueState extends State<ShowQueue> {
                           SizedBox(
                             width: 20,
                             child: Text(
-                                (index - trackQueue.currentIndex).toString(),
+                              (index - trackQueue.currentIndex).toString(),
                               textAlign: TextAlign.right,
                             ),
                           ),
                           SizedBox(
-                              height: 40,
-                              child: queue[index].album.thumbnail,
-                              width: 50,
+                            height: 40,
+                            child: queue[index].album.thumbnail,
+                            width: 50,
                           ),
                           SizedBox(
                             child: Column(
@@ -103,13 +109,13 @@ class _ShowQueueState extends State<ShowQueue> {
                                 ),
                               ],
                             ),
-                            width: MediaQuery.of(context).orientation == Orientation.portrait ?
-                            MediaQuery.of(context).size.width - 130 : MediaQuery.of(context).size.width/2 - 110,
+                            width: MediaQuery.of(context).orientation ==
+                                    Orientation.portrait
+                                ? MediaQuery.of(context).size.width - 130
+                                : MediaQuery.of(context).size.width / 2 - 110,
                           )
-
                         ],
                       ),
-
                       onTap: () async {
                         if (index != trackQueue.currentIndex) {
                           player.pause();
@@ -118,13 +124,11 @@ class _ShowQueueState extends State<ShowQueue> {
                         }
                         Navigator.pop(context);
                       },
-                    )
-                );
+                    ));
               }),
         ),
         PlayBar(),
       ]),
-
     );
   }
 }

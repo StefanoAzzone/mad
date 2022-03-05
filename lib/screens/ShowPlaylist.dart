@@ -20,6 +20,13 @@ class _ShowPlaylistState extends State<ShowPlaylist> {
     return Scaffold(
       appBar: AppBar(
         title: Text(playlist.name),
+        flexibleSpace: Container(
+          decoration: BoxDecoration(
+              gradient: LinearGradient(
+                  begin: Alignment.topRight,
+                  end: Alignment.bottomLeft,
+                  colors: [Colors.indigo, Colors.lightBlue])),
+        ),
         centerTitle: true,
       ),
       body: TrackList((Track track) async {
@@ -41,11 +48,10 @@ class _ShowPlaylistState extends State<ShowPlaylist> {
           }),
       floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
       bottomNavigationBar: BottomAppBar(
-          shape: const CircularNotchedRectangle(),
           child: SizedBox(
-            child: PlayBar(),
-            height: 70,
-          )),
+        child: PlayBar(),
+        height: 50,
+      )),
     );
   }
 }
