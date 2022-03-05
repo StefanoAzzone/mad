@@ -19,7 +19,21 @@ class _ShowPlaylistState extends State<ShowPlaylist> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(playlist.name),
+        title: Row(
+          children: [
+            Expanded(child: Text(playlist.name)),
+            IconButton(
+                icon: const Icon(Icons.add),
+                onPressed: () async {
+                  await Navigator.pushNamed(context, '/select',
+                      arguments: (List<Track> tracks, index) {
+                        playlist.addTrack(tracks[index]);
+                        database.saveAllData();
+                      });
+                  setState(() {});
+                }),
+          ],
+        ),
         flexibleSpace: Container(
           decoration: BoxDecoration(
               gradient: LinearGradient(
@@ -36,16 +50,6 @@ class _ShowPlaylistState extends State<ShowPlaylist> {
         player.play();
         await Navigator.pushNamed(context, '/playingTrack');
       }, playlist.tracks),
-      floatingActionButton: FloatingActionButton(
-          child: const Icon(Icons.add),
-          onPressed: () async {
-            await Navigator.pushNamed(context, '/select',
-                arguments: (List<Track> tracks, index) {
-              playlist.addTrack(tracks[index]);
-              database.saveAllData();
-            });
-            setState(() {});
-          }),
       floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
       bottomNavigationBar: BottomAppBar(
           child: SizedBox(
