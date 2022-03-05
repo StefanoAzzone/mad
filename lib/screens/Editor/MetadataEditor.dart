@@ -38,33 +38,45 @@ class _MetadataEditorState extends State<MetadataEditor> {
                     end: Alignment.bottomLeft,
                     colors: [Colors.indigo, Colors.lightBlue])),
           ),
-          title: TextFormField(
-            onChanged: (value) async {
-              var res = await loader.searchAllTracks(value);
-              setState(() {
-                result = res;
-              });
-            },
-            decoration: InputDecoration(
-              labelText: "Enter Name",
-              floatingLabelBehavior: FloatingLabelBehavior.never,
-              fillColor: Colors.white,
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(30.0),
-                borderSide: BorderSide(
-                  color: Colors.lightBlue,
-                  width: 2.0,
+          title: SizedBox(
+            height: 40,
+            child: TextFormField(
+              onChanged: (value) async {
+                var res = await loader.searchAllTracks(value);
+                setState(() {
+                  result = res;
+                });
+              },
+
+              decoration: InputDecoration(
+                contentPadding: EdgeInsets.all(10),
+                labelText: "Enter Name",
+                labelStyle: const TextStyle(
+                  color: Colors.blue,
                 ),
-              ),
-              enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(30.0),
-                borderSide: BorderSide(
-                  color: Colors.lightBlue,
-                  width: 3.0,
+
+                floatingLabelBehavior: FloatingLabelBehavior.never,
+                fillColor: Colors.lightBlue.shade50,
+                filled: true,
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(1000.0),
+                  borderSide: const BorderSide(
+                    color: Colors.lightBlue,
+                    width: 1.0,
+                  ),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(1000.0),
+                  borderSide: const BorderSide(
+                    color: Colors.lightBlue,
+                    width: 1.0,
+                  ),
                 ),
               ),
             ),
           ),
+
+
           centerTitle: true,
         ),
         body: Column(children: [
@@ -94,7 +106,6 @@ class _MetadataEditorState extends State<MetadataEditor> {
                           title: Container(
                             decoration: const BoxDecoration(
                                 border:
-                                //Border.all(color: Colors.black, width: 0.05)),
                                 Border(
                                   top: BorderSide(width: 0.05, color: Colors.black),
                                   bottom: BorderSide(width: 0.05, color: Colors.black),
