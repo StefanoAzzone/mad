@@ -20,15 +20,29 @@ class _ArtistAlbumsState extends State<ArtistAlbums> {
     Size size = MediaQuery.of(context).size;
     return OrientationBuilder(builder: (context, orientation) {
       return Scaffold(
+        appBar: AppBar(
+          title: Text(artist.name),
+          centerTitle: true,
+          flexibleSpace: Container(
+            decoration: const BoxDecoration(
+                gradient: LinearGradient(
+                    begin: Alignment.topRight,
+                    end: Alignment.bottomLeft,
+                    colors: [Colors.indigo, Colors.lightBlue])),
+          ),
+        ),
           body: NestedScrollView(
+
               headerSliverBuilder:
                   (BuildContext context, bool innerBoxIsScrolled) {
                 return <Widget>[
                   SliverSafeArea(
                     sliver: SliverAppBar(
+                      automaticallyImplyLeading: false,
                       backgroundColor: Colors.lightBlue[100],
                       expandedHeight: 200,
-                      flexibleSpace: FlexibleSpaceBar(background: () {
+                      flexibleSpace:
+                      FlexibleSpaceBar(background: () {
                         return ArtistCard(artist);
                       }()),
                     ),
