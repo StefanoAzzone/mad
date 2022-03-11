@@ -22,10 +22,20 @@ class _MetadataEditorState extends State<MetadataEditor> {
     Orientation orientation = MediaQuery.of(context).orientation;
 
     if (!loader.connected) {
-      return const Center(
-        child: Text(
-            "Cannot access server.\nTry to check your internet connection."),
-      );
+      return Scaffold(
+          appBar: AppBar(
+            flexibleSpace: Container(
+              decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                      begin: Alignment.topRight,
+                      end: Alignment.bottomLeft,
+                      colors: [Colors.indigo, Colors.lightBlue])),
+            ),
+          ),
+          body: Center(
+            child: Text(
+                "Cannot access server.\nTry to check your internet connection."),
+          ));
     }
 
     Size size = MediaQuery.of(context).size;
@@ -47,14 +57,12 @@ class _MetadataEditorState extends State<MetadataEditor> {
                   result = res;
                 });
               },
-
               decoration: InputDecoration(
                 contentPadding: EdgeInsets.all(10),
                 labelText: "Enter Name",
                 labelStyle: const TextStyle(
                   color: Colors.blue,
                 ),
-
                 floatingLabelBehavior: FloatingLabelBehavior.never,
                 fillColor: Colors.lightBlue.shade50,
                 filled: true,
@@ -75,8 +83,6 @@ class _MetadataEditorState extends State<MetadataEditor> {
               ),
             ),
           ),
-
-
           centerTitle: true,
         ),
         body: Column(children: [
@@ -105,60 +111,57 @@ class _MetadataEditorState extends State<MetadataEditor> {
                         return ListTile(
                           title: Container(
                             decoration: const BoxDecoration(
-                                border:
-                                Border(
-                                  top: BorderSide(width: 0.05, color: Colors.black),
-                                  bottom: BorderSide(width: 0.05, color: Colors.black),
-                                )),
-
+                                border: Border(
+                              top: BorderSide(width: 0.05, color: Colors.black),
+                              bottom:
+                                  BorderSide(width: 0.05, color: Colors.black),
+                            )),
                             child: Row(
-                                children: [
-                                  SizedBox(
-                                    width: 50,
-                                    child: thumbnail == null
-                                        ? defaultAlbumThumbnail
-                                        : Image.memory(thumbnail),
-                                  ),
-
-                                  const Padding(padding: EdgeInsets.all(8)),
-                                  Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      SizedBox(
-                                        width: orientation == Orientation.portrait
-                                            ? size.width * 0.7
-                                            : size.width * 0.29,
-                                        child: Text(
-                                          loader.extractTitleFromTracks(result, index),
-                                          textAlign: TextAlign.left,
-                                          overflow: TextOverflow.ellipsis,
-                                          style: const TextStyle(
-                                            fontSize: 15,
-                                          ),
+                              children: [
+                                SizedBox(
+                                  width: 50,
+                                  child: thumbnail == null
+                                      ? defaultAlbumThumbnail
+                                      : Image.memory(thumbnail),
+                                ),
+                                const Padding(padding: EdgeInsets.all(8)),
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    SizedBox(
+                                      width: orientation == Orientation.portrait
+                                          ? size.width * 0.7
+                                          : size.width * 0.29,
+                                      child: Text(
+                                        loader.extractTitleFromTracks(
+                                            result, index),
+                                        textAlign: TextAlign.left,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: const TextStyle(
+                                          fontSize: 15,
                                         ),
                                       ),
-                                      SizedBox(
-                                        width: orientation == Orientation.portrait
-                                            ? size.width * 0.7
-                                            : size.width * 0.29,
-                                        child: Text(
-                                          loader.extractArtistFromTracks(result, index),
-                                          textAlign: TextAlign.left,
-                                          overflow: TextOverflow.ellipsis,
-                                          style: const TextStyle(
-                                            fontSize: 11,
-                                          ),
+                                    ),
+                                    SizedBox(
+                                      width: orientation == Orientation.portrait
+                                          ? size.width * 0.7
+                                          : size.width * 0.29,
+                                      child: Text(
+                                        loader.extractArtistFromTracks(
+                                            result, index),
+                                        textAlign: TextAlign.left,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: const TextStyle(
+                                          fontSize: 11,
                                         ),
                                       ),
-
-                                    ],
-                                  )
-                                ],
-                              ),
-
+                                    ),
+                                  ],
+                                )
+                              ],
+                            ),
                           ),
-
                           onTap: () {
                             Navigator.pop(
                                 context, loader.getItem(result, index));

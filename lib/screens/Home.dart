@@ -54,6 +54,7 @@ class _MyHomePageState extends State<MyHomePage> {
                         )),
                         IconButton(
                             onPressed: () async {
+                              await loader.checkConnection();
                               var result = await Navigator.pushNamed(
                                   context, '/editMetadata');
                               if (result != null) {

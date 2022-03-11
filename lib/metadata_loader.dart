@@ -2,18 +2,15 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 
-import 'package:flutter/cupertino.dart';
-import 'package:mad/data.dart' as data;
-import 'package:spotify/spotify.dart';
-import 'package:flutter/src/widgets/image.dart' as image;
 import 'package:http/http.dart' as http;
-import 'dart:convert';
 import 'package:html/parser.dart' as parser;
 
 MetadataLoader loader = MetadataLoader.instance;
 
 class MetadataLoader {
   bool connected = false;
+  int lastPingTime = 0;
+  int lastTokenTime = 0;
   String base = "https://api.spotify.com";
   String genius = "https://api.genius.com";
   String accounts = "https://accounts.spotify.com";
@@ -39,62 +36,88 @@ class MetadataLoader {
   }
   MetadataLoader._internal();
 
-  Future initialize() async {
-    try {
-      final result = await InternetAddress.lookup('google.com');
-      if (result.isNotEmpty && result[0].rawAddress.isNotEmpty) {
-        connected = true;
-        print('connected');
+  Future<bool> initialize() async {
+    int now = DateTime.now().millisecondsSinceEpoch;
+    //Initialize if the token is missing or expired
+    if (spotifyToken == "" || now - lastTokenTime > (3600 * 1000)) {
+      if (!await checkConnection()) {
+        //if not connected
+        return false;
       }
-    } on SocketException catch (_) {
-      print('not connected');
+      Codec<String, String> stringToBase64 = utf8.fuse(base64);
+      //SPOTIFY AUTHENTICATION//
+      try {
+        http.Response response = await http.post(
+            Uri.parse(accounts + authReqEndPoint),
+            headers: <String, String>{
+              'Content-Type': 'application/x-www-form-urlencoded',
+              'Authorization': 'Basic ' +
+                  stringToBase64
+                      .encode(clientIdSpotify + ":" + clientSecretSpotify),
+            },
+            body: <String, String>{
+              'grant_type': 'client_credentials',
+            });
+
+        spotifyToken = jsonDecode(response.body)['access_token'];
+        print(response.body);
+        return true;
+      } catch (e) {
+        print("Disconnected while trying to get Spotify token.");
+        return false;
+      }
     }
+    return true;
+  }
 
-    return Future(() async {
-      if (spotifyToken == "") {
-        Codec<String, String> stringToBase64 = utf8.fuse(base64);
-        //SPOTIFY AUTHENTICATION//
-        try {
-          http.Response response = await http.post(
-              Uri.parse(accounts + authReqEndPoint),
-              headers: <String, String>{
-                'Content-Type': 'application/x-www-form-urlencoded',
-                'Authorization': 'Basic ' +
-                    stringToBase64
-                        .encode(clientIdSpotify + ":" + clientSecretSpotify),
-              },
-              body: <String, String>{
-                'grant_type': 'client_credentials',
-              });
-
-          spotifyToken = jsonDecode(response.body)['access_token'];
-          print(response.body);
-        } catch (e) {
-          print("disconnected");
+  Future<bool> checkConnection() async {
+    int now = DateTime.now().millisecondsSinceEpoch;
+    if (now - lastPingTime > 1000) {
+      try {
+        final result = await InternetAddress.lookup('google.com');
+        if (result.isNotEmpty && result[0].rawAddress.isNotEmpty) {
+          lastPingTime = now;
+          if (connected == false) {
+            connected = true;
+            initialize();
+          }
+        } else {
+          connected = false;
         }
+      } on SocketException catch (_) {
+        connected = false;
+        print('not connected');
       }
-    });
+    }
+    return connected;
   }
 
   Future searchArtist(String artist) async {
-    http.Response response =
-        await queryAPI(Uri.encodeFull("artist:" + artist + "&type=artist"));
+    try {
+      http.Response response =
+          await queryAPI(Uri.encodeFull("artist:" + artist + "&type=artist"));
 
-    var items = jsonDecode(response.body)["artists"]["items"];
+      var items = jsonDecode(response.body)["artists"]["items"];
 
-    return Future(() => items.length != 0 ? items[0] : null);
+      return Future(() => items.length != 0 ? items[0] : null);
+    } catch (e) {
+      await checkConnection();
+      return Future(() => null);
+    }
   }
 
   Future searchAlbum(String title) async {
-    http.Response response =
-        await queryAPI(Uri.encodeFull("album:" + title + "&type=album"));
-    if (response.body == "") {
-      return null;
+    try {
+      http.Response response =
+          await queryAPI(Uri.encodeFull("album:" + title + "&type=album"));
+
+      var items = jsonDecode(response.body)["albums"]["items"];
+
+      return Future(() => items.length != 0 ? items[0] : null);
+    } catch (e) {
+      await checkConnection();
+      return Future(() => null);
     }
-
-    var items = jsonDecode(response.body)["albums"]["items"];
-
-    return Future(() => items.length != 0 ? items[0] : null);
   }
 
   Future searchFirstTrack(String title) async {
@@ -105,7 +128,8 @@ class MetadataLoader {
       var items = jsonDecode(response.body)["tracks"]["items"];
       return Future(() => items.length != 0 ? items[0] : null);
     } catch (e) {
-      return null;
+      await checkConnection();
+      return Future(() => null);
     }
   }
 
@@ -117,7 +141,8 @@ class MetadataLoader {
       var items = jsonDecode(response.body)["tracks"]["items"];
       return Future(() => items.length != 0 ? items : null);
     } catch (e) {
-      return null;
+      await checkConnection();
+      return Future(() => null);
     }
   }
 
@@ -129,7 +154,8 @@ class MetadataLoader {
       var items = jsonDecode(response.body)["albums"]["items"];
       return Future(() => items.length != 0 ? items : null);
     } catch (e) {
-      return null;
+      await checkConnection();
+      return Future(() => null);
     }
   }
 
@@ -141,7 +167,8 @@ class MetadataLoader {
       var items = jsonDecode(response.body)["artists"]["items"];
       return Future(() => items.length != 0 ? items : null);
     } catch (e) {
-      return null;
+      await checkConnection();
+      return Future(() => null);
     }
   }
 
@@ -150,7 +177,7 @@ class MetadataLoader {
   }
 
   Map getItem(var items, int index) {
-    return items[index];
+    return items != null ? items[index] : null;
   }
 
   String extractId(var item) {
@@ -191,13 +218,14 @@ class MetadataLoader {
   }
 
   Future<Uint8List?> extractThumbnailUrlFromTracks(var items, int index) async {
-    var tmp = items[index]["album"]["images"];
-    if (tmp.length == 0) {
+    try {
+      var tmp = items[index]["album"]["images"];
+      String url = tmp[tmp.length - 1]["url"];
+      return (await http.get(Uri.parse(url))).bodyBytes;
+    } catch (e) {
+      await checkConnection();
       return null;
-      //DefaulThumbnail
     }
-    String url = tmp[tmp.length - 1]["url"];
-    return (await http.get(Uri.parse(url))).bodyBytes;
   }
 
   String extractArtistNameFromTrack(var item) {
@@ -220,24 +248,43 @@ class MetadataLoader {
     return item["track_number"];
   }
 
-  Future<Uint8List> extractCoverFromTrack(var item) async {
-    String url = item["album"]["images"][0]["url"];
-    return (await http.get(Uri.parse(url))).bodyBytes;
+  Future<Uint8List?> extractCoverFromTrack(var item) async {
+    try {
+      String url = item["album"]["images"][0]["url"];
+      return (await http.get(Uri.parse(url))).bodyBytes;
+    } catch (e) {
+      await checkConnection();
+      return Future(() => null);
+    }
   }
 
   Future getTracksOfAlbum(String albumId) async {
-    return jsonDecode((await queryAlbumTracks(albumId)).body)['items'];
+    try {
+      return jsonDecode((await queryAlbumTracks(albumId)).body)['items'];
+    } catch (e) {
+      await checkConnection();
+      return Future(() => null);
+    }
   }
 
   Future getAlbumsOfArtist(String artistName) async {
-    String id = extractId(await searchArtist(artistName));
-
-    return jsonDecode((await queryArtistAlbums(id)).body)['items'];
+    try {
+      String id = extractId(await searchArtist(artistName));
+      return jsonDecode((await queryArtistAlbums(id)).body)['items'];
+    } catch (e) {
+      await checkConnection();
+      return Future(() => null);
+    }
   }
 
   Future<String> getLyricsFromTrack(var item) async {
-    return await queryLyrics(
-        extractTitleFromTrack(item) + " " + extractArtistNameFromTrack(item));
+    try {
+      return await queryLyrics(
+          extractTitleFromTrack(item) + " " + extractArtistNameFromTrack(item));
+    } catch (e) {
+      await checkConnection();
+      return "";
+    }
   }
 
   Future<Uint8List?> getArtistImage(String Id) async {
@@ -254,6 +301,7 @@ class MetadataLoader {
       url = jsonDecode(response.body)["images"][0]["url"];
       return (await http.get(Uri.parse(url))).bodyBytes;
     } catch (e) {
+      await checkConnection();
       return null;
     }
   }

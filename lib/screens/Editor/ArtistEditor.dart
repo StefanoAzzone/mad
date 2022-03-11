@@ -29,10 +29,20 @@ class _ArtistEditorState extends State<ArtistEditor> {
   @override
   Widget build(BuildContext context) {
     if (!loader.connected) {
-      return const Center(
-        child: Text(
-            "Cannot access server.\nTry to check your internet connection."),
-      );
+      return Scaffold(
+          appBar: AppBar(
+            flexibleSpace: Container(
+              decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                      begin: Alignment.topRight,
+                      end: Alignment.bottomLeft,
+                      colors: [Colors.indigo, Colors.lightBlue])),
+            ),
+          ),
+          body: Center(
+            child: Text(
+                "Cannot access server.\nTry to check your internet connection."),
+          ));
     }
 
     size = MediaQuery.of(context).size;

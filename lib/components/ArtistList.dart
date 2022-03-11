@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'dart:io';
 
 import 'package:mad/data.dart';
+import 'package:mad/metadata_loader.dart';
 import 'package:mad/screens/ArtistAlbums.dart';
 
 class ArtistList extends StatefulWidget {
@@ -50,6 +51,7 @@ class _ArtistListState extends State<ArtistList> {
                                 child: Column(children: [
                                   TextButton(
                                       onPressed: () async {
+                                        await loader.checkConnection();
                                         var image = await Navigator.pushNamed(
                                             context, '/artistEditor',
                                             arguments: artists[index].name);

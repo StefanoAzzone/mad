@@ -591,6 +591,8 @@ class Database {
     String lyrics = tag?.lyrics ?? "";
     var info = null;
 
+    await loader.checkConnection();
+
     /***TITLE***/
     if (title == "") {
       //Title tag missing
@@ -615,9 +617,12 @@ class Database {
       if (info != null) {
         lyrics = await loader.getLyricsFromTrack(info);
         print("lyrics not in tags; used API instead");
-        await tagger.writeTag(path: path, tagField: "lyrics", value: lyrics);
-      } else {
+      }
+
+      if (lyrics == "") {
         lyrics = "Unknown lyrics";
+      } else {
+        await tagger.writeTag(path: path, tagField: "lyrics", value: lyrics);
       }
     }
 
@@ -755,7 +760,9 @@ class Database {
 
     /***LYRICS***/
     String lyrics = await loader.getLyricsFromTrack(metadata);
-    await tagger.writeTag(path: path, tagField: "lyrics", value: lyrics);
+    if (lyrics != "") {
+      await tagger.writeTag(path: path, tagField: "lyrics", value: lyrics);
+    }
 
     /***TRACK NUMBER***/
     int trackNumber = loader.extractTrackNumberFromTrack(metadata);

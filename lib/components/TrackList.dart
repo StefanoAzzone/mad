@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:mad/Player.dart';
 import 'package:mad/data.dart';
+import 'package:mad/metadata_loader.dart';
 
 class TrackList extends StatefulWidget {
   Function callback;
@@ -23,7 +24,8 @@ class _TrackListState extends State<TrackList> {
     int count = database.state == DatabaseState.Ready
         ? tracks.length + 1
         : tracks.length + 2;
-    var ncols = MediaQuery.of(context).orientation == Orientation.portrait ? 1 : 2;
+    var ncols =
+        MediaQuery.of(context).orientation == Orientation.portrait ? 1 : 2;
 
     return GridView.count(
         padding: EdgeInsets.only(top: 0.0),
@@ -92,8 +94,7 @@ class _TrackListState extends State<TrackList> {
                             _tapPosition &
                                 const Size(
                                     40, 40), // smaller rect, the touch area
-                            Offset.zero &
-                                size // Bigger rect, the entire screen
+                            Offset.zero & size // Bigger rect, the entire screen
                             ),
                         items: <PopupMenuEntry<String>>[
                           PopupMenuItem<String>(
@@ -103,6 +104,7 @@ class _TrackListState extends State<TrackList> {
                                   TextButton(
                                       onPressed: () async {
                                         Navigator.pop(context);
+                                        await loader.checkConnection();
                                         var metadata =
                                             await Navigator.pushNamed(
                                                 context, '/editMetadata');
@@ -120,8 +122,7 @@ class _TrackListState extends State<TrackList> {
                                       )),
                                   TextButton(
                                       onPressed: () {
-                                        trackQueue
-                                            .pushLast(tracks[index - 1]);
+                                        trackQueue.pushLast(tracks[index - 1]);
                                         Navigator.pop(context);
                                       },
                                       child: const Text(
@@ -146,15 +147,12 @@ class _TrackListState extends State<TrackList> {
                                                         itemBuilder:
                                                             (context, i) {
                                                           return ListTile(
-                                                            title: Text(
-                                                                database
-                                                                    .playlists[
-                                                                        i]
-                                                                    .name),
+                                                            title: Text(database
+                                                                .playlists[i]
+                                                                .name),
                                                             onTap: () async {
                                                               database
-                                                                  .playlists[
-                                                                      i]
+                                                                  .playlists[i]
                                                                   .addTrack(tracks[
                                                                       index -
                                                                           1]);
@@ -194,7 +192,8 @@ class _TrackListState extends State<TrackList> {
                         ),
                         SizedBox(
                             height: 50,
-                            width: MediaQuery.of(context).orientation == Orientation.portrait
+                            width: MediaQuery.of(context).orientation ==
+                                    Orientation.portrait
                                 ? size.width * 0.7
                                 : size.width * 0.29,
                             child: Column(
