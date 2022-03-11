@@ -22,10 +22,12 @@ class _AlbumCardState extends State<AlbumCard> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            SizedBox(
-              child: album.cover,
-              width: size.width / ncols - 20,
-              height: size.width / ncols - 20,
+            Expanded(
+                child: SizedBox(
+                  child: album.cover,
+                  width: size.width / ncols - 20,
+                  height: size.width / ncols - 20,
+                ),
             ),
             Text(
               ' ' + album.name,
