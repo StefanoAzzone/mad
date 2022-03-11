@@ -14,7 +14,7 @@ class AlbumInfo extends StatelessWidget {
         return Scaffold(
             appBar: AppBar(
               flexibleSpace: Container(
-                decoration: BoxDecoration(
+                decoration: const BoxDecoration(
                     gradient: LinearGradient(
                         begin: Alignment.topRight,
                         end: Alignment.bottomLeft,
@@ -36,15 +36,9 @@ class AlbumInfo extends StatelessWidget {
                   } else {
                     return Column(children: [
                       Expanded(
-                        child: Container(
-                            decoration: const BoxDecoration(
-                              color: Colors.grey,
-                            ),
-                            child: GridView.builder(
+                        child: GridView.builder(
                                 gridDelegate:
                                     SliverGridDelegateWithFixedCrossAxisCount(
-                                  crossAxisSpacing: 0.5,
-                                  mainAxisSpacing: 0.5,
                                   crossAxisCount:
                                       orientation == Orientation.portrait
                                           ? 1
@@ -56,6 +50,10 @@ class AlbumInfo extends StatelessWidget {
                                   return Container(
                                     decoration: const BoxDecoration(
                                       color: Colors.white,
+                                      border: Border(
+                                        top: BorderSide(width: 0.05, color: Colors.black),
+                                        bottom: BorderSide(width: 0.05, color: Colors.black),
+                                      ),
                                     ),
                                     child: ListTile(
                                         title: Row(
@@ -73,14 +71,27 @@ class AlbumInfo extends StatelessWidget {
                                               ),
                                               width: 20,
                                             ),
-                                            Text(
-                                              '  ' +
-                                                  loader.extractTitleFromTrack(
-                                                      loader.getItem(
-                                                          snapshot.data,
-                                                          index)),
-                                              overflow: TextOverflow.ellipsis,
+                                            Container(
+                                              width: 10,
+                                              height: 40,
+                                              decoration: const BoxDecoration(
+                                                color: Colors.white,
+                                                border: Border(
+                                                  right: BorderSide(width: 0.25, color: Colors.grey),
+                                                ),
+                                              ),
                                             ),
+                                            Expanded(
+                                                child: Text(
+                                                  '  ' +
+                                                      loader.extractTitleFromTrack(
+                                                          loader.getItem(
+                                                              snapshot.data,
+                                                              index)),
+                                                  overflow: TextOverflow.ellipsis,
+                                                ),
+                                            ),
+
                                           ],
                                         ),
                                         onTap: () async {
@@ -97,7 +108,7 @@ class AlbumInfo extends StatelessWidget {
                                           await launch(url);
                                         }),
                                   );
-                                })),
+                                }),
                       ),
                       PlayBar(),
                     ]);

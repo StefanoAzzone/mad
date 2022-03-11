@@ -39,7 +39,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 return <Widget>[
                   SliverAppBar(
                     flexibleSpace: Container(
-                      decoration: BoxDecoration(
+                      decoration: const BoxDecoration(
                           gradient: LinearGradient(
                               begin: Alignment.topRight,
                               end: Alignment.bottomLeft,
@@ -48,7 +48,7 @@ class _MyHomePageState extends State<MyHomePage> {
                     snap: false,
                     title: Row(
                       children: [
-                        Expanded(
+                        const Expanded(
                             child: Text(
                           '  MBox',
                         )),
