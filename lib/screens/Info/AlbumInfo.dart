@@ -9,6 +9,23 @@ class AlbumInfo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (!loader.connected) {
+      return Scaffold(
+          appBar: AppBar(
+            flexibleSpace: Container(
+              decoration: const BoxDecoration(
+                  gradient: LinearGradient(
+                      begin: Alignment.topRight,
+                      end: Alignment.bottomLeft,
+                      colors: [Colors.indigo, Colors.lightBlue])),
+            ),
+          ),
+          body: Center(
+            child: Text(
+                "Cannot access server.\nTry to check your internet connection."),
+          ));
+    }
+
     return OrientationBuilder(
       builder: (context, orientation) {
         return Scaffold(
@@ -37,78 +54,73 @@ class AlbumInfo extends StatelessWidget {
                     return Column(children: [
                       Expanded(
                         child: GridView.builder(
-                                gridDelegate:
-                                    SliverGridDelegateWithFixedCrossAxisCount(
-                                  crossAxisCount:
-                                      orientation == Orientation.portrait
-                                          ? 1
-                                          : 2,
-                                  childAspectRatio: 7,
+                            gridDelegate:
+                                SliverGridDelegateWithFixedCrossAxisCount(
+                              crossAxisCount:
+                                  orientation == Orientation.portrait ? 1 : 2,
+                              childAspectRatio: 7,
+                            ),
+                            itemCount: loader.getItemsCount(snapshot.data),
+                            itemBuilder: (context, index) {
+                              return Container(
+                                decoration: const BoxDecoration(
+                                  color: Colors.white,
+                                  border: Border(
+                                    top: BorderSide(
+                                        width: 0.05, color: Colors.black),
+                                    bottom: BorderSide(
+                                        width: 0.05, color: Colors.black),
+                                  ),
                                 ),
-                                itemCount: loader.getItemsCount(snapshot.data),
-                                itemBuilder: (context, index) {
-                                  return Container(
-                                    decoration: const BoxDecoration(
-                                      color: Colors.white,
-                                      border: Border(
-                                        top: BorderSide(width: 0.05, color: Colors.black),
-                                        bottom: BorderSide(width: 0.05, color: Colors.black),
-                                      ),
-                                    ),
-                                    child: ListTile(
-                                        title: Row(
-                                          children: [
-                                            SizedBox(
-                                              child: Text(
-                                                loader
-                                                    .extractTrackNumberFromTrack(
-                                                        loader.getItem(
-                                                            snapshot.data,
-                                                            index))
-                                                    .toString(),
-                                                overflow: TextOverflow.ellipsis,
-                                                textAlign: TextAlign.right,
-                                              ),
-                                              width: 20,
-                                            ),
-                                            Container(
-                                              width: 10,
-                                              height: 40,
-                                              decoration: const BoxDecoration(
-                                                color: Colors.white,
-                                                border: Border(
-                                                  right: BorderSide(width: 0.25, color: Colors.grey),
-                                                ),
-                                              ),
-                                            ),
-                                            Expanded(
-                                                child: Text(
-                                                  '  ' +
-                                                      loader.extractTitleFromTrack(
-                                                          loader.getItem(
-                                                              snapshot.data,
-                                                              index)),
-                                                  overflow: TextOverflow.ellipsis,
-                                                ),
-                                            ),
-
-                                          ],
+                                child: ListTile(
+                                    title: Row(
+                                      children: [
+                                        SizedBox(
+                                          child: Text(
+                                            loader
+                                                .extractTrackNumberFromTrack(
+                                                    loader.getItem(
+                                                        snapshot.data, index))
+                                                .toString(),
+                                            overflow: TextOverflow.ellipsis,
+                                            textAlign: TextAlign.right,
+                                          ),
+                                          width: 20,
                                         ),
-                                        onTap: () async {
-                                          String url = await loader
-                                              .queryYouTubeUrl(loader
-                                                      .extractTitleFromTracks(
-                                                          snapshot.data,
-                                                          index) +
-                                                  ' ' +
-                                                  loader
-                                                      .extractArtistFromTracks(
-                                                          snapshot.data,
-                                                          index));
-                                          await launch(url);
-                                        }),
-                                  );
-                                }),
+                                        Container(
+                                          width: 10,
+                                          height: 40,
+                                          decoration: const BoxDecoration(
+                                            color: Colors.white,
+                                            border: Border(
+                                              right: BorderSide(
+                                                  width: 0.25,
+                                                  color: Colors.grey),
+                                            ),
+                                          ),
+                                        ),
+                                        Expanded(
+                                          child: Text(
+                                            '  ' +
+                                                loader.extractTitleFromTrack(
+                                                    loader.getItem(
+                                                        snapshot.data, index)),
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    onTap: () async {
+                                      String url = await loader.queryYouTubeUrl(
+                                          loader.extractTitleFromTracks(
+                                                  snapshot.data, index) +
+                                              ' ' +
+                                              loader.extractArtistFromTracks(
+                                                  snapshot.data, index));
+                                      await launch(url);
+                                    }),
+                              );
+                            }),
                       ),
                       PlayBar(),
                     ]);

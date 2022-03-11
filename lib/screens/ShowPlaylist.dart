@@ -27,15 +27,15 @@ class _ShowPlaylistState extends State<ShowPlaylist> {
                 onPressed: () async {
                   await Navigator.pushNamed(context, '/select',
                       arguments: (List<Track> tracks, index) {
-                        playlist.addTrack(tracks[index]);
-                        database.saveAllData();
-                      });
+                    playlist.addTrack(tracks[index]);
+                    database.saveAllData();
+                  });
                   setState(() {});
                 }),
           ],
         ),
         flexibleSpace: Container(
-          decoration: BoxDecoration(
+          decoration: const BoxDecoration(
               gradient: LinearGradient(
                   begin: Alignment.topRight,
                   end: Alignment.bottomLeft,
@@ -43,10 +43,10 @@ class _ShowPlaylistState extends State<ShowPlaylist> {
         ),
         centerTitle: true,
       ),
-      body: TrackList((Track track) async {
+      body: TrackList((List<Track> tracks, int index) async {
         player.pause();
         trackQueue.reset();
-        trackQueue.pushFront(track);
+        trackQueue.pushFront(tracks[index]);
         player.play();
         await Navigator.pushNamed(context, '/playingTrack');
       }, playlist.tracks),

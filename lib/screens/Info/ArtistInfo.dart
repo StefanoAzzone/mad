@@ -12,6 +12,23 @@ class ArtistInfo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (!loader.connected) {
+      return Scaffold(
+          appBar: AppBar(
+            flexibleSpace: Container(
+              decoration: const BoxDecoration(
+                  gradient: LinearGradient(
+                      begin: Alignment.topRight,
+                      end: Alignment.bottomLeft,
+                      colors: [Colors.indigo, Colors.lightBlue])),
+            ),
+          ),
+          body: Center(
+            child: Text(
+                "Cannot access server.\nTry to check your internet connection."),
+          ));
+    }
+
     return OrientationBuilder(
       builder: (context, orientation) {
         return FutureBuilder(
@@ -69,38 +86,38 @@ class ArtistInfo extends StatelessWidget {
                                             ),
                                           );
                                         } else {
-                                          albumName = loader.extractAlbumTitleFromAlbum(loader.getItem(snapshot.data, index));
+                                          albumName =
+                                              loader.extractAlbumTitleFromAlbum(
+                                                  loader.getItem(
+                                                      snapshot.data, index));
                                           return Card(
-                                            child: Column(
-                                              crossAxisAlignment: CrossAxisAlignment.start,
-                                              children: [
-                                                Expanded(
-                                                    child: Image.memory(
-                                                        snapshotImage.data as Uint8List),
+                                              child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              Expanded(
+                                                child: Image.memory(
+                                                    snapshotImage.data
+                                                        as Uint8List),
+                                              ),
+                                              Text(
+                                                albumName,
+                                                overflow: TextOverflow.ellipsis,
+                                                textAlign: TextAlign.left,
+                                                style: const TextStyle(
+                                                  fontSize: 14,
                                                 ),
-                                                Text(
-                                                  albumName,
-                                                  overflow: TextOverflow.ellipsis,
-                                                  textAlign: TextAlign.left,
-                                                  style: const TextStyle(
-                                                    fontSize: 14,
-
-                                                  ),
+                                              ),
+                                              Text(
+                                                artistName,
+                                                overflow: TextOverflow.ellipsis,
+                                                textAlign: TextAlign.left,
+                                                style: const TextStyle(
+                                                  fontSize: 12,
                                                 ),
-                                                Text(
-                                                  artistName,
-                                                  overflow: TextOverflow.ellipsis,
-                                                  textAlign: TextAlign.left,
-                                                  style: const TextStyle(
-                                                    fontSize: 12,
-
-                                                  ),
-                                                ),
-                                              ],
-                                            )
-
-                                          );
-
+                                              ),
+                                            ],
+                                          ));
                                         }
                                       },
                                     ));

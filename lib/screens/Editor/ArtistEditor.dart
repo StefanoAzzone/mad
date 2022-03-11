@@ -32,7 +32,7 @@ class _ArtistEditorState extends State<ArtistEditor> {
       return Scaffold(
           appBar: AppBar(
             flexibleSpace: Container(
-              decoration: BoxDecoration(
+              decoration: const BoxDecoration(
                   gradient: LinearGradient(
                       begin: Alignment.topRight,
                       end: Alignment.bottomLeft,

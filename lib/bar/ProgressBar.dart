@@ -32,7 +32,10 @@ class _ProgressBarState extends State<ProgressBar> {
     player.audioPlayer.onDurationChanged.listen((Duration d) {
       if (!isChanging) {
         //print('Max duration: $d');
-        setState(() => trackDuration = d);
+        setState(() {
+          trackDuration = d;
+          trackPosition = Duration.zero;
+        });
         int t = trackDuration.inSeconds % 60;
         durationString = t < 10 ? "0" : "";
         durationString += t.toString();
