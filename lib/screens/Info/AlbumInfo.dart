@@ -1,10 +1,14 @@
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import 'package:mad/components/PlayBar.dart';
 import 'package:mad/metadata_loader.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class AlbumInfo extends StatelessWidget {
+  var albumName = "Unknown Album";
   var album;
+
   AlbumInfo(this.album, {Key? key}) : super(key: key);
 
   @override
@@ -36,13 +40,60 @@ class AlbumInfo extends StatelessWidget {
                   } else {
                     return Column(children: [
                       Expanded(
-                        child: GridView.builder(
+                        child: NestedScrollView(
+                            headerSliverBuilder:
+                                (BuildContext context, bool innerBoxIsScrolled) {
+                              return <Widget>[
+                                SliverSafeArea(
+                                  sliver: SliverAppBar(
+                                    automaticallyImplyLeading: false,
+                                    backgroundColor: Colors.lightBlue[100],
+                                    expandedHeight: 400,
+                                    flexibleSpace:
+                                    FlexibleSpaceBar(background: () {
+                                      return FutureBuilder(
+                                        future: loader.extractCoverFromAlbum(
+                                            album),
+                                        builder: (context, snapshotImage) {
+                                          if (!snapshotImage.hasData) {
+                                            return const Center(
+                                              child: SizedBox(
+                                                width: 50,
+                                                height: 50,
+                                                child:
+                                                CircularProgressIndicator(),
+                                              ),
+                                            );
+                                          } else {
+                                            albumName = loader.extractAlbumTitleFromAlbum(album);
+                                            return Card(
+                                                child: Column(
+                                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                                  children: [
+                                                    Expanded(
+                                                      child: Image.memory(
+                                                          snapshotImage.data as Uint8List),
+                                                    ),
+                                                  ],
+                                                )
+
+                                            );
+
+                                          }
+                                        },
+                                      );
+                                    }()),
+                                  ),
+                                )
+                              ];
+                            },
+                            body: GridView.builder(
                                 gridDelegate:
-                                    SliverGridDelegateWithFixedCrossAxisCount(
+                                SliverGridDelegateWithFixedCrossAxisCount(
                                   crossAxisCount:
-                                      orientation == Orientation.portrait
-                                          ? 1
-                                          : 2,
+                                  orientation == Orientation.portrait
+                                      ? 1
+                                      : 2,
                                   childAspectRatio: 7,
                                 ),
                                 itemCount: loader.getItemsCount(snapshot.data),
@@ -62,9 +113,9 @@ class AlbumInfo extends StatelessWidget {
                                               child: Text(
                                                 loader
                                                     .extractTrackNumberFromTrack(
-                                                        loader.getItem(
-                                                            snapshot.data,
-                                                            index))
+                                                    loader.getItem(
+                                                        snapshot.data,
+                                                        index))
                                                     .toString(),
                                                 overflow: TextOverflow.ellipsis,
                                                 textAlign: TextAlign.right,
@@ -82,14 +133,14 @@ class AlbumInfo extends StatelessWidget {
                                               ),
                                             ),
                                             Expanded(
-                                                child: Text(
-                                                  '  ' +
-                                                      loader.extractTitleFromTrack(
-                                                          loader.getItem(
-                                                              snapshot.data,
-                                                              index)),
-                                                  overflow: TextOverflow.ellipsis,
-                                                ),
+                                              child: Text(
+                                                '  ' +
+                                                    loader.extractTitleFromTrack(
+                                                        loader.getItem(
+                                                            snapshot.data,
+                                                            index)),
+                                                overflow: TextOverflow.ellipsis,
+                                              ),
                                             ),
 
                                           ],
@@ -97,23 +148,26 @@ class AlbumInfo extends StatelessWidget {
                                         onTap: () async {
                                           String url = await loader
                                               .queryYouTubeUrl(loader
-                                                      .extractTitleFromTracks(
-                                                          snapshot.data,
-                                                          index) +
-                                                  ' ' +
-                                                  loader
-                                                      .extractArtistFromTracks(
-                                                          snapshot.data,
-                                                          index));
+                                              .extractTitleFromTracks(
+                                              snapshot.data,
+                                              index) +
+                                              ' ' +
+                                              loader
+                                                  .extractArtistFromTracks(
+                                                  snapshot.data,
+                                                  index));
                                           await launch(url);
                                         }),
                                   );
                                 }),
+                        )
+
                       ),
                       PlayBar(),
                     ]);
                   }
-                }));
+                })
+        );
       },
     );
   }
