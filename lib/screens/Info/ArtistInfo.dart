@@ -7,6 +7,7 @@ import 'package:mad/screens/Info/AlbumInfo.dart';
 
 class ArtistInfo extends StatelessWidget {
   String artistName;
+  String albumName = "Unknown Artist";
   ArtistInfo(this.artistName, {Key? key}) : super(key: key);
 
   @override
@@ -28,7 +29,7 @@ class ArtistInfo extends StatelessWidget {
                 return Scaffold(
                     appBar: AppBar(
                       flexibleSpace: Container(
-                        decoration: BoxDecoration(
+                        decoration: const BoxDecoration(
                             gradient: LinearGradient(
                                 begin: Alignment.topRight,
                                 end: Alignment.bottomLeft,
@@ -40,6 +41,7 @@ class ArtistInfo extends StatelessWidget {
                     body: Column(children: [
                       Expanded(
                           child: GridView.count(
+                              childAspectRatio: 0.85,
                               crossAxisCount:
                                   orientation == Orientation.portrait ? 2 : 4,
                               children: List<IconButton>.generate(
@@ -56,8 +58,8 @@ class ArtistInfo extends StatelessWidget {
                                     icon: FutureBuilder(
                                       future: loader.extractCoverFromAlbum(
                                           loader.getItem(snapshot.data, index)),
-                                      builder: (context, snapshot) {
-                                        if (!snapshot.hasData) {
+                                      builder: (context, snapshotImage) {
+                                        if (!snapshotImage.hasData) {
                                           return const Center(
                                             child: SizedBox(
                                               width: 50,
@@ -67,8 +69,38 @@ class ArtistInfo extends StatelessWidget {
                                             ),
                                           );
                                         } else {
-                                          return Image.memory(
-                                              snapshot.data as Uint8List);
+                                          albumName = loader.extractAlbumTitleFromAlbum(loader.getItem(snapshot.data, index));
+                                          return Card(
+                                            child: Column(
+                                              crossAxisAlignment: CrossAxisAlignment.start,
+                                              children: [
+                                                Expanded(
+                                                    child: Image.memory(
+                                                        snapshotImage.data as Uint8List),
+                                                ),
+                                                Text(
+                                                  albumName,
+                                                  overflow: TextOverflow.ellipsis,
+                                                  textAlign: TextAlign.left,
+                                                  style: const TextStyle(
+                                                    fontSize: 14,
+
+                                                  ),
+                                                ),
+                                                Text(
+                                                  artistName,
+                                                  overflow: TextOverflow.ellipsis,
+                                                  textAlign: TextAlign.left,
+                                                  style: const TextStyle(
+                                                    fontSize: 12,
+
+                                                  ),
+                                                ),
+                                              ],
+                                            )
+
+                                          );
+
                                         }
                                       },
                                     ));

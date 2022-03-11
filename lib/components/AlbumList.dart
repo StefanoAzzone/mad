@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mad/buttons/AlbumCard.dart';
 import 'dart:io';
 
 import 'package:mad/data.dart';
@@ -37,36 +38,7 @@ class _AlbumListState extends State<AlbumList> {
                     );
                     setState(() {});
                   },
-                  icon: Card(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        SizedBox(
-                          child: albums[index].cover,
-                          width: size.width / ncols - 20,
-                          height: size.width / ncols - 20,
-                        ),
-                        Text(
-                          ' ' + albums[index].name,
-                          overflow: TextOverflow.ellipsis,
-                          textAlign: TextAlign.left,
-                          style: const TextStyle(
-                            fontSize: 14,
-
-                          ),
-                        ),
-                        Text(
-                          ' ' + albums[index].artist.name,
-                          overflow: TextOverflow.ellipsis,
-                          textAlign: TextAlign.left,
-                          style: const TextStyle(
-                            fontSize: 12,
-
-                          ),
-                        ),
-                      ],
-                    )
-                  ),
+                  icon: AlbumCard(albums[index], ncols),
               );
             })
         );
