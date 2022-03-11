@@ -48,7 +48,7 @@ class AlbumInfo extends StatelessWidget {
                                   sliver: SliverAppBar(
                                     automaticallyImplyLeading: false,
                                     backgroundColor: Colors.lightBlue[100],
-                                    expandedHeight: 400,
+                                    expandedHeight: MediaQuery.of(context).orientation == Orientation.portrait ? 400 : 200,
                                     flexibleSpace:
                                     FlexibleSpaceBar(background: () {
                                       return FutureBuilder(
@@ -70,9 +70,11 @@ class AlbumInfo extends StatelessWidget {
                                                 child: Column(
                                                   crossAxisAlignment: CrossAxisAlignment.start,
                                                   children: [
-                                                    Expanded(
-                                                      child: Image.memory(
-                                                          snapshotImage.data as Uint8List),
+                                                    Center(
+                                                      child: Expanded(
+                                                        child: Image.memory(
+                                                            snapshotImage.data as Uint8List),
+                                                      ),
                                                     ),
                                                   ],
                                                 )
