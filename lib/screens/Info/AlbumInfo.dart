@@ -1,10 +1,14 @@
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import 'package:mad/components/PlayBar.dart';
 import 'package:mad/metadata_loader.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class AlbumInfo extends StatelessWidget {
+  var albumName = "Unknown Album";
   var album;
+
   AlbumInfo(this.album, {Key? key}) : super(key: key);
 
   @override
@@ -53,7 +57,57 @@ class AlbumInfo extends StatelessWidget {
                   } else {
                     return Column(children: [
                       Expanded(
-                        child: GridView.builder(
+                          child: NestedScrollView(
+                        headerSliverBuilder:
+                            (BuildContext context, bool innerBoxIsScrolled) {
+                          return <Widget>[
+                            SliverSafeArea(
+                              sliver: SliverAppBar(
+                                automaticallyImplyLeading: false,
+                                backgroundColor: Colors.lightBlue[100],
+                                expandedHeight:
+                                    MediaQuery.of(context).orientation ==
+                                            Orientation.portrait
+                                        ? 400
+                                        : 200,
+                                flexibleSpace: FlexibleSpaceBar(background: () {
+                                  return FutureBuilder(
+                                    future: loader.extractCoverFromAlbum(album),
+                                    builder: (context, snapshotImage) {
+                                      if (!snapshotImage.hasData) {
+                                        return const Center(
+                                          child: SizedBox(
+                                            width: 50,
+                                            height: 50,
+                                            child: CircularProgressIndicator(),
+                                          ),
+                                        );
+                                      } else {
+                                        albumName = loader
+                                            .extractAlbumTitleFromAlbum(album);
+                                        return Card(
+                                            child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Center(
+                                              child: Expanded(
+                                                child: Image.memory(
+                                                    snapshotImage.data
+                                                        as Uint8List),
+                                              ),
+                                            ),
+                                          ],
+                                        ));
+                                      }
+                                    },
+                                  );
+                                }()),
+                              ),
+                            )
+                          ];
+                        },
+                        body: GridView.builder(
                             gridDelegate:
                                 SliverGridDelegateWithFixedCrossAxisCount(
                               crossAxisCount:
@@ -121,7 +175,7 @@ class AlbumInfo extends StatelessWidget {
                                     }),
                               );
                             }),
-                      ),
+                      )),
                       PlayBar(),
                     ]);
                   }

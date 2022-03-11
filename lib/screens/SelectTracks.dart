@@ -19,13 +19,13 @@ class SelectTracks extends StatelessWidget {
     return Scaffold(
         appBar: AppBar(
           flexibleSpace: Container(
-            decoration: BoxDecoration(
+            decoration: const BoxDecoration(
                 gradient: LinearGradient(
                     begin: Alignment.topRight,
                     end: Alignment.bottomLeft,
                     colors: [Colors.indigo, Colors.lightBlue])),
           ),
-          title: Text("Select the tracks:"),
+          title: const Text("Select the tracks:"),
           centerTitle: true,
         ),
         body: Column(children: [

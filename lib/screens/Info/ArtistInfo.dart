@@ -120,7 +120,8 @@ class ArtistInfo extends StatelessWidget {
                                           ));
                                         }
                                       },
-                                    ));
+                                    )
+                                );
                               }))),
                       PlayBar(),
                     ]));
