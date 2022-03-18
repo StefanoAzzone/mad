@@ -16,7 +16,7 @@ class _PlayButtonState extends State<PlayButton> {
   _PlayButtonState() {
     player.audioPlayer.onPlayerStateChanged
         .listen((PlayerState s) => {
-          if(mounted) // we may have a leak
+          if(this.mounted) // we may have a leak
             setState(() => state = s)}
           );
   }
