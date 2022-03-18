@@ -29,8 +29,10 @@ class Player {
   }
 
   void play() async {
-    int result =
-        await audioPlayer.play(trackQueue.current().path, isLocal: true);
+    if (trackQueue.length > 0) {
+      int result =
+          await audioPlayer.play(trackQueue.current().path, isLocal: true);
+    }
   }
 
   void toEnd() async {

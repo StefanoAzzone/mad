@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:mad/Player.dart';
 import 'package:mad/components/PlayBar.dart';
+import 'package:mad/components/SwipeTrackList.dart';
 import 'package:mad/components/TrackList.dart';
 import 'package:mad/data.dart';
 
@@ -43,7 +44,7 @@ class _ShowPlaylistState extends State<ShowPlaylist> {
         ),
         centerTitle: true,
       ),
-      body: TrackList((List<Track> tracks, int index) async {
+      body: SwipeTrackList((List<Track> tracks, int index) async {
         player.pause();
         trackQueue.reset();
         for (Track t in tracks) {
@@ -52,6 +53,9 @@ class _ShowPlaylistState extends State<ShowPlaylist> {
         trackQueue.setCurrent(index);
         player.play();
         await Navigator.pushNamed(context, '/playingTrack');
+      }, (Track track) {
+        playlist.removeTrack(track);
+        database.saveAllData();
       }, playlist.tracks),
       floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
       bottomNavigationBar: BottomAppBar(

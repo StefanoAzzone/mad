@@ -286,6 +286,10 @@ class TrackQueue {
   }
 
   void remove(int index) async {
+    if (index < currentIndex ||
+        (index == currentIndex && currentIndex == queue.length - 1)) {
+      currentIndex--;
+    }
     queue.removeAt(index);
     await saveQueue();
   }

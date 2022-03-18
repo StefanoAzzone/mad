@@ -11,7 +11,11 @@ class ShowQueue extends StatefulWidget {
 }
 
 class _ShowQueueState extends State<ShowQueue> {
+  final int MAX_SWIPE_OFFSET = 200;
+  final int SWIPE_TRESHOLD = 1;
   List<Track> queue = [];
+  double offset = 0.0;
+  int lastSwipeIndex = 0;
 
   void _update() {
     setState(() {});
@@ -74,57 +78,95 @@ class _ShowQueueState extends State<ShowQueue> {
                       top: BorderSide(width: 0.05, color: Colors.black),
                       bottom: BorderSide(width: 0.05, color: Colors.black),
                     )),
-                    child: ListTile(
-                      title: Row(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        children: [
-                          SizedBox(
-                            width: 20,
-                            child: Text(
-                              (index - trackQueue.currentIndex).toString(),
-                              textAlign: TextAlign.right,
-                            ),
-                          ),
-                          SizedBox(
-                            height: 40,
-                            child: queue[index].album.thumbnail,
-                            width: 50,
-                          ),
-                          SizedBox(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                              children: [
-                                Text(
-                                  queue[index].title,
-                                  overflow: TextOverflow.ellipsis,
+                    child: GestureDetector(
+                        onPanUpdate: (details) {
+                          double dx = details.delta.dx;
+                          if (dx >= SWIPE_TRESHOLD && lastSwipeIndex >= 0) {
+                            // swiping in right direction
+                            setState(() {
+                              offset += dx;
+                              if (offset >= MAX_SWIPE_OFFSET) {
+                                offset = 0;
+                                if (index == trackQueue.currentIndex) {
+                                  player.next();
+                                }
+                                trackQueue.remove(index);
+                                lastSwipeIndex = -1;
+                              } else {
+                                lastSwipeIndex = index;
+                              }
+                            });
+                          } else if (dx < 0) {
+                            dx = -dx;
+                            setState(() {
+                              offset = offset > dx ? offset - dx : 0;
+                            });
+                          }
+                        },
+                        onPanEnd: (details) => setState(() {
+                              offset = 0;
+                              lastSwipeIndex = 0;
+                            }),
+                        child: ListTile(
+                          title: Row(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                            children: [
+                              SizedBox(
+                                height: 50,
+                                width: index == lastSwipeIndex ? offset : 0,
+                              ),
+                              SizedBox(
+                                width: 20,
+                                child: Text(
+                                  (index - trackQueue.currentIndex).toString(),
+                                  textAlign: TextAlign.right,
                                 ),
-                                Text(
-                                  queue[index].artist.name,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: const TextStyle(
-                                    fontSize: 12,
-                                  ),
+                              ),
+                              SizedBox(
+                                height: 40,
+                                child: queue[index].album.thumbnail,
+                                width: 50,
+                              ),
+                              SizedBox(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceEvenly,
+                                  children: [
+                                    Text(
+                                      queue[index].title,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                    Text(
+                                      queue[index].artist.name,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: const TextStyle(
+                                        fontSize: 12,
+                                      ),
+                                    ),
+                                  ],
                                 ),
-                              ],
-                            ),
-                            width: MediaQuery.of(context).orientation ==
-                                    Orientation.portrait
-                                ? MediaQuery.of(context).size.width - 130
-                                : MediaQuery.of(context).size.width / 2 - 110,
-                          )
-                        ],
-                      ),
-                      onTap: () async {
-                        if (index != trackQueue.currentIndex) {
-                          player.pause();
-                          trackQueue.setCurrent(index);
-                          player.play();
-                        }
-                        Navigator.pop(context);
-                      },
-                    ));
+                                width: MediaQuery.of(context).orientation ==
+                                        Orientation.portrait
+                                    ? MediaQuery.of(context).size.width -
+                                        130 -
+                                        (lastSwipeIndex == index ? offset : 0)
+                                    : MediaQuery.of(context).size.width / 2 -
+                                        110 -
+                                        (lastSwipeIndex == index ? offset : 0),
+                              )
+                            ],
+                          ),
+                          onTap: () async {
+                            if (index != trackQueue.currentIndex) {
+                              player.pause();
+                              trackQueue.setCurrent(index);
+                              player.play();
+                            }
+                            Navigator.pop(context);
+                          },
+                        )));
               }),
         ),
         PlayBar(),
