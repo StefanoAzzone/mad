@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:collection';
 
 import 'package:flutter/cupertino.dart';
@@ -15,10 +16,20 @@ class PlayingTrack extends StatefulWidget {
 }
 
 class _PlayingTrackState extends State<PlayingTrack> {
+  late StreamSubscription<Duration> sub;
+
   _PlayingTrackState() {
-    player.audioPlayer.onDurationChanged.listen((event) {
+    sub = player.audioPlayer.onDurationChanged.listen((event) {
       setState(() {});
     });
+  }
+
+  @protected
+  @mustCallSuper
+  void dispose()
+  {
+    sub.cancel();
+    super.dispose();
   }
 
   @override
