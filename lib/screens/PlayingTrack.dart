@@ -1,7 +1,5 @@
 import 'dart:async';
-import 'dart:collection';
 
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:mad/Player.dart';
 import 'package:mad/bar/ProgressBar.dart';
@@ -24,6 +22,7 @@ class _PlayingTrackState extends State<PlayingTrack> {
     });
   }
 
+  @override
   @protected
   @mustCallSuper
   void dispose()
