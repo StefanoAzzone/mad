@@ -46,7 +46,10 @@ class _ShowPlaylistState extends State<ShowPlaylist> {
       body: TrackList((List<Track> tracks, int index) async {
         player.pause();
         trackQueue.reset();
-        trackQueue.pushFront(tracks[index]);
+        for (Track t in tracks) {
+          trackQueue.pushLast(t);
+        }
+        trackQueue.setCurrent(index);
         player.play();
         await Navigator.pushNamed(context, '/playingTrack');
       }, playlist.tracks),
