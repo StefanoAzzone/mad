@@ -30,6 +30,9 @@ class AlbumInfo extends StatelessWidget {
           ));
     }
 
+    Size size = MediaQuery.of(context).size;
+    Orientation orientation = MediaQuery.of(context).orientation;
+
     return OrientationBuilder(
       builder: (context, orientation) {
         return Scaffold(
@@ -91,7 +94,9 @@ class AlbumInfo extends StatelessWidget {
                                               CrossAxisAlignment.start,
                                           children: [
                                             Center(
-                                              child: Expanded(
+                                              child: SizedBox(
+                                                height: orientation == Orientation.portrait ?
+                                                        size.height*0.5 : size.height*0.47,
                                                 child: Image.memory(
                                                     snapshotImage.data
                                                         as Uint8List),

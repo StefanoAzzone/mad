@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
 import 'package:mad/Player.dart';
@@ -19,12 +21,22 @@ class PlayBar extends StatefulWidget {
   // PlayBar._internal();
 
 class _PlayBarState extends State<PlayBar> {
+  late StreamSubscription<Duration> sub;
+
   _PlayBarState() {
-    player.audioPlayer.onDurationChanged.listen((event) {
+    sub = player.audioPlayer.onDurationChanged.listen((event) {
       setState(() {
         
       });
     });
+  }
+
+  @protected
+  @mustCallSuper
+  void dispose()
+  {
+    sub.cancel();
+    super.dispose();
   }
 
   @override

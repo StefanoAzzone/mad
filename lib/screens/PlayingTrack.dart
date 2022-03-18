@@ -1,6 +1,5 @@
-import 'dart:collection';
+import 'dart:async';
 
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:mad/Player.dart';
 import 'package:mad/bar/ProgressBar.dart';
@@ -10,15 +9,28 @@ import 'package:mad/data.dart';
 import 'package:mad/metadata_loader.dart';
 
 class PlayingTrack extends StatefulWidget {
+  const PlayingTrack({Key? key}) : super(key: key);
+
   @override
   State<PlayingTrack> createState() => _PlayingTrackState();
 }
 
 class _PlayingTrackState extends State<PlayingTrack> {
+  late StreamSubscription<Duration> sub;
+
   _PlayingTrackState() {
-    player.audioPlayer.onDurationChanged.listen((event) {
+    sub = player.audioPlayer.onDurationChanged.listen((event) {
       setState(() {});
     });
+  }
+
+  @override
+  @protected
+  @mustCallSuper
+  void dispose()
+  {
+    sub.cancel();
+    super.dispose();
   }
 
   @override
@@ -59,7 +71,7 @@ class _PlayingTrackState extends State<PlayingTrack> {
               Expanded(child: CoverButton()),
               Column(
                 children: [
-                  ProgressBar(),
+                  const ProgressBar(),
                   Row(
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: [
@@ -130,7 +142,7 @@ class _PlayingTrackState extends State<PlayingTrack> {
                         trackQueue.current().artist.name,
                         style: const TextStyle(fontSize: 12),
                       ),
-                      Expanded(child: ProgressBar()),
+                      const Expanded(child: ProgressBar()),
                       Row(
                           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                           children: [

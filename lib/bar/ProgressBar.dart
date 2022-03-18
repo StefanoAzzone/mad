@@ -1,48 +1,67 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:mad/Player.dart';
 import 'dart:io';
 
 import 'package:mad/data.dart';
 
+String durationToString(Duration duration) {
+  String twoDigits(int n) => n.toString().padLeft(2, "0");
+  String twoDigitMinutes = twoDigits(duration.inMinutes.remainder(60));
+  String twoDigitSeconds = twoDigits(duration.inSeconds.remainder(60));
+  return twoDigitMinutes + ":" + twoDigitSeconds;
+}
+
+class DurationInfo
+{
+  Duration trackPosition = const Duration();
+  Duration trackDuration = const Duration();
+
+  static final DurationInfo instance = DurationInfo._internal();
+  factory DurationInfo() {
+    return instance;
+  }
+  DurationInfo._internal();
+}
+
+DurationInfo durationInfo = DurationInfo.instance;
+
 class ProgressBar extends StatefulWidget {
+  const ProgressBar({Key? key}) : super(key: key);
+
+
   @override
   State<ProgressBar> createState() => _ProgressBarState();
 }
 
 class _ProgressBarState extends State<ProgressBar> {
   bool isChanging = false;
-  Duration trackPosition = Duration();
-  Duration trackDuration = Duration();
 
-  String positionString = "";
-  String durationString = "";
+  late StreamSubscription<Duration> pos;
+  late StreamSubscription<Duration> dur;
 
   _ProgressBarState() {
-    player.audioPlayer.onAudioPositionChanged.listen((Duration p) {
+    pos = player.audioPlayer.onAudioPositionChanged.listen((Duration p) {
       if (!isChanging) {
-        //print('Current position: $p');
-        setState(() => trackPosition = p);
-        int t = trackPosition.inSeconds % 60;
-        positionString = t < 10 ? "0" : "";
-        positionString += t.toString();
-        positionString =
-            trackPosition.inMinutes.toString() + ":" + positionString;
+        setState(() => durationInfo.trackPosition = p);
+
       }
     });
-    player.audioPlayer.onDurationChanged.listen((Duration d) {
+    dur = player.audioPlayer.onDurationChanged.listen((Duration d) {
       if (!isChanging) {
-        //print('Max duration: $d');
-        setState(() {
-          trackDuration = d;
-          trackPosition = Duration.zero;
-        });
-        int t = trackDuration.inSeconds % 60;
-        durationString = t < 10 ? "0" : "";
-        durationString += t.toString();
-        durationString =
-            trackDuration.inMinutes.toString() + ":" + durationString;
+        setState(() => durationInfo.trackDuration = d);
       }
     });
+  }
+
+  @protected
+  @mustCallSuper
+  void dispose()
+  {
+    pos.cancel();
+    dur.cancel();
+    super.dispose();
   }
 
   @override
@@ -51,14 +70,14 @@ class _ProgressBarState extends State<ProgressBar> {
       children: [
         Padding(
           padding: EdgeInsets.all(8.0),
-          child: Text(positionString),
+          child: Text(durationToString(durationInfo.trackPosition)),
         ),
         Expanded(
           child: Slider(
               onChangeStart: (value) => isChanging = true,
               onChanged: (double value) {
                 setState(() {
-                  trackPosition = Duration(seconds: value.toInt());
+                  durationInfo.trackPosition = Duration(seconds: value.toInt());
                 });
               },
               onChangeEnd: (double newValue) {
@@ -68,12 +87,12 @@ class _ProgressBarState extends State<ProgressBar> {
                       Duration(seconds: newValue.toInt()));
                 });
               },
-              value: trackPosition.inSeconds.toDouble(),
-              max: trackDuration.inSeconds.toDouble()),
+              value: durationInfo.trackPosition.inSeconds.toDouble(),
+              max: durationInfo.trackDuration.inSeconds.toDouble()),
         ),
         Padding(
           padding: EdgeInsets.all(8.0),
-          child: Text(durationString),
+          child: Text(durationToString(durationInfo.trackDuration)),
         ),
       ],
     );
