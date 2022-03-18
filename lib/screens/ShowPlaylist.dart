@@ -53,6 +53,7 @@ class _ShowPlaylistState extends State<ShowPlaylist> {
         trackQueue.setCurrent(index);
         player.play();
         await Navigator.pushNamed(context, '/playingTrack');
+        setState(() {});
       }, (Track track) {
         playlist.removeTrack(track);
         database.saveAllData();

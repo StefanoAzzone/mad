@@ -107,7 +107,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   }, database.tracks),
                   AlbumList(database.albums),
                   ArtistList(),
-                  PlaylistList()
+                  PlaylistList(_updatePage)
                 ],
               ),
             ),

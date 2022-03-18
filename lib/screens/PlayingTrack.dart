@@ -27,8 +27,7 @@ class _PlayingTrackState extends State<PlayingTrack> {
   @override
   @protected
   @mustCallSuper
-  void dispose()
-  {
+  void dispose() {
     sub.cancel();
     super.dispose();
   }
@@ -98,7 +97,11 @@ class _PlayingTrackState extends State<PlayingTrack> {
                         IconButton(
                             onPressed: () async {
                               await Navigator.pushNamed(context, '/queue');
-                              setState(() {});
+                              if (trackQueue.length <= 0) {
+                                Navigator.pop(context);
+                              } else {
+                                setState(() {});
+                              }
                             },
                             icon: const Icon(Icons.view_list)),
                       ])
