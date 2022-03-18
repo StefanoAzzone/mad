@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
 import 'package:mad/Player.dart';
@@ -12,13 +14,21 @@ class PlayButton extends StatefulWidget {
 
 class _PlayButtonState extends State<PlayButton> {
   PlayerState state = PlayerState.PLAYING;
-
+  late StreamSubscription<PlayerState> sub;
   _PlayButtonState() {
-    player.audioPlayer.onPlayerStateChanged
+    sub = player.audioPlayer.onPlayerStateChanged
         .listen((PlayerState s) => {
           if(this.mounted) // we may have a leak
             setState(() => state = s)}
           );
+  }
+
+  @protected
+  @mustCallSuper
+  void dispose()
+  {
+    sub.cancel();
+    super.dispose();
   }
 
   @override
