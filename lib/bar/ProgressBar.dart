@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:mad/Player.dart';
 import 'dart:io';
@@ -17,8 +19,11 @@ class _ProgressBarState extends State<ProgressBar> {
   String positionString = "";
   String durationString = "";
 
+  late StreamSubscription<Duration> pos;
+  late StreamSubscription<Duration> dur;
+
   _ProgressBarState() {
-    player.audioPlayer.onAudioPositionChanged.listen((Duration p) {
+    pos = player.audioPlayer.onAudioPositionChanged.listen((Duration p) {
       if (!isChanging) {
         //print('Current position: $p');
         setState(() => trackPosition = p);
@@ -29,7 +34,7 @@ class _ProgressBarState extends State<ProgressBar> {
             trackPosition.inMinutes.toString() + ":" + positionString;
       }
     });
-    player.audioPlayer.onDurationChanged.listen((Duration d) {
+    dur = player.audioPlayer.onDurationChanged.listen((Duration d) {
       if (!isChanging) {
         //print('Max duration: $d');
         setState(() {
@@ -43,6 +48,15 @@ class _ProgressBarState extends State<ProgressBar> {
             trackDuration.inMinutes.toString() + ":" + durationString;
       }
     });
+  }
+
+  @protected
+  @mustCallSuper
+  void dispose()
+  {
+    pos.cancel();
+    dur.cancel();
+    super.dispose();
   }
 
   @override
