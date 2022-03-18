@@ -9,6 +9,8 @@ import 'package:mad/data.dart';
 import 'package:mad/metadata_loader.dart';
 
 class PlayingTrack extends StatefulWidget {
+  const PlayingTrack({Key? key}) : super(key: key);
+
   @override
   State<PlayingTrack> createState() => _PlayingTrackState();
 }
@@ -69,7 +71,7 @@ class _PlayingTrackState extends State<PlayingTrack> {
               Expanded(child: CoverButton()),
               Column(
                 children: [
-                  ProgressBar(),
+                  const ProgressBar(),
                   Row(
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: [
@@ -140,7 +142,7 @@ class _PlayingTrackState extends State<PlayingTrack> {
                         trackQueue.current().artist.name,
                         style: const TextStyle(fontSize: 12),
                       ),
-                      Expanded(child: ProgressBar()),
+                      const Expanded(child: ProgressBar()),
                       Row(
                           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                           children: [
