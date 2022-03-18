@@ -28,6 +28,8 @@ class DurationInfo
 DurationInfo durationInfo = DurationInfo.instance;
 
 class ProgressBar extends StatefulWidget {
+  const ProgressBar({Key? key}) : super(key: key);
+
 
   @override
   State<ProgressBar> createState() => _ProgressBarState();
