@@ -4,26 +4,22 @@ import 'package:mad/data.dart';
 import 'package:mad/metadata_loader.dart';
 
 class TrackList extends StatefulWidget {
-  Function callback;
-  List<Track> list;
-  TrackList(this.callback, this.list, {Key? key}) : super(key: key);
+  final Function callback;
+  final List<Track> tracks;
+  const TrackList(this.callback, this.tracks, {Key? key}) : super(key: key);
   @override
-  State<TrackList> createState() => _TrackListState(callback, list);
+  State<TrackList> createState() => _TrackListState();
 }
 
 class _TrackListState extends State<TrackList> {
-  Function callback;
-  List<Track> tracks;
   late Offset _tapPosition;
-
-  _TrackListState(this.callback, this.tracks);
 
   @override
   Widget build(BuildContext context) {
     Size size = MediaQuery.of(context).size;
     int count = database.state == DatabaseState.Ready
-        ? tracks.length + 1
-        : tracks.length + 2;
+        ? widget.tracks.length + 1
+        : widget.tracks.length + 2;
     var ncols =
         MediaQuery.of(context).orientation == Orientation.portrait ? 1 : 2;
 
@@ -35,7 +31,7 @@ class _TrackListState extends State<TrackList> {
         children: List.generate(count, (index) {
           RenderObject? overlay =
               Overlay.of(context)?.context.findRenderObject();
-          if (index >= tracks.length + 1) {
+          if (index >= widget.tracks.length + 1) {
             Size size = MediaQuery.of(context).size;
             return Center(
                 child: SizedBox(
@@ -55,7 +51,7 @@ class _TrackListState extends State<TrackList> {
               title: InkWell(
                   onTap: () async {
                     trackQueue.reset();
-                    trackQueue.addList(tracks);
+                    trackQueue.addList(widget.tracks);
                     trackQueue.shuffle();
                     player.play();
                     await Navigator.pushNamed(context, '/playingTrack');
@@ -110,7 +106,7 @@ class _TrackListState extends State<TrackList> {
                                                 context, '/editMetadata');
                                         if (metadata != null) {
                                           await database.setNewMetadata(
-                                              tracks[index - 1], metadata);
+                                              widget.tracks[index - 1], metadata);
                                           setState(() {
                                             //tracks = database.tracks;
                                           });
@@ -122,7 +118,7 @@ class _TrackListState extends State<TrackList> {
                                       )),
                                   TextButton(
                                       onPressed: () {
-                                        trackQueue.pushLast(tracks[index - 1]);
+                                        trackQueue.pushLast(widget.tracks[index - 1]);
                                         Navigator.pop(context);
                                       },
                                       child: const Text(
@@ -153,7 +149,7 @@ class _TrackListState extends State<TrackList> {
                                                             onTap: () async {
                                                               database
                                                                   .playlists[i]
-                                                                  .addTrack(tracks[
+                                                                  .addTrack(widget.tracks[
                                                                       index -
                                                                           1]);
                                                               await database
@@ -184,7 +180,7 @@ class _TrackListState extends State<TrackList> {
                         SizedBox(
                           width: size.width * 0.15,
                           height: 50,
-                          child: tracks[index - 1].album.thumbnail,
+                          child: widget.tracks[index - 1].album.thumbnail,
                         ),
                         const SizedBox(
                           height: 50,
@@ -201,7 +197,7 @@ class _TrackListState extends State<TrackList> {
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
                                 Text(
-                                  tracks[index - 1].title,
+                                  widget.tracks[index - 1].title,
                                   overflow: TextOverflow.ellipsis,
                                   textAlign: TextAlign.left,
                                   style: const TextStyle(
@@ -209,7 +205,7 @@ class _TrackListState extends State<TrackList> {
                                   ),
                                 ),
                                 Text(
-                                  tracks[index - 1].artist.name,
+                                  widget.tracks[index - 1].artist.name,
                                   overflow: TextOverflow.ellipsis,
                                   style: const TextStyle(
                                     fontSize: 11,
@@ -220,7 +216,7 @@ class _TrackListState extends State<TrackList> {
                       ],
                     ),
                     onTap: () {
-                      callback(tracks, index - 1);
+                      widget.callback(widget.tracks, index - 1);
                     },
                   )));
         }));
