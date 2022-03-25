@@ -13,11 +13,11 @@ import 'package:mad/screens/ShowQueue.dart';
 
 void main() {
   //Database.instance.init();
-  runApp(MyApp());
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
-  MyApp({Key? key}) : super(key: key);
+  const MyApp({Key? key}) : super(key: key);
 
   // This widget is the root of your application.
   @override
@@ -28,10 +28,10 @@ class MyApp extends StatelessWidget {
       routes: {
         '/': (context) => const MyHomePage(title: 'MBox'),
         '/playingTrack': (context) => const PlayingTrack(),
-        '/queue': (context) => ShowQueue(),
+        '/queue': (context) => const ShowQueue(),
         ExtractArgumentsSelectTracks.routeName: (context) =>
             const ExtractArgumentsSelectTracks(),
-        '/editMetadata': (context) => MetadataEditor(),
+        '/editMetadata': (context) => const MetadataEditor(),
         ExtractArgumentsArtistEditor.routeName: (context) =>
             const ExtractArgumentsArtistEditor(),
         ExtractArgumentsAlbumTracks.routeName: (context) =>

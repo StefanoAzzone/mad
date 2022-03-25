@@ -5,29 +5,26 @@ import 'package:mad/components/SwipeTrackList.dart';
 import 'package:mad/data.dart';
 
 class ShowPlaylist extends StatefulWidget {
-  ShowPlaylist(this.playlist, {Key? key}) : super(key: key);
-  Playlist playlist;
+  const ShowPlaylist(this.playlist, {Key? key}) : super(key: key);
+  final Playlist playlist;
   @override
-  State<ShowPlaylist> createState() => _ShowPlaylistState(playlist);
+  State<ShowPlaylist> createState() => _ShowPlaylistState();
 }
 
 class _ShowPlaylistState extends State<ShowPlaylist> {
-  Playlist playlist;
-  _ShowPlaylistState(this.playlist);
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Row(
           children: [
-            Expanded(child: Text(playlist.name)),
+            Expanded(child: Text(widget.playlist.name)),
             IconButton(
                 icon: const Icon(Icons.add),
                 onPressed: () async {
                   await Navigator.pushNamed(context, '/select',
                       arguments: (List<Track> tracks, index) {
-                    playlist.addTrack(tracks[index]);
+                    widget.playlist.addTrack(tracks[index]);
                     database.saveAllData();
                   });
                   setState(() {});
@@ -54,9 +51,9 @@ class _ShowPlaylistState extends State<ShowPlaylist> {
         await Navigator.pushNamed(context, '/playingTrack');
         setState(() {});
       }, (Track track) {
-        playlist.removeTrack(track);
+        widget.playlist.removeTrack(track);
         database.saveAllData();
-      }, playlist.tracks),
+      }, widget.playlist.tracks),
       floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
       bottomNavigationBar: const BottomAppBar(
           child: SizedBox(

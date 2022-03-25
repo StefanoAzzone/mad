@@ -5,22 +5,19 @@ import 'package:mad/components/PlayBar.dart';
 import 'package:mad/data.dart';
 
 class ArtistAlbums extends StatefulWidget {
-  Artist artist;
-  ArtistAlbums(this.artist, {Key? key}) : super(key: key);
+  final Artist artist;
+  const ArtistAlbums(this.artist, {Key? key}) : super(key: key);
   @override
-  State<ArtistAlbums> createState() => _ArtistAlbumsState(artist);
+  State<ArtistAlbums> createState() => _ArtistAlbumsState();
 }
 
 class _ArtistAlbumsState extends State<ArtistAlbums> {
-  Artist artist;
-  _ArtistAlbumsState(this.artist);
-
   @override
   Widget build(BuildContext context) {
     return OrientationBuilder(builder: (context, orientation) {
       return Scaffold(
           appBar: AppBar(
-            title: Text(artist.name),
+            title: Text(widget.artist.name),
             centerTitle: true,
             flexibleSpace: Container(
               decoration: const BoxDecoration(
@@ -40,7 +37,7 @@ class _ArtistAlbumsState extends State<ArtistAlbums> {
                       backgroundColor: Colors.lightBlue[100],
                       expandedHeight: 200,
                       flexibleSpace: FlexibleSpaceBar(background: () {
-                        return ArtistCard(artist);
+                        return ArtistCard(widget.artist);
                       }()),
                     ),
                   )
@@ -48,7 +45,7 @@ class _ArtistAlbumsState extends State<ArtistAlbums> {
               },
               body: Column(children: [
                 Expanded(
-                  child: AlbumList(artist.albumList),
+                  child: AlbumList(widget.artist.albumList),
                 ),
               ])),
           bottomNavigationBar: const BottomAppBar(

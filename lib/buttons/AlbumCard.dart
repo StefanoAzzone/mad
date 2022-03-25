@@ -2,19 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:mad/data.dart';
 
 class AlbumCard extends StatefulWidget {
-  int ncols;
-  Album album;
-  AlbumCard(this.album, this.ncols, {Key? key}) : super(key: key);
+  final int ncols;
+  final Album album;
+  const AlbumCard(this.album, this.ncols, {Key? key}) : super(key: key);
   @override
-  State<AlbumCard> createState() => _AlbumCardState(album, ncols);
+  State<AlbumCard> createState() => _AlbumCardState();
 
 
 }
 class _AlbumCardState extends State<AlbumCard> {
-  int ncols;
-  Album album;
-  _AlbumCardState(this.album, this.ncols);
-
   @override
   Widget build(BuildContext context) {
     Size size = MediaQuery.of(context).size;
@@ -24,13 +20,13 @@ class _AlbumCardState extends State<AlbumCard> {
           children: [
             Expanded(
                 child: SizedBox(
-                  child: album.cover,
-                  width: size.width / ncols - 20,
-                  height: size.width / ncols - 20,
+                  child: widget.album.cover,
+                  width: size.width / widget.ncols - 20,
+                  height: size.width / widget.ncols - 20,
                 ),
             ),
             Text(
-              ' ' + album.name,
+              ' ' + widget.album.name,
               overflow: TextOverflow.ellipsis,
               textAlign: TextAlign.left,
               style: const TextStyle(
@@ -39,7 +35,7 @@ class _AlbumCardState extends State<AlbumCard> {
               ),
             ),
             Text(
-              ' ' + album.artist.name,
+              ' ' + widget.album.artist.name,
               overflow: TextOverflow.ellipsis,
               textAlign: TextAlign.left,
               style: const TextStyle(

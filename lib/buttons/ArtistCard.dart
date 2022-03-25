@@ -3,16 +3,13 @@ import 'package:mad/data.dart';
 import 'package:mad/metadata_loader.dart';
 
 class ArtistCard extends StatefulWidget {
-  Artist artist;
-  ArtistCard(this.artist, {Key? key}) : super(key: key);
+  final Artist artist;
+  const ArtistCard(this.artist, {Key? key}) : super(key: key);
   @override
-  State<ArtistCard> createState() => _ArtistCardState(artist);
+  State<ArtistCard> createState() => _ArtistCardState();
 }
 
 class _ArtistCardState extends State<ArtistCard> {
-  Artist artist;
-  _ArtistCardState(this.artist);
-
   @override
   build(context) {
     Size size = MediaQuery.of(context).size;
@@ -26,7 +23,7 @@ class _ArtistCardState extends State<ArtistCard> {
             height: size.height / 3,
           ),
           SizedBox(
-            child: artist.image,
+            child: widget.artist.image,
             width: size.width / 3,
             height: size.height / 4,
           ),
@@ -44,7 +41,7 @@ class _ArtistCardState extends State<ArtistCard> {
                     ? size.height / 4
                     : size.height / 2,
                 child: FutureBuilder(
-                  future: loader.getWikipedia(artist.name),
+                  future: loader.getWikipedia(widget.artist.name),
                   builder:
                       (BuildContext context, AsyncSnapshot<String> snapshot) {
                     if (!loader.connected) {
@@ -79,7 +76,7 @@ class _ArtistCardState extends State<ArtistCard> {
       ),
       onTap: () async {
         await loader.checkConnection();
-        Navigator.pushNamed(context, "/artistInfo", arguments: artist.name);
+        Navigator.pushNamed(context, "/artistInfo", arguments: widget.artist.name);
       },
     );
   }
