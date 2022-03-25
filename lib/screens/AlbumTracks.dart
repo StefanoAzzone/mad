@@ -5,15 +5,13 @@ import 'package:mad/components/TrackList.dart';
 import 'package:mad/data.dart';
 
 class AlbumTracks extends StatefulWidget {
-  Album album;
-  AlbumTracks(this.album, {Key? key}) : super(key: key);
+  final Album album;
+  const AlbumTracks(this.album, {Key? key}) : super(key: key);
   @override
-  State<AlbumTracks> createState() => _AlbumTracksState(album);
+  State<AlbumTracks> createState() => _AlbumTracksState();
 }
 
 class _AlbumTracksState extends State<AlbumTracks> {
-  Album album;
-  _AlbumTracksState(this.album);
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -25,7 +23,7 @@ class _AlbumTracksState extends State<AlbumTracks> {
                     end: Alignment.bottomLeft,
                     colors: [Colors.indigo, Colors.lightBlue])),
           ),
-          title: Text(album.name),
+          title: Text(widget.album.name),
           centerTitle: true,
         ),
         body: Column(children: [
@@ -38,7 +36,7 @@ class _AlbumTracksState extends State<AlbumTracks> {
               player.play();
               await Navigator.pushNamed(context, '/playingTrack');
               setState(() {});
-            }, album.trackList),
+            }, widget.album.trackList),
           ),
         ]),
         bottomNavigationBar: const BottomAppBar(
