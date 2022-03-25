@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:mad/components/PlayBar.dart';
 
 import 'package:mad/data.dart';
@@ -6,6 +8,7 @@ import 'package:audioplayers/audioplayers.dart';
 Player player = Player.instance;
 
 class Player {
+  Map<int, Function> callbacks = <int, Function>{};
   PlayBar? playBar;
   static final Player instance = Player._internal();
   factory Player() {
@@ -17,6 +20,22 @@ class Player {
     });
   }
   AudioPlayer audioPlayer = AudioPlayer();
+
+  int subscribe(Function callback) {
+    int token = Random().nextInt(1 << 32);
+    callbacks[token] = callback;
+    return token;
+  }
+
+  void unsubscribe(int token) {
+    callbacks.remove(token);
+  }
+
+  void updateSubscribers() {
+    callbacks.forEach((key, value) {
+      value();
+    });
+  }
 
   void toggle() async {
     if (!isPlaying()) {
@@ -44,32 +63,33 @@ class Player {
     await audioPlayer.seek(position);
   }
 
-  void prev() async {
-    if (trackQueue.currentIndex == 0) {
-      await audioPlayer.seek(Duration.zero);
-      if (!isPlaying()) {
-        play();
-      }
-    } else {
-      if (isPlaying()) {
-        pause();
-      }
-      trackQueue.prev();
-      play();
+  Future<bool> prev() async {
+    await audioPlayer.seek(Duration.zero);
+    if (isPlaying()) {
+      pause();
     }
+    if (trackQueue.currentIndex == 0) {
+      play();
+      return true;
+    }
+    trackQueue.prev();
+    play();
+    updateSubscribers();
+    return true;
   }
 
-  void next() async {
-    if (trackQueue.currentIndex == trackQueue.length - 1) {
-      await audioPlayer.seek(Duration.zero);
+  Future<bool> next() async {
+    await audioPlayer.seek(Duration.zero);
+    if (isPlaying()) {
       pause();
-    } else {
-      if (isPlaying()) {
-        pause();
-      }
-      trackQueue.next();
-      play();
     }
+    if (trackQueue.currentIndex == trackQueue.length - 1) {
+      return true;
+    }
+    trackQueue.next();
+    play();
+    updateSubscribers();
+    return true;
   }
 
   bool isPlaying() {

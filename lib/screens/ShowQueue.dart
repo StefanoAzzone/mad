@@ -16,6 +16,21 @@ class _ShowQueueState extends State<ShowQueue> {
   List<Track> queue = [];
   double offset = 0.0;
   int lastSwipeIndex = 0;
+  late int token;
+
+  _ShowQueueState() {
+    token = player.subscribe(() {
+      setState(() {});
+    });
+  }
+
+  @override
+  @protected
+  @mustCallSuper
+  void dispose() {
+    super.dispose();
+    player.unsubscribe(token);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -78,12 +93,12 @@ class _ShowQueueState extends State<ShowQueue> {
                           double dx = details.delta.dx;
                           if (dx >= SWIPE_TRESHOLD && lastSwipeIndex >= 0) {
                             // swiping in right direction
-                            setState(() {
+                            setState(() async {
                               offset += dx;
                               if (offset >= MAX_SWIPE_OFFSET) {
                                 offset = 0;
                                 if (index == trackQueue.currentIndex) {
-                                  player.next();
+                                  await player.next();
                                 }
                                 trackQueue.remove(index);
                                 lastSwipeIndex = -1;

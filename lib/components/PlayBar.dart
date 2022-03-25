@@ -20,10 +20,10 @@ class PlayBar extends StatefulWidget {
 // PlayBar._internal();
 
 class _PlayBarState extends State<PlayBar> {
-  late StreamSubscription<Duration> sub;
+  late int token;
 
   _PlayBarState() {
-    sub = player.audioPlayer.onDurationChanged.listen((event) {
+    token = player.subscribe(() {
       setState(() {});
     });
   }
@@ -32,8 +32,8 @@ class _PlayBarState extends State<PlayBar> {
   @protected
   @mustCallSuper
   void dispose() {
-    sub.cancel();
     super.dispose();
+    player.unsubscribe(token);
   }
 
   @override
@@ -89,9 +89,10 @@ class _PlayBarState extends State<PlayBar> {
                           }
                         }()))
                   ]),
-                  onPressed: () {
+                  onPressed: () async {
                     if (trackQueue.length > 0) {
-                      Navigator.pushNamed(context, '/playingTrack');
+                      await Navigator.pushNamed(context, '/playingTrack');
+                      setState(() {});
                     }
                   },
                 )),
