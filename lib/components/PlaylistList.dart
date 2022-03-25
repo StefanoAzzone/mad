@@ -3,20 +3,17 @@ import 'package:flutter/material.dart';
 import 'package:mad/data.dart';
 
 class PlaylistList extends StatefulWidget {
-  Function update;
-  PlaylistList(this.update, {Key? key}) : super(key: key);
+  final Function update;
+  const PlaylistList(this.update, {Key? key}) : super(key: key);
   @override
-  State<PlaylistList> createState() => _PlaylistListState(update);
+  State<PlaylistList> createState() => _PlaylistListState();
 }
 
 class _PlaylistListState extends State<PlaylistList> {
-  Function update;
   List<Playlist> playlists = database.playlists;
   String newName = "";
   TextEditingController tec = TextEditingController();
   late Offset _tapPosition;
-
-  _PlaylistListState(this.update);
 
   @override
   Widget build(BuildContext context) {
@@ -83,7 +80,7 @@ class _PlaylistListState extends State<PlaylistList> {
                           onTap: () async {
                             await Navigator.pushNamed(context, '/showPlaylist',
                                 arguments: playlists[index]);
-                            update();
+                            widget.update();
                           },
                         )));
               }),
