@@ -6,12 +6,13 @@ import 'package:mad/metadata_loader.dart';
 import 'package:mad/screens/Info/AlbumInfo.dart';
 
 class ArtistInfo extends StatelessWidget {
-  String artistName;
-  String albumName = "Unknown Artist";
-  ArtistInfo(this.artistName, {Key? key}) : super(key: key);
+  final String artistName;
+
+  const ArtistInfo(this.artistName, {Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    String albumName = "Unknown album";
     if (!loader.connected) {
       return Scaffold(
           appBar: AppBar(
@@ -139,7 +140,7 @@ class ExtractArgumentsArtistInfo extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final String artistName =
-        ModalRoute.of(context)!.settings.arguments as String;
+        ModalRoute.of(context)?.settings.arguments as String;
 
     return ArtistInfo(artistName);
   }
