@@ -5,19 +5,14 @@ import 'package:mad/components/PlayBar.dart';
 import 'package:mad/metadata_loader.dart';
 import 'package:mad/screens/Info/AlbumInfo.dart';
 
-class ArtistInfo extends StatefulWidget {
+class ArtistInfo extends StatelessWidget {
   final String artistName;
+
   const ArtistInfo(this.artistName, {Key? key}) : super(key: key);
 
   @override
-  State<ArtistInfo> createState() => _ArtistInfoState();
-}
-
-class _ArtistInfoState extends State<ArtistInfo> {
-  String albumName = "Unknown album";
-
-  @override
   Widget build(BuildContext context) {
+    String albumName = "Unknown album";
     if (!loader.connected) {
       return Scaffold(
           appBar: AppBar(
@@ -38,7 +33,7 @@ class _ArtistInfoState extends State<ArtistInfo> {
     return OrientationBuilder(
       builder: (context, orientation) {
         return FutureBuilder(
-            future: loader.getAlbumsOfArtist(widget.artistName),
+            future: loader.getAlbumsOfArtist(artistName),
             builder: (context, snapshot) {
               if (!snapshot.hasData) {
                 return const Scaffold(
@@ -58,7 +53,7 @@ class _ArtistInfoState extends State<ArtistInfo> {
                                 end: Alignment.bottomLeft,
                                 colors: [Colors.indigo, Colors.lightBlue])),
                       ),
-                      title: Text(widget.artistName),
+                      title: Text(artistName),
                       centerTitle: true,
                     ),
                     body: Column(children: [
@@ -115,7 +110,7 @@ class _ArtistInfoState extends State<ArtistInfo> {
                                                 ),
                                               ),
                                               Text(
-                                                widget.artistName,
+                                                artistName,
                                                 overflow: TextOverflow.ellipsis,
                                                 textAlign: TextAlign.left,
                                                 style: const TextStyle(
@@ -145,7 +140,7 @@ class ExtractArgumentsArtistInfo extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final String artistName =
-        ModalRoute.of(context)!.settings.arguments as String;
+        ModalRoute.of(context)?.settings.arguments as String;
 
     return ArtistInfo(artistName);
   }

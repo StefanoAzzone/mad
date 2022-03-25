@@ -6,10 +6,9 @@ import 'package:mad/metadata_loader.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class AlbumInfo extends StatelessWidget {
-  var albumName = "Unknown Album";
-  var album;
+  final Object? album;
 
-  AlbumInfo(this.album, {Key? key}) : super(key: key);
+  const AlbumInfo(this.album, {Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -85,8 +84,6 @@ class AlbumInfo extends StatelessWidget {
                                           ),
                                         );
                                       } else {
-                                        albumName = loader
-                                            .extractAlbumTitleFromAlbum(album);
                                         return Card(
                                             child: Column(
                                           crossAxisAlignment:
@@ -198,7 +195,7 @@ class ExtractArgumentsAlbumInfo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final album = ModalRoute.of(context)!.settings.arguments;
+    final album = ModalRoute.of(context)?.settings.arguments;
 
     return AlbumInfo(album);
   }
