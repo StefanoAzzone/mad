@@ -5,10 +5,16 @@ import 'package:mad/components/PlayBar.dart';
 import 'package:mad/metadata_loader.dart';
 import 'package:mad/screens/Info/AlbumInfo.dart';
 
-class ArtistInfo extends StatelessWidget {
-  String artistName;
-  String albumName = "Unknown Artist";
-  ArtistInfo(this.artistName, {Key? key}) : super(key: key);
+class ArtistInfo extends StatefulWidget {
+  final String artistName;
+  const ArtistInfo(this.artistName, {Key? key}) : super(key: key);
+
+  @override
+  State<ArtistInfo> createState() => _ArtistInfoState();
+}
+
+class _ArtistInfoState extends State<ArtistInfo> {
+  String albumName = "Unknown album";
 
   @override
   Widget build(BuildContext context) {
@@ -32,7 +38,7 @@ class ArtistInfo extends StatelessWidget {
     return OrientationBuilder(
       builder: (context, orientation) {
         return FutureBuilder(
-            future: loader.getAlbumsOfArtist(artistName),
+            future: loader.getAlbumsOfArtist(widget.artistName),
             builder: (context, snapshot) {
               if (!snapshot.hasData) {
                 return const Scaffold(
@@ -52,7 +58,7 @@ class ArtistInfo extends StatelessWidget {
                                 end: Alignment.bottomLeft,
                                 colors: [Colors.indigo, Colors.lightBlue])),
                       ),
-                      title: Text(artistName),
+                      title: Text(widget.artistName),
                       centerTitle: true,
                     ),
                     body: Column(children: [
@@ -109,7 +115,7 @@ class ArtistInfo extends StatelessWidget {
                                                 ),
                                               ),
                                               Text(
-                                                artistName,
+                                                widget.artistName,
                                                 overflow: TextOverflow.ellipsis,
                                                 textAlign: TextAlign.left,
                                                 style: const TextStyle(
