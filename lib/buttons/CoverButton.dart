@@ -1,11 +1,6 @@
-import 'dart:typed_data';
 import 'dart:ui';
 
-import 'package:audioplayers/audioplayers.dart';
-import 'package:audiotagger/audiotagger.dart';
 import 'package:flutter/material.dart';
-import 'package:mad/Player.dart';
-import 'dart:io';
 
 import 'package:mad/data.dart';
 
@@ -15,7 +10,7 @@ class CoverButton extends StatefulWidget {
 }
 
 class _CoverButtonState extends State<CoverButton> {
-  bool lyricsVisible = false;
+  static bool lyricsVisible = false;
   double imageSize = 100;
 
   _CoverButtonState() {}
