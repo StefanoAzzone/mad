@@ -4,7 +4,7 @@ import 'package:mad/components/PlayBar.dart';
 import 'package:mad/data.dart';
 
 class ShowQueue extends StatefulWidget {
-  ShowQueue();
+  const ShowQueue({Key? key}) : super(key: key);
 
   @override
   State<ShowQueue> createState() => _ShowQueueState();
@@ -17,18 +17,13 @@ class _ShowQueueState extends State<ShowQueue> {
   double offset = 0.0;
   int lastSwipeIndex = 0;
 
-  void _update() {
-    setState(() {});
-  }
-
   @override
   Widget build(BuildContext context) {
-    Size size = MediaQuery.of(context).size;
     queue = trackQueue.queue;
     return Scaffold(
       appBar: AppBar(
         flexibleSpace: Container(
-          decoration: BoxDecoration(
+          decoration: const BoxDecoration(
               gradient: LinearGradient(
                   begin: Alignment.topRight,
                   end: Alignment.bottomLeft,
@@ -46,7 +41,7 @@ class _ShowQueueState extends State<ShowQueue> {
                     arguments: (List<Track> tracks, int index) {
                   trackQueue.pushLast(tracks[index]);
                 });
-                _update();
+                setState(() {});
               },
             ),
           ],
@@ -169,7 +164,7 @@ class _ShowQueueState extends State<ShowQueue> {
                         )));
               }),
         ),
-        PlayBar(),
+        const PlayBar(),
       ]),
     );
   }

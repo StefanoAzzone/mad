@@ -1,13 +1,14 @@
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
-import 'dart:io';
 
 import 'package:mad/data.dart';
 import 'package:mad/metadata_loader.dart';
 import 'package:mad/screens/ArtistAlbums.dart';
 
 class ArtistList extends StatefulWidget {
+  const ArtistList({Key? key}) : super(key: key);
+
   @override
   State<ArtistList> createState() => _ArtistListState();
 }
@@ -24,7 +25,7 @@ class _ArtistListState extends State<ArtistList> {
         int ncols = orientation == Orientation.portrait ? 3 : 5;
         return GridView.count(
             childAspectRatio: 0.9,
-            padding: EdgeInsets.only(top: 0.0),
+            padding: const EdgeInsets.only(top: 0.0),
             crossAxisCount: ncols,
             children: List.generate(artists.length, (index) {
               return GestureDetector(
@@ -59,8 +60,7 @@ class _ArtistListState extends State<ArtistList> {
                                           artists[index].image =
                                               Image.memory(image as Uint8List);
                                           database.saveArtistImage(
-                                              artists[index].id,
-                                              image as Uint8List?);
+                                              artists[index].id, image);
                                         }
                                         Navigator.pop(context);
                                         setState(() {});

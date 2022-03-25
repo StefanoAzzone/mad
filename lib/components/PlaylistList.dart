@@ -4,9 +4,9 @@ import 'package:mad/data.dart';
 
 class PlaylistList extends StatefulWidget {
   Function update;
-  PlaylistList(this.update);
+  PlaylistList(this.update, {Key? key}) : super(key: key);
   @override
-  State<PlaylistList> createState() => _PlaylistListState(this.update);
+  State<PlaylistList> createState() => _PlaylistListState(update);
 }
 
 class _PlaylistListState extends State<PlaylistList> {
@@ -24,7 +24,7 @@ class _PlaylistListState extends State<PlaylistList> {
       builder: (context, orientation) {
         return Scaffold(
             body: GridView.count(
-              padding: EdgeInsets.only(top: 0.0),
+              padding: const EdgeInsets.only(top: 0.0),
               childAspectRatio: 7,
               crossAxisCount: orientation == Orientation.portrait ? 1 : 2,
               shrinkWrap: true,
@@ -91,7 +91,7 @@ class _PlaylistListState extends State<PlaylistList> {
             floatingActionButtonLocation:
                 FloatingActionButtonLocation.endDocked,
             floatingActionButton: FloatingActionButton(
-                child: Icon(Icons.add),
+                child: const Icon(Icons.add),
                 onPressed: () {
                   showDialog(
                       context: context,

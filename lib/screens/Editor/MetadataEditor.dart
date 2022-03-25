@@ -1,15 +1,12 @@
-import 'dart:collection';
 import 'dart:typed_data';
 
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:mad/Player.dart';
-import 'package:mad/components/PlayBar.dart';
-import 'package:mad/components/TrackList.dart';
 import 'package:mad/data.dart';
 import 'package:mad/metadata_loader.dart';
 
 class MetadataEditor extends StatefulWidget {
+  const MetadataEditor({Key? key}) : super(key: key);
+
   @override
   State<MetadataEditor> createState() => _MetadataEditorState();
 }
@@ -32,7 +29,7 @@ class _MetadataEditorState extends State<MetadataEditor> {
                       colors: [Colors.indigo, Colors.lightBlue])),
             ),
           ),
-          body: Center(
+          body: const Center(
             child: Text(
                 "Cannot access server.\nTry to check your internet connection."),
           ));
@@ -42,7 +39,7 @@ class _MetadataEditorState extends State<MetadataEditor> {
     return Scaffold(
         appBar: AppBar(
           flexibleSpace: Container(
-            decoration: BoxDecoration(
+            decoration: const BoxDecoration(
                 gradient: LinearGradient(
                     begin: Alignment.topRight,
                     end: Alignment.bottomLeft,
@@ -58,7 +55,7 @@ class _MetadataEditorState extends State<MetadataEditor> {
                 });
               },
               decoration: InputDecoration(
-                contentPadding: EdgeInsets.all(10),
+                contentPadding: const EdgeInsets.all(10),
                 labelText: "Enter Name",
                 labelStyle: const TextStyle(
                   color: Colors.blue,

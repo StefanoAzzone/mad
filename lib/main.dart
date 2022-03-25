@@ -1,7 +1,4 @@
-import 'dart:collection';
-
 import 'package:flutter/material.dart';
-import 'package:mad/data.dart';
 import 'package:mad/screens/AlbumTracks.dart';
 import 'package:mad/screens/ArtistAlbums.dart';
 import 'package:mad/screens/Editor/ArtistEditor.dart';
@@ -30,7 +27,7 @@ class MyApp extends StatelessWidget {
       initialRoute: '/',
       routes: {
         '/': (context) => const MyHomePage(title: 'MBox'),
-        '/playingTrack': (context) => PlayingTrack(),
+        '/playingTrack': (context) => const PlayingTrack(),
         '/queue': (context) => ShowQueue(),
         ExtractArgumentsSelectTracks.routeName: (context) =>
             const ExtractArgumentsSelectTracks(),

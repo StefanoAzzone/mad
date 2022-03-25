@@ -4,7 +4,7 @@ import 'package:mad/metadata_loader.dart';
 
 class ArtistCard extends StatefulWidget {
   Artist artist;
-  ArtistCard(this.artist);
+  ArtistCard(this.artist, {Key? key}) : super(key: key);
   @override
   State<ArtistCard> createState() => _ArtistCardState(artist);
 }
@@ -13,6 +13,7 @@ class _ArtistCardState extends State<ArtistCard> {
   Artist artist;
   _ArtistCardState(this.artist);
 
+  @override
   build(context) {
     Size size = MediaQuery.of(context).size;
     Orientation orientation = MediaQuery.of(context).orientation;
@@ -54,13 +55,13 @@ class _ArtistCardState extends State<ArtistCard> {
                       return Center(
                           child: Text(
                         snapshot.data!,
-                        style: TextStyle(overflow: TextOverflow.fade),
+                        style: const TextStyle(overflow: TextOverflow.fade),
                       ));
                     } else if (snapshot.connectionState ==
                         ConnectionState.waiting) {
                       return Center(
                           child: SizedBox(
-                        child: CircularProgressIndicator(),
+                        child: const CircularProgressIndicator(),
                         width: size.width / 10,
                         //height: size.height/10,
                       ));

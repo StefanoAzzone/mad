@@ -1,18 +1,13 @@
 import 'dart:async';
-import 'dart:collection';
 import 'dart:typed_data';
 
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:mad/Player.dart';
-import 'package:mad/components/PlayBar.dart';
-import 'package:mad/components/TrackList.dart';
 import 'package:mad/data.dart';
 import 'package:mad/metadata_loader.dart';
 
 class ArtistEditor extends StatefulWidget {
   String artistName;
-  ArtistEditor(this.artistName);
+  ArtistEditor(this.artistName, {Key? key}) : super(key: key);
 
   @override
   State<ArtistEditor> createState() => _ArtistEditorState(artistName);
@@ -39,7 +34,7 @@ class _ArtistEditorState extends State<ArtistEditor> {
                       colors: [Colors.indigo, Colors.lightBlue])),
             ),
           ),
-          body: Center(
+          body: const Center(
             child: Text(
                 "Cannot access server.\nTry to check your internet connection."),
           ));
@@ -49,17 +44,17 @@ class _ArtistEditorState extends State<ArtistEditor> {
     return Scaffold(
         appBar: AppBar(
           flexibleSpace: Container(
-            decoration: BoxDecoration(
+            decoration: const BoxDecoration(
                 gradient: LinearGradient(
-                    begin: Alignment.topRight,
-                    end: Alignment.bottomLeft,
+                    begin: Alignment.topRight, end: Alignment.bottomLeft,
+                    // ignore: prefer_const_literals_to_create_immutables
                     colors: [Colors.indigo, Colors.lightBlue])),
           ),
           title: TextFormField(
             initialValue: artistName,
             onChanged: (value) {
               timer.cancel();
-              timer = Timer(Duration(milliseconds: 500), () {
+              timer = Timer(const Duration(milliseconds: 500), () {
                 print("updated");
                 setState(() {
                   artistName = value;
@@ -72,14 +67,14 @@ class _ArtistEditorState extends State<ArtistEditor> {
               fillColor: Colors.white,
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(30.0),
-                borderSide: BorderSide(
+                borderSide: const BorderSide(
                   color: Colors.lightBlue,
                   width: 2.0,
                 ),
               ),
               enabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(30.0),
-                borderSide: BorderSide(
+                borderSide: const BorderSide(
                   color: Colors.lightBlue,
                   width: 3.0,
                 ),
@@ -98,7 +93,7 @@ class _ArtistEditorState extends State<ArtistEditor> {
               Expanded(
                   child: GridView.count(
                 childAspectRatio: 1,
-                padding: EdgeInsets.only(top: 0.0),
+                padding: const EdgeInsets.only(top: 0.0),
                 crossAxisCount: 2,
                 shrinkWrap: true,
                 children: List.generate(

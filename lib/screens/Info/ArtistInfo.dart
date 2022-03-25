@@ -23,7 +23,7 @@ class ArtistInfo extends StatelessWidget {
                       colors: [Colors.indigo, Colors.lightBlue])),
             ),
           ),
-          body: Center(
+          body: const Center(
             child: Text(
                 "Cannot access server.\nTry to check your internet connection."),
           ));
@@ -120,10 +120,9 @@ class ArtistInfo extends StatelessWidget {
                                           ));
                                         }
                                       },
-                                    )
-                                );
+                                    ));
                               }))),
-                      PlayBar(),
+                      const PlayBar(),
                     ]));
               }
             });

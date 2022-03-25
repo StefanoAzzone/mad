@@ -7,7 +7,6 @@ import 'package:mad/components/PlaylistList.dart';
 import 'package:mad/components/TrackList.dart';
 import 'package:mad/data.dart';
 import 'package:mad/metadata_loader.dart';
-import 'package:mad/screens/PlayingTrack.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class MyHomePage extends StatefulWidget {
@@ -19,8 +18,6 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
-
   void _updatePage() {
     setState(() {});
   }
@@ -65,7 +62,7 @@ class _MyHomePageState extends State<MyHomePage> {
                                 await launch(url);
                               }
                             },
-                            icon: Icon(Icons.search))
+                            icon: const Icon(Icons.search))
                       ],
                     ),
                     pinned: true,
@@ -106,12 +103,12 @@ class _MyHomePageState extends State<MyHomePage> {
                     setState(() {});
                   }, database.tracks),
                   AlbumList(database.albums),
-                  ArtistList(),
+                  const ArtistList(),
                   PlaylistList(_updatePage)
                 ],
               ),
             ),
-            bottomNavigationBar: BottomAppBar(
+            bottomNavigationBar: const BottomAppBar(
                 child: SizedBox(
               child: PlayBar(),
               height: 50,

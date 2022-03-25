@@ -17,7 +17,6 @@ class _ArtistAlbumsState extends State<ArtistAlbums> {
 
   @override
   Widget build(BuildContext context) {
-    Size size = MediaQuery.of(context).size;
     return OrientationBuilder(builder: (context, orientation) {
       return Scaffold(
           appBar: AppBar(
@@ -32,7 +31,6 @@ class _ArtistAlbumsState extends State<ArtistAlbums> {
             ),
           ),
           body: NestedScrollView(
-
               headerSliverBuilder:
                   (BuildContext context, bool innerBoxIsScrolled) {
                 return <Widget>[
@@ -41,8 +39,7 @@ class _ArtistAlbumsState extends State<ArtistAlbums> {
                       automaticallyImplyLeading: false,
                       backgroundColor: Colors.lightBlue[100],
                       expandedHeight: 200,
-                      flexibleSpace:
-                      FlexibleSpaceBar(background: () {
+                      flexibleSpace: FlexibleSpaceBar(background: () {
                         return ArtistCard(artist);
                       }()),
                     ),
@@ -53,9 +50,8 @@ class _ArtistAlbumsState extends State<ArtistAlbums> {
                 Expanded(
                   child: AlbumList(artist.albumList),
                 ),
-              ])
-          ),
-          bottomNavigationBar: BottomAppBar(
+              ])),
+          bottomNavigationBar: const BottomAppBar(
               child: SizedBox(
             child: PlayBar(),
             height: 50,

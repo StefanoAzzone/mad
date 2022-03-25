@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:mad/Player.dart';
 import 'package:mad/components/PlayBar.dart';
 import 'package:mad/components/SwipeTrackList.dart';
-import 'package:mad/components/TrackList.dart';
 import 'package:mad/data.dart';
 
 class ShowPlaylist extends StatefulWidget {
@@ -59,7 +58,7 @@ class _ShowPlaylistState extends State<ShowPlaylist> {
         database.saveAllData();
       }, playlist.tracks),
       floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
-      bottomNavigationBar: BottomAppBar(
+      bottomNavigationBar: const BottomAppBar(
           child: SizedBox(
         child: PlayBar(),
         height: 50,

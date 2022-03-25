@@ -1,6 +1,4 @@
-import 'package:flutter/material.dart';
 import 'package:mad/components/PlayBar.dart';
-import 'dart:io';
 
 import 'package:mad/data.dart';
 import 'package:audioplayers/audioplayers.dart';
@@ -30,8 +28,7 @@ class Player {
 
   void play() async {
     if (trackQueue.length > 0) {
-      int result =
-          await audioPlayer.play(trackQueue.current().path, isLocal: true);
+      await audioPlayer.play(trackQueue.current().path, isLocal: true);
     }
   }
 

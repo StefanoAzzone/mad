@@ -6,7 +6,7 @@ import 'package:mad/metadata_loader.dart';
 class TrackList extends StatefulWidget {
   Function callback;
   List<Track> list;
-  TrackList(this.callback, this.list);
+  TrackList(this.callback, this.list, {Key? key}) : super(key: key);
   @override
   State<TrackList> createState() => _TrackListState(callback, list);
 }
@@ -28,7 +28,7 @@ class _TrackListState extends State<TrackList> {
         MediaQuery.of(context).orientation == Orientation.portrait ? 1 : 2;
 
     return GridView.count(
-        padding: EdgeInsets.only(top: 0.0),
+        padding: const EdgeInsets.only(top: 0.0),
         crossAxisCount: ncols,
         shrinkWrap: true,
         childAspectRatio: 6.5,
@@ -62,7 +62,7 @@ class _TrackListState extends State<TrackList> {
                     setState(() {});
                   },
                   child: Padding(
-                      padding: EdgeInsets.all(15.0),
+                      padding: const EdgeInsets.all(15.0),
                       child: Row(
                         children: const [
                           Expanded(
@@ -137,7 +137,7 @@ class _TrackListState extends State<TrackList> {
                                               return AlertDialog(
                                                   title: const Text(
                                                       'Add to playlist'),
-                                                  content: Container(
+                                                  content: SizedBox(
                                                     height: 500,
                                                     width: 500,
                                                     child: ListView.builder(

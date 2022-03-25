@@ -24,14 +24,13 @@ class AlbumInfo extends StatelessWidget {
                       colors: [Colors.indigo, Colors.lightBlue])),
             ),
           ),
-          body: Center(
+          body: const Center(
             child: Text(
                 "Cannot access server.\nTry to check your internet connection."),
           ));
     }
 
     Size size = MediaQuery.of(context).size;
-    Orientation orientation = MediaQuery.of(context).orientation;
 
     return OrientationBuilder(
       builder: (context, orientation) {
@@ -95,8 +94,10 @@ class AlbumInfo extends StatelessWidget {
                                           children: [
                                             Center(
                                               child: SizedBox(
-                                                height: orientation == Orientation.portrait ?
-                                                        size.height*0.5 : size.height*0.47,
+                                                height: orientation ==
+                                                        Orientation.portrait
+                                                    ? size.height * 0.5
+                                                    : size.height * 0.47,
                                                 child: Image.memory(
                                                     snapshotImage.data
                                                         as Uint8List),
@@ -181,7 +182,7 @@ class AlbumInfo extends StatelessWidget {
                               );
                             }),
                       )),
-                      PlayBar(),
+                      const PlayBar(),
                     ]);
                   }
                 }));

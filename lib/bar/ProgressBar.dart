@@ -2,9 +2,6 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:mad/Player.dart';
-import 'dart:io';
-
-import 'package:mad/data.dart';
 
 String durationToString(Duration duration) {
   String twoDigits(int n) => n.toString().padLeft(2, "0");
@@ -13,8 +10,7 @@ String durationToString(Duration duration) {
   return twoDigitMinutes + ":" + twoDigitSeconds;
 }
 
-class DurationInfo
-{
+class DurationInfo {
   Duration trackPosition = const Duration();
   Duration trackDuration = const Duration();
 
@@ -30,7 +26,6 @@ DurationInfo durationInfo = DurationInfo.instance;
 class ProgressBar extends StatefulWidget {
   const ProgressBar({Key? key}) : super(key: key);
 
-
   @override
   State<ProgressBar> createState() => _ProgressBarState();
 }
@@ -45,7 +40,6 @@ class _ProgressBarState extends State<ProgressBar> {
     pos = player.audioPlayer.onAudioPositionChanged.listen((Duration p) {
       if (!isChanging) {
         setState(() => durationInfo.trackPosition = p);
-
       }
     });
     dur = player.audioPlayer.onDurationChanged.listen((Duration d) {
@@ -55,10 +49,10 @@ class _ProgressBarState extends State<ProgressBar> {
     });
   }
 
+  @override
   @protected
   @mustCallSuper
-  void dispose()
-  {
+  void dispose() {
     pos.cancel();
     dur.cancel();
     super.dispose();
@@ -69,7 +63,7 @@ class _ProgressBarState extends State<ProgressBar> {
     return Row(
       children: [
         Padding(
-          padding: EdgeInsets.all(8.0),
+          padding: const EdgeInsets.all(8.0),
           child: Text(durationToString(durationInfo.trackPosition)),
         ),
         Expanded(
@@ -91,7 +85,7 @@ class _ProgressBarState extends State<ProgressBar> {
               max: durationInfo.trackDuration.inSeconds.toDouble()),
         ),
         Padding(
-          padding: EdgeInsets.all(8.0),
+          padding: const EdgeInsets.all(8.0),
           child: Text(durationToString(durationInfo.trackDuration)),
         ),
       ],

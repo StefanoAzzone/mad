@@ -6,7 +6,7 @@ import 'package:mad/data.dart';
 
 class AlbumTracks extends StatefulWidget {
   Album album;
-  AlbumTracks(this.album);
+  AlbumTracks(this.album, {Key? key}) : super(key: key);
   @override
   State<AlbumTracks> createState() => _AlbumTracksState(album);
 }
@@ -41,7 +41,7 @@ class _AlbumTracksState extends State<AlbumTracks> {
             }, album.trackList),
           ),
         ]),
-        bottomNavigationBar: BottomAppBar(
+        bottomNavigationBar: const BottomAppBar(
             child: SizedBox(
           child: PlayBar(),
           height: 50,

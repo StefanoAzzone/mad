@@ -1,5 +1,3 @@
-import 'dart:ffi';
-
 import 'package:flutter/material.dart';
 import 'package:mad/Player.dart';
 import 'package:mad/data.dart';
@@ -39,7 +37,7 @@ class _SwipeTrackListState extends State<SwipeTrackList> {
         MediaQuery.of(context).orientation == Orientation.portrait ? 1 : 2;
 
     return GridView.count(
-        padding: EdgeInsets.only(top: 0.0),
+        padding: const EdgeInsets.only(top: 0.0),
         crossAxisCount: ncols,
         shrinkWrap: true,
         childAspectRatio: 6.5,
@@ -73,7 +71,7 @@ class _SwipeTrackListState extends State<SwipeTrackList> {
                     setState(() {});
                   },
                   child: Padding(
-                      padding: EdgeInsets.all(15.0),
+                      padding: const EdgeInsets.all(15.0),
                       child: Row(
                         children: const [
                           Expanded(
@@ -174,7 +172,7 @@ class _SwipeTrackListState extends State<SwipeTrackList> {
                                               return AlertDialog(
                                                   title: const Text(
                                                       'Add to playlist'),
-                                                  content: Container(
+                                                  content: SizedBox(
                                                     height: 500,
                                                     width: 500,
                                                     child: ListView.builder(

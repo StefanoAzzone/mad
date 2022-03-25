@@ -67,7 +67,7 @@ class _PlayingTrackState extends State<PlayingTrack> {
                 trackQueue.current().artist.name,
                 style: const TextStyle(fontSize: 12),
               ),
-              Expanded(child: CoverButton()),
+              const Expanded(child: CoverButton()),
               Column(
                 children: [
                   const ProgressBar(),
@@ -87,7 +87,7 @@ class _PlayingTrackState extends State<PlayingTrack> {
                               setState(() {});
                             },
                             icon: const Icon(Icons.skip_previous_rounded)),
-                        PlayButton(),
+                        const PlayButton(),
                         IconButton(
                             onPressed: () {
                               player.next();
@@ -113,7 +113,7 @@ class _PlayingTrackState extends State<PlayingTrack> {
                 child: Row(
                     //mainAxisAlignment: MainAxisAlignment.end,
                     children: [
-                  Expanded(child: CoverButton()),
+                  const Expanded(child: CoverButton()),
                   Expanded(
                       child: Column(
                     children: [
@@ -163,7 +163,7 @@ class _PlayingTrackState extends State<PlayingTrack> {
                                   setState(() {});
                                 },
                                 icon: const Icon(Icons.skip_previous_rounded)),
-                            PlayButton(),
+                            const PlayButton(),
                             IconButton(
                                 onPressed: () {
                                   player.next();

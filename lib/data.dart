@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:ffi';
 import 'dart:math';
 import 'dart:typed_data';
 import 'package:flutter/src/widgets/image.dart' as img;
@@ -309,7 +308,7 @@ class TrackQueue {
   }
 
   Track current() {
-    if (queue.length > 0) {
+    if (queue.isNotEmpty) {
       return queue[currentIndex];
     } else {
       return Track("UnknownTrack", "path", Database.UnknownArtist,
@@ -419,11 +418,11 @@ class Database {
     }
 
     for (var e in (json['tracks'] as List<dynamic>)) {
-      insertTrack(await Track.fromJson(e as Map<String, dynamic>));
+      insertTrack(Track.fromJson(e as Map<String, dynamic>));
     }
 
     for (var e in (json['playlists'] as List<dynamic>)) {
-      insertPlaylist(await Playlist.fromJson(e as Map<String, dynamic>));
+      insertPlaylist(Playlist.fromJson(e as Map<String, dynamic>));
     }
     return true;
   }
@@ -899,7 +898,6 @@ class Database {
         return;
       }
     }
-    File file = File((await _coversDirectory).path + '/' + album.id.toString());
 
     albums.add(album);
     album.artist.addAlbum(album);

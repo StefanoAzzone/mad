@@ -1,15 +1,11 @@
-import 'dart:collection';
-
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:mad/Player.dart';
 import 'package:mad/components/PlayBar.dart';
 import 'package:mad/components/TrackList.dart';
 import 'package:mad/data.dart';
 
 class SelectTracks extends StatelessWidget {
   Function callback;
-  SelectTracks(this.callback);
+  SelectTracks(this.callback, {Key? key}) : super(key: key);
 
   List<Track> list = [];
 
@@ -30,7 +26,7 @@ class SelectTracks extends StatelessWidget {
         ),
         body: Column(children: [
           Expanded(child: TrackList(callback, list)),
-          PlayBar(),
+          const PlayBar(),
         ]));
   }
 }
