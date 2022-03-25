@@ -6,23 +6,23 @@ import 'package:mad/data.dart';
 import 'package:mad/metadata_loader.dart';
 
 class ArtistEditor extends StatefulWidget {
-  String artistName;
-  ArtistEditor(this.artistName, {Key? key}) : super(key: key);
+  final String artistName;
+  const ArtistEditor(this.artistName, {Key? key}) : super(key: key);
 
   @override
-  State<ArtistEditor> createState() => _ArtistEditorState(artistName);
+  State<ArtistEditor> createState() => _ArtistEditorState();
 }
 
 class _ArtistEditorState extends State<ArtistEditor> {
-  final int MAX_IMAGES = 10;
+  final int maxImages = 10;
   Size size = Size.zero;
-  String artistName;
   Timer timer = Timer(Duration.zero, () => 0);
-
-  _ArtistEditorState(this.artistName);
+  String artistName = "Unknown artist";
 
   @override
   Widget build(BuildContext context) {
+    artistName = widget.artistName;
+
     if (!loader.connected) {
       return Scaffold(
           appBar: AppBar(
@@ -55,7 +55,6 @@ class _ArtistEditorState extends State<ArtistEditor> {
             onChanged: (value) {
               timer.cancel();
               timer = Timer(const Duration(milliseconds: 500), () {
-                print("updated");
                 setState(() {
                   artistName = value;
                 });
@@ -84,7 +83,7 @@ class _ArtistEditorState extends State<ArtistEditor> {
           centerTitle: true,
         ),
         body: FutureBuilder(
-          future: loader.searchAllArtists(artistName),
+          future: loader.searchAllArtists(widget.artistName),
           builder: (context, altSnapshot) {
             if (!altSnapshot.hasData) {
               return const Center(child: Text("No artist found."));
@@ -97,9 +96,9 @@ class _ArtistEditorState extends State<ArtistEditor> {
                 crossAxisCount: 2,
                 shrinkWrap: true,
                 children: List.generate(
-                  loader.getItemsCount(altSnapshot.data) <= MAX_IMAGES
+                  loader.getItemsCount(altSnapshot.data) <= maxImages
                       ? loader.getItemsCount(altSnapshot.data)
-                      : MAX_IMAGES,
+                      : maxImages,
                   (index) {
                     return FutureBuilder(
                         future: loader.getArtistImage(loader.extractId(
