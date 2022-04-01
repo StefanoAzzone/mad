@@ -5,6 +5,14 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "name": "release",
+            "request": "launch",
+            "type": "dart",
+            "program": "lib/main.dart",
+            "flutterMode": "release"
+        },
+
+        {
             "name": "mad",
             "request": "launch",
             "type": "dart",
@@ -14,7 +22,8 @@
             "name": "mad (profile mode)",
             "request": "launch",
             "type": "dart",
-            "flutterMode": "profile"
+            "flutterMode": "profile",
+            "args": ["--no-sound-null-safety"]
         }
     ]
 }

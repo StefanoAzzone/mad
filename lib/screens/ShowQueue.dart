@@ -11,8 +11,8 @@ class ShowQueue extends StatefulWidget {
 }
 
 class _ShowQueueState extends State<ShowQueue> {
-  final int maxSwipeOffset = 200;
-  final int swipeThreshold = 1;
+  final int MAX_SWIPE_OFFSET = 200;
+  final int SWIPE_TRESHOLD = 1;
   List<Track> queue = [];
   double offset = 0.0;
   int lastSwipeIndex = 0;
@@ -91,14 +91,14 @@ class _ShowQueueState extends State<ShowQueue> {
                     child: GestureDetector(
                         onPanUpdate: (details) {
                           double dx = details.delta.dx;
-                          if (dx >= swipeThreshold && lastSwipeIndex >= 0) {
+                          if (dx >= SWIPE_TRESHOLD && lastSwipeIndex >= 0) {
                             // swiping in right direction
-                            setState(() async {
+                            setState(() {
                               offset += dx;
-                              if (offset >= maxSwipeOffset) {
+                              if (offset >= MAX_SWIPE_OFFSET) {
                                 offset = 0;
                                 if (index == trackQueue.currentIndex) {
-                                  await player.next();
+                                  player.next();
                                 }
                                 trackQueue.remove(index);
                                 lastSwipeIndex = -1;

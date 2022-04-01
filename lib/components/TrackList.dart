@@ -23,6 +23,12 @@ class _TrackListState extends State<TrackList> {
     var ncols =
         MediaQuery.of(context).orientation == Orientation.portrait ? 1 : 2;
 
+    if (widget.tracks.isEmpty) {
+      return const Center(
+        child: Text("No content here."),
+      );
+    }
+
     return GridView.count(
         padding: const EdgeInsets.only(top: 0.0),
         crossAxisCount: ncols,
@@ -106,7 +112,8 @@ class _TrackListState extends State<TrackList> {
                                                 context, '/editMetadata');
                                         if (metadata != null) {
                                           await database.setNewMetadata(
-                                              widget.tracks[index - 1], metadata);
+                                              widget.tracks[index - 1],
+                                              metadata);
                                           setState(() {
                                             //tracks = database.tracks;
                                           });
@@ -118,7 +125,8 @@ class _TrackListState extends State<TrackList> {
                                       )),
                                   TextButton(
                                       onPressed: () {
-                                        trackQueue.pushLast(widget.tracks[index - 1]);
+                                        trackQueue
+                                            .pushLast(widget.tracks[index - 1]);
                                         Navigator.pop(context);
                                       },
                                       child: const Text(
@@ -149,7 +157,8 @@ class _TrackListState extends State<TrackList> {
                                                             onTap: () async {
                                                               database
                                                                   .playlists[i]
-                                                                  .addTrack(widget.tracks[
+                                                                  .addTrack(widget
+                                                                          .tracks[
                                                                       index -
                                                                           1]);
                                                               await database

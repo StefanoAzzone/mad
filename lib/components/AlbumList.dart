@@ -12,8 +12,20 @@ class AlbumList extends StatefulWidget {
 }
 
 class _AlbumListState extends State<AlbumList> {
+  static final int unknownAlbumID = Database.UnknownAlbum.id;
+
   @override
   Widget build(BuildContext context) {
+    bool toDelete = false;
+    for (var album in widget.albums) {
+      if (album.id == unknownAlbumID && album.trackList.isEmpty) {
+        toDelete = true;
+      }
+    }
+    if (toDelete) {
+      widget.albums.remove(Database.UnknownAlbum);
+    }
+
     return OrientationBuilder(
       builder: (context, orientation) {
         int ncols = orientation == Orientation.portrait ? 2 : 4;

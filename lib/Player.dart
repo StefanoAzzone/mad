@@ -63,33 +63,34 @@ class Player {
     await audioPlayer.seek(position);
   }
 
-  Future<bool> prev() async {
-    await audioPlayer.seek(Duration.zero);
-    if (isPlaying()) {
-      pause();
-    }
+  void prev() async {
     if (trackQueue.currentIndex == 0) {
+      await audioPlayer.seek(Duration.zero);
+      if (!isPlaying()) {
+        play();
+      }
+    } else {
+      if (isPlaying()) {
+        pause();
+      }
+      trackQueue.prev();
       play();
-      return true;
     }
-    trackQueue.prev();
-    play();
     updateSubscribers();
-    return true;
   }
 
-  Future<bool> next() async {
-    await audioPlayer.seek(Duration.zero);
-    if (isPlaying()) {
-      pause();
-    }
+  void next() async {
     if (trackQueue.currentIndex == trackQueue.length - 1) {
-      return true;
+      await audioPlayer.seek(Duration.zero);
+      pause();
+    } else {
+      if (isPlaying()) {
+        pause();
+      }
+      trackQueue.next();
+      play();
     }
-    trackQueue.next();
-    play();
     updateSubscribers();
-    return true;
   }
 
   bool isPlaying() {

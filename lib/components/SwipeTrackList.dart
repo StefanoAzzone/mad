@@ -10,8 +10,7 @@ class SwipeTrackList extends StatefulWidget {
   const SwipeTrackList(this.callback, this.onSwipe, this.tracks, {Key? key})
       : super(key: key);
   @override
-  State<SwipeTrackList> createState() =>
-      _SwipeTrackListState();
+  State<SwipeTrackList> createState() => _SwipeTrackListState();
 }
 
 class _SwipeTrackListState extends State<SwipeTrackList> {
@@ -22,7 +21,6 @@ class _SwipeTrackListState extends State<SwipeTrackList> {
   double offset = 0.0;
   int lastSwipeIndex = 0;
 
-
   @override
   Widget build(BuildContext context) {
     Size size = MediaQuery.of(context).size;
@@ -31,6 +29,12 @@ class _SwipeTrackListState extends State<SwipeTrackList> {
         : widget.tracks.length + 2;
     var ncols =
         MediaQuery.of(context).orientation == Orientation.portrait ? 1 : 2;
+
+    if (widget.tracks.isEmpty) {
+      return const Center(
+        child: Text("No content here"),
+      );
+    }
 
     return GridView.count(
         padding: const EdgeInsets.only(top: 0.0),
@@ -141,7 +145,8 @@ class _SwipeTrackListState extends State<SwipeTrackList> {
                                                 context, '/editMetadata');
                                         if (metadata != null) {
                                           await database.setNewMetadata(
-                                              widget.tracks[index - 1], metadata);
+                                              widget.tracks[index - 1],
+                                              metadata);
                                           setState(() {
                                             //tracks = database.tracks;
                                           });
@@ -153,7 +158,8 @@ class _SwipeTrackListState extends State<SwipeTrackList> {
                                       )),
                                   TextButton(
                                       onPressed: () {
-                                        trackQueue.pushLast(widget.tracks[index - 1]);
+                                        trackQueue
+                                            .pushLast(widget.tracks[index - 1]);
                                         Navigator.pop(context);
                                       },
                                       child: const Text(
@@ -184,7 +190,8 @@ class _SwipeTrackListState extends State<SwipeTrackList> {
                                                             onTap: () async {
                                                               database
                                                                   .playlists[i]
-                                                                  .addTrack(widget.tracks[
+                                                                  .addTrack(widget
+                                                                          .tracks[
                                                                       index -
                                                                           1]);
                                                               await database

@@ -14,11 +14,24 @@ class ArtistList extends StatefulWidget {
 }
 
 class _ArtistListState extends State<ArtistList> {
+  static final int unknownArtistID = Database.UnknownArtist.id;
   late Offset _tapPosition = Offset.zero;
   List<Artist> artists = Database.instance.artists;
 
   @override
   Widget build(BuildContext context) {
+    bool toDelete = true;
+
+    for (var album in Database.UnknownArtist.albumList) {
+      if (album.trackList.isNotEmpty) {
+        toDelete = false;
+      }
+    }
+
+    if (toDelete) {
+      artists.remove(Database.UnknownArtist);
+    }
+
     Size size = MediaQuery.of(context).size;
     return OrientationBuilder(
       builder: (context, orientation) {
