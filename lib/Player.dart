@@ -49,6 +49,7 @@ class Player {
     if (trackQueue.length > 0) {
       await audioPlayer.play(trackQueue.current().path, isLocal: true);
     }
+    updateSubscribers();
   }
 
   void toEnd() async {
