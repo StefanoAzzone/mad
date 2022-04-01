@@ -67,7 +67,7 @@ class _PlayingTrackState extends State<PlayingTrack> {
                 trackQueue.current().artist.name,
                 style: const TextStyle(fontSize: 12),
               ),
-              const Expanded(child: CoverButton()),
+              Expanded(child: CoverButton()),
               Column(
                 children: [
                   const ProgressBar(),
