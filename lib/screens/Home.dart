@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:mad/Player.dart';
+import 'package:mad/buttons/reload_button.dart';
 import 'package:mad/components/AlbumList.dart';
 import 'package:mad/components/ArtistList.dart';
 import 'package:mad/components/PlayBar.dart';
@@ -45,10 +46,8 @@ class _MyHomePageState extends State<MyHomePage> {
                     snap: false,
                     title: Row(
                       children: [
-                        const Expanded(
-                            child: Text(
-                          '  MBox',
-                        )),
+                        ReloadButton(_updatePage),
+                        Expanded(child: Container()),
                         IconButton(
                             onPressed: () async {
                               await loader.checkConnection();

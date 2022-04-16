@@ -448,6 +448,7 @@ class Database {
     insertAlbum(UnknownAlbum);
 
     await trackQueue.loadQueue();
+    update();
 
     await fetchNewData(update);
     state = DatabaseState.Ready;
@@ -479,10 +480,16 @@ class Database {
     return true;
   }
 
-  Future deleteAll() async {
+  Future<bool> deleteAll() async {
     (await _artistsDirectory).delete(recursive: true);
     (await _coversDirectory).delete(recursive: true);
     (await _savedDB).delete(recursive: true);
+    trackQueue.reset();
+    playlists = [];
+    artists = [];
+    albums = [];
+    tracks = [];
+    return true;
   }
 
   void saveArtistImage(int id, Uint8List? image) async {
