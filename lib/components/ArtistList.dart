@@ -27,9 +27,14 @@ class _ArtistListState extends State<ArtistList> {
         toDelete = false;
       }
     }
-
     if (toDelete) {
       artists.remove(Database.UnknownArtist);
+    }
+
+    if (artists.isEmpty) {
+      return const Center(
+        child: Text("No artists here."),
+      );
     }
 
     Size size = MediaQuery.of(context).size;

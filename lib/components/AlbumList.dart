@@ -26,6 +26,12 @@ class _AlbumListState extends State<AlbumList> {
       widget.albums.remove(Database.UnknownAlbum);
     }
 
+    if (widget.albums.isEmpty) {
+      return const Center(
+        child: Text("No albums here."),
+      );
+    }
+
     return OrientationBuilder(
       builder: (context, orientation) {
         int ncols = orientation == Orientation.portrait ? 2 : 4;
