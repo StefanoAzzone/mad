@@ -17,6 +17,52 @@ class _PlaylistListState extends State<PlaylistList> {
 
   @override
   Widget build(BuildContext context) {
+    if (playlists.isEmpty) {
+      return Scaffold(
+        body: const Center(
+          child: Text(
+            "No playlists here.\n\n\nCreate one with the + button",
+            textAlign: TextAlign.center,
+          ),
+        ),
+        floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
+        floatingActionButton: FloatingActionButton(
+            child: const Icon(Icons.add),
+            onPressed: () {
+              showDialog(
+                  context: context,
+                  builder: (BuildContext context) {
+                    return AlertDialog(
+                      title: const Text('New playlist'),
+                      content: TextFormField(
+                        controller: tec,
+                        decoration: const InputDecoration(
+                          border: OutlineInputBorder(),
+                          labelText: 'Playlist name',
+                        ),
+                      ),
+                      actions: <Widget>[
+                        TextButton(
+                          onPressed: () => Navigator.pop(context, 'Cancel'),
+                          child: const Text('Cancel'),
+                        ),
+                        TextButton(
+                          onPressed: () async {
+                            setState(() {
+                              database.insertPlaylist(Playlist(tec.text));
+                            });
+                            await database.saveAllData();
+                            Navigator.pop(context, 'OK');
+                          },
+                          child: const Text('OK'),
+                        ),
+                      ],
+                    );
+                  });
+            }),
+      );
+    }
+
     return OrientationBuilder(
       builder: (context, orientation) {
         return Scaffold(
