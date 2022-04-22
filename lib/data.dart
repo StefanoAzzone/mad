@@ -8,6 +8,7 @@ import 'package:audiotagger/audiotagger.dart';
 import 'package:audiotagger/models/tag.dart';
 import 'package:crypto/crypto.dart';
 import 'package:mad/metadata_loader.dart';
+import 'package:mad/worker.dart';
 import 'package:path/path.dart' as p;
 import 'dart:convert'; // for the utf8.encode method
 import 'dart:io';
@@ -68,14 +69,13 @@ class Artist {
   }
 
   static Future<Artist> fromJson(Map<String, dynamic> json) async {
-    File file = File(
-        (await database._artistsDirectory).path + '/' + json["id"].toString());
+    String path = (await database._artistsDirectory).path + '/' + json["id"].toString();
+    Uint8List? image = await Database.worker.getImage(path);
 
     return Artist(
-        json["name"],
-        await file.exists()
-            ? img.Image.memory(await file.readAsBytes())
-            : defaultImage);
+        json["name"], image != null?
+                      img.Image.memory(image) :
+                      defaultImage);
   }
 
   Map<String, dynamic> toJson() => <String, dynamic>{
@@ -427,6 +427,8 @@ class Database {
     return true;
   }
 
+  static Worker worker = Worker();
+
   void init(Function update) async {
     var status = await Permission.camera.status;
     if (status.isDenied) {
@@ -442,6 +444,7 @@ class Database {
     state = DatabaseState.Loading;
     //deleteAll();
     await loader.initialize();
+    await worker.initialize();
     await loadData(update);
 
     insertArtist(UnknownArtist);
