@@ -4,17 +4,21 @@ import 'dart:io';
 import 'dart:isolate';
 import 'dart:typed_data';
 import 'package:async/async.dart';
+import 'package:mad/data.dart';
+import 'package:path_provider/path_provider.dart';
 
 enum Command
 {
   getLocalImage,
-  saveImage
+  saveImage,
+  saveDatabase,
 }
 
 class Message
 {
   Command command;
   late String path;
+  late String database;
   late Uint8List image;
 
   Message(
@@ -45,7 +49,7 @@ class Worker
   }
   
   Future<Uint8List?> getLocalImage(String path) async {
-    Message message = Message(Command.saveImage);
+    Message message = Message(Command.getLocalImage);
     message.path = path;
     toWorker.send(message);
     Uint8List? response = await fromWorker.next;
@@ -59,24 +63,33 @@ class Worker
     toWorker.send(message);
   }
 
+  void saveDatabase(String db) {
+    Message message = Message(Command.saveDatabase);
+    message.database = db;
+    assert(database.dbPath != "");
+    message.path = database.dbPath;
+    toWorker.send(message);
+  }
+
+
+
   Future<void> _worker(SendPort p) async {
     final commandPort = ReceivePort();
     p.send(commandPort.sendPort);
     await for (final message in commandPort) {
       if (message is Message) {
-        dynamic res;
         switch (message.command) {
           case Command.getLocalImage:
-            res = null;
+            Uint8List? res;
             String path = message.path;
             File file = File(path);
             if(await file.exists())
             {
               res = await File(path).readAsBytes();
             }
+            p.send(res);
             break;
           case Command.saveImage:
-            res = null;
             String path = message.path;
             File file = File(path);
             if(!await file.exists())
@@ -85,9 +98,12 @@ class Worker
             }
             file.writeAsBytes(message.image);
             break;
+          case Command.saveDatabase:
+            File file = File(message.path);
+            file.writeAsString(message.database, mode: FileMode.write, flush: true);
+            break;
           default:
         }
-        p.send(res);
       } else if (message == null) {
         break;
       }

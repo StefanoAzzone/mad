@@ -360,11 +360,15 @@ class Database {
     return dir;
   }
 
+  String dbPath = "";
   Future<File> get _savedDB async {
-    String path = (await getApplicationDocumentsDirectory()).path;
-    File file = File(path + "/MBox/db");
+    if(dbPath == "")
+    {
+      dbPath = (await getApplicationDocumentsDirectory()).path + "/MBox/db";
+    }
+    File file = File(dbPath);
     if (!await file.exists()) {
-      print("Creating DB file: " + path + "/MBox/db");
+      print("Creating DB file: " + dbPath + "/MBox/db");
       await file.create(recursive: true);
     }
     return file;
@@ -442,6 +446,7 @@ class Database {
     }
 
     await Permission.manageExternalStorage.request();
+    await _savedDB;
     state = DatabaseState.Loading;
     //deleteAll();
     await loader.initialize();
@@ -457,6 +462,7 @@ class Database {
     await fetchNewData(update);
     state = DatabaseState.Ready;
     update();
+    worker.shutdown();
   }
 
   Future<bool> loadData(Function update) async {
@@ -466,7 +472,7 @@ class Database {
       print("No saved data.");
       return false;
     }
-    File savedDB = File(directory.path + "/db");
+    File savedDB = await _savedDB;
     if (!await savedDB.exists()) {
       print("No saved data.");
       return false;
@@ -498,35 +504,22 @@ class Database {
 
   void saveArtistImage(int id, Uint8List? image) async {
     if (image != null) {
-      File file = File((await _artistsDirectory).path + '/' + id.toString());
-      if (!await file.exists()) {
-        print("Creating file " + file.path);
-        await file.create();
-      }
-      file.writeAsBytes(image);
+      String path = (await _artistsDirectory).path + '/' + id.toString();
+      Database.worker.saveImage(path, image);
     }
   }
 
   void saveAlbumCover(int id, Uint8List? image) async {
     if (image != null) {
-      File file = File((await _coversDirectory).path + '/' + id.toString());
-      if (!await file.exists()) {
-        print("Creating file " + file.path);
-        await file.create();
-      }
-      file.writeAsBytes(image);
+      String path = (await _coversDirectory).path + '/' + id.toString();
+      Database.worker.saveImage(path, image);
     }
   }
 
   void saveAlbumThumbnail(int id, Uint8List? image) async {
     if (image != null) {
-      File file = File(
-          (await _coversDirectory).path + '/' + id.toString() + '_thumb.png');
-      if (!await file.exists()) {
-        print("Creating file " + file.path);
-        await file.create();
-      }
-      file.writeAsBytes(image);
+      String path = (await _coversDirectory).path + '/' + id.toString() + '_thumb.png';
+      Database.worker.saveImage(path, image);
     }
   }
 
@@ -534,14 +527,9 @@ class Database {
   /// Delete saved database and save it anew
   ///
   Future<bool> saveAllData() async {
-    //(await _savedDB).delete();
-
-    File db = await _savedDB;
-    //print("Recreating file " + db.path);
-
     try {
-      String JsonDB = jsonEncode(toJson());
-      await db.writeAsString(JsonDB, mode: FileMode.write, flush: true);
+      String jsonDB = jsonEncode(toJson());
+      Database.worker.saveDatabase(jsonDB);
     } catch (e) {
       print("Error while saving data.");
       return false;
