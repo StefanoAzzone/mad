@@ -7,17 +7,18 @@ import 'package:async/async.dart';
 
 enum Command
 {
-  image,
+  getLocalImage,
+  saveImage
 }
 
 class Message
 {
   Command command;
-  dynamic body;
+  late String path;
+  late Uint8List image;
 
   Message(
     this.command,
-    this.body
   );
 }
 
@@ -44,9 +45,18 @@ class Worker
   }
   
   Future<Uint8List?> getLocalImage(String path) async {
-    toWorker.send(Message(Command.image, path));
-    Uint8List? message = await fromWorker.next;
-    return message;
+    Message message = Message(Command.saveImage);
+    message.path = path;
+    toWorker.send(message);
+    Uint8List? response = await fromWorker.next;
+    return response;
+  }
+
+  void saveImage(String path, Uint8List image) {
+    Message message = Message(Command.saveImage);
+    message.path = path;
+    message.image = image;
+    toWorker.send(message);
   }
 
   Future<void> _worker(SendPort p) async {
@@ -56,17 +66,24 @@ class Worker
       if (message is Message) {
         dynamic res;
         switch (message.command) {
-          case Command.image:
+          case Command.getLocalImage:
             res = null;
-            String? path = message.body;
-            if(path != null)
+            String path = message.path;
+            File file = File(path);
+            if(await file.exists())
             {
-              File file = File(path);
-              if(await file.exists())
-              {
-                res = await File(path).readAsBytes();
-              }
+              res = await File(path).readAsBytes();
             }
+            break;
+          case Command.saveImage:
+            res = null;
+            String path = message.path;
+            File file = File(path);
+            if(!await file.exists())
+            {
+              await file.create();
+            }
+            file.writeAsBytes(message.image);
             break;
           default:
         }
