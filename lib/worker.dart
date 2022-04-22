@@ -2,11 +2,23 @@
 import 'dart:async';
 import 'dart:io';
 import 'dart:isolate';
+import 'dart:typed_data';
 import 'package:async/async.dart';
 
 enum Command
 {
   image,
+}
+
+class Message
+{
+  Command command;
+  dynamic body;
+
+  Message(
+    this.command,
+    this.body
+  );
 }
 
 class Worker
@@ -20,8 +32,8 @@ class Worker
   {
     ReceivePort rp = ReceivePort();
     await Isolate.spawn(_worker, rp.sendPort);
-    final events = StreamQueue<dynamic>(rp);
-    toWorker = await events.next;
+    fromWorker = StreamQueue<dynamic>(rp);
+    toWorker = await fromWorker.next;
     return true;
   }
 
@@ -31,9 +43,9 @@ class Worker
     await fromWorker.cancel();
   }
   
-  dynamic getImage(String path) async {
-    toWorker.send({Command.image: path});
-    dynamic message = await fromWorker.next;
+  Future<Uint8List?> getLocalImage(String path) async {
+    toWorker.send(Message(Command.image, path));
+    Uint8List? message = await fromWorker.next;
     return message;
   }
 
@@ -41,12 +53,12 @@ class Worker
     final commandPort = ReceivePort();
     p.send(commandPort.sendPort);
     await for (final message in commandPort) {
-      if (message is Map<Command, String>) {
+      if (message is Message) {
         dynamic res;
-        switch (message.keys.first) {
+        switch (message.command) {
           case Command.image:
             res = null;
-            String? path = message[Command.image];
+            String? path = message.body;
             if(path != null)
             {
               File file = File(path);

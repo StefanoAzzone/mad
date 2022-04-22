@@ -70,7 +70,7 @@ class Artist {
 
   static Future<Artist> fromJson(Map<String, dynamic> json) async {
     String path = (await database._artistsDirectory).path + '/' + json["id"].toString();
-    Uint8List? image = await Database.worker.getImage(path);
+    Uint8List? image = await Database.worker.getLocalImage(path);
 
     return Artist(
         json["name"], image != null?
@@ -109,21 +109,22 @@ class Album {
   }
 
   static Future<Album> fromJson(Map<String, dynamic> json) async {
-    File coverFile = File(
-        (await database._coversDirectory).path + '/' + json["id"].toString());
-    File thumbnailFile = File((await database._coversDirectory).path +
+    String coverPath = (await database._coversDirectory).path + '/' + json["id"].toString();
+    Uint8List? coverFile = await Database.worker.getLocalImage(coverPath);
+    String thumbnailPath = (await database._coversDirectory).path +
         '/' +
         json["id"].toString() +
-        '_thumb.png');
+        '_thumb.png';
+    Uint8List? thumbnailFile = await Database.worker.getLocalImage(thumbnailPath);
 
     return Album(
         json["name"],
         database.containsArtist(json["Artist"]) ?? Database.UnknownArtist,
-        await coverFile.exists()
-            ? img.Image.memory(await coverFile.readAsBytes())
+        coverFile != null
+            ? img.Image.memory(coverFile)
             : defaultImage,
-        await thumbnailFile.exists()
-            ? img.Image.memory(await thumbnailFile.readAsBytes())
+        thumbnailFile != null
+            ? img.Image.memory(thumbnailFile)
             : defaultAlbumThumbnail);
   }
 
