@@ -5,7 +5,6 @@ import 'dart:isolate';
 import 'dart:typed_data';
 import 'package:async/async.dart';
 import 'package:mad/data.dart';
-import 'package:path_provider/path_provider.dart';
 
 enum Command
 {
@@ -30,22 +29,36 @@ class Worker
 {
   late SendPort toWorker;
   late StreamQueue<dynamic> fromWorker;
+  bool initialized = false;
 
-  Worker();
+
+  static final Worker _worker = Worker._internal();
+
+  factory Worker() {
+    return _worker;
+  }
+
+  Worker._internal();
 
   Future<bool> initialize() async
   {
-    ReceivePort rp = ReceivePort();
-    await Isolate.spawn(_worker, rp.sendPort);
-    fromWorker = StreamQueue<dynamic>(rp);
-    toWorker = await fromWorker.next;
-    return true;
+    if(!initialized)
+    {
+      ReceivePort rp = ReceivePort();
+      await Isolate.spawn(_workerBody, rp.sendPort);
+      fromWorker = StreamQueue<dynamic>(rp);
+      toWorker = await fromWorker.next;
+      initialized = true;
+      return true;
+    }
+    return false;
   }
 
   void shutdown() async
   {
     toWorker.send(null);
     await fromWorker.cancel();
+    initialized = false;
   }
   
   Future<Uint8List?> getLocalImage(String path) async {
@@ -71,9 +84,7 @@ class Worker
     toWorker.send(message);
   }
 
-
-
-  Future<void> _worker(SendPort p) async {
+  Future<void> _workerBody(SendPort p) async {
     final commandPort = ReceivePort();
     p.send(commandPort.sendPort);
     await for (final message in commandPort) {

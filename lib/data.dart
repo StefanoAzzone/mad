@@ -462,7 +462,6 @@ class Database {
     await fetchNewData(update);
     state = DatabaseState.Ready;
     update();
-    worker.shutdown();
   }
 
   Future<bool> loadData(Function update) async {
@@ -484,6 +483,8 @@ class Database {
       update();
     } catch (e) {
       print("Error while loading data.");
+      print(await savedDB.readAsString());
+      print(e);
       return false;
     }
     print("Data loaded succesfully.");
@@ -579,7 +580,7 @@ class Database {
       insertTrack(await extractTrack(tags[i], files[toAdd[i]].path));
       update();
     }
-
+    print("New tracks loaded\n");
     await saveAllData();
     return true;
   }
