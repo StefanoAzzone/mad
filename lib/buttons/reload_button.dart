@@ -27,7 +27,7 @@ class _ReloadButtonState extends State<ReloadButton> {
 
   void onPressed() {
     ++numberOfTaps;
-    if (numberOfTaps >= 10) {
+    if (numberOfTaps >= 10 && database.state == DatabaseState.Ready) {
       showDialog(
           context: context,
           builder: (BuildContext context) {

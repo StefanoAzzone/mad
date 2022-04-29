@@ -69,13 +69,12 @@ class Artist {
   }
 
   static Future<Artist> fromJson(Map<String, dynamic> json) async {
-    String path = (await database._artistsDirectory).path + '/' + json["id"].toString();
+    String path =
+        (await database._artistsDirectory).path + '/' + json["id"].toString();
     Uint8List? image = await Database.worker.getLocalImage(path);
 
     return Artist(
-        json["name"], image != null?
-                      img.Image.memory(image) :
-                      defaultImage);
+        json["name"], image != null ? img.Image.memory(image) : defaultImage);
   }
 
   Map<String, dynamic> toJson() => <String, dynamic>{
@@ -109,20 +108,20 @@ class Album {
   }
 
   static Future<Album> fromJson(Map<String, dynamic> json) async {
-    String coverPath = (await database._coversDirectory).path + '/' + json["id"].toString();
+    String coverPath =
+        (await database._coversDirectory).path + '/' + json["id"].toString();
     Uint8List? coverFile = await Database.worker.getLocalImage(coverPath);
     String thumbnailPath = (await database._coversDirectory).path +
         '/' +
         json["id"].toString() +
         '_thumb.png';
-    Uint8List? thumbnailFile = await Database.worker.getLocalImage(thumbnailPath);
+    Uint8List? thumbnailFile =
+        await Database.worker.getLocalImage(thumbnailPath);
 
     return Album(
         json["name"],
         database.containsArtist(json["Artist"]) ?? Database.UnknownArtist,
-        coverFile != null
-            ? img.Image.memory(coverFile)
-            : defaultImage,
+        coverFile != null ? img.Image.memory(coverFile) : defaultImage,
         thumbnailFile != null
             ? img.Image.memory(thumbnailFile)
             : defaultAlbumThumbnail);
@@ -362,8 +361,7 @@ class Database {
 
   String dbPath = "";
   Future<File> get _savedDB async {
-    if(dbPath == "")
-    {
+    if (dbPath == "") {
       dbPath = (await getApplicationDocumentsDirectory()).path + "/MBox/db";
     }
     File file = File(dbPath);
@@ -427,6 +425,7 @@ class Database {
     }
 
     for (var e in (json['playlists'] as List<dynamic>)) {
+      insertPlaylist(Playlist.fromJson(e as Map<String, dynamic>));
       insertPlaylist(Playlist.fromJson(e as Map<String, dynamic>));
     }
     return true;
@@ -519,7 +518,8 @@ class Database {
 
   void saveAlbumThumbnail(int id, Uint8List? image) async {
     if (image != null) {
-      String path = (await _coversDirectory).path + '/' + id.toString() + '_thumb.png';
+      String path =
+          (await _coversDirectory).path + '/' + id.toString() + '_thumb.png';
       Database.worker.saveImage(path, image);
     }
   }

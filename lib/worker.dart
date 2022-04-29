@@ -1,4 +1,3 @@
-
 import 'dart:async';
 import 'dart:io';
 import 'dart:isolate';
@@ -6,15 +5,14 @@ import 'dart:typed_data';
 import 'package:async/async.dart';
 import 'package:mad/data.dart';
 
-enum Command
-{
+enum Command {
   getLocalImage,
   saveImage,
   saveDatabase,
+  flush,
 }
 
-class Message
-{
+class Message {
   Command command;
   late String path;
   late String database;
@@ -25,12 +23,10 @@ class Message
   );
 }
 
-class Worker
-{
+class Worker {
   late SendPort toWorker;
   late StreamQueue<dynamic> fromWorker;
   bool initialized = false;
-
 
   static final Worker _worker = Worker._internal();
 
@@ -40,10 +36,8 @@ class Worker
 
   Worker._internal();
 
-  Future<bool> initialize() async
-  {
-    if(!initialized)
-    {
+  Future<bool> initialize() async {
+    if (!initialized) {
       ReceivePort rp = ReceivePort();
       await Isolate.spawn(_workerBody, rp.sendPort);
       fromWorker = StreamQueue<dynamic>(rp);
@@ -54,13 +48,12 @@ class Worker
     return false;
   }
 
-  void shutdown() async
-  {
+  void shutdown() async {
     toWorker.send(null);
     await fromWorker.cancel();
     initialized = false;
   }
-  
+
   Future<Uint8List?> getLocalImage(String path) async {
     Message message = Message(Command.getLocalImage);
     message.path = path;
@@ -94,8 +87,7 @@ class Worker
             Uint8List? res;
             String path = message.path;
             File file = File(path);
-            if(await file.exists())
-            {
+            if (await file.exists()) {
               res = await File(path).readAsBytes();
             }
             p.send(res);
@@ -103,15 +95,15 @@ class Worker
           case Command.saveImage:
             String path = message.path;
             File file = File(path);
-            if(!await file.exists())
-            {
+            if (!await file.exists()) {
               await file.create();
             }
             file.writeAsBytes(message.image);
             break;
           case Command.saveDatabase:
             File file = File(message.path);
-            file.writeAsString(message.database, mode: FileMode.write, flush: true);
+            file.writeAsString(message.database,
+                mode: FileMode.write, flush: true);
             break;
           default:
         }
@@ -122,5 +114,3 @@ class Worker
     Isolate.exit();
   }
 }
-
-
