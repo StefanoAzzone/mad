@@ -44,3 +44,8 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+*.toc
+*.fls
+*.aux
+*.fdb_latexmk
+*.synctex.gz
