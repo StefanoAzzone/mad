@@ -371,8 +371,8 @@ orientation.
 \end{figure}
 
 This component displays a GridView of the Artist Cards, that contain the artist
-name and image. The GestureDetector allows to edit the artist image, while the
-IconButton allows to access the ArtistAlbum screen.
+name and image. The GestureDetector allows to edit the artist image through
+ArtistEditor, while the IconButton allows to access the ArtistAlbum screen.
 
 The OrientationBuilder allows to choose an appropriate layout for the device
 orientation.
@@ -476,5 +476,87 @@ playing track occurs, that change is shown.
 		\includegraphics[scale=0.5]{images/ArtistEditor.png}}
 	\caption{ArtistEditor} 
 \end{figure}
+
+The ArtistEditor is a widget that allows to select a new artwork for the input
+artist. The artwork can be searched online by writing inside the TextFormField.
+
+The results, if present, are listed as a grid (GridView) and returned by the
+FutureBuilder, as tiles (ListTile) of images and names.
+
+The LinearGradient widget allows to apply a pleasant color to the AppBar.
+
+\subsubsection{MetadataEditor (also known as SearchSong)}
+
+\begin{figure}[H]
+	\noindent
+	\makebox[\textwidth]{ 
+		\includegraphics[scale=0.5]{images/MetadataEditor_SearchSong.png}}
+	\caption{MetadataEditor (also known as SearchSong)} 
+\end{figure}
+
+The MetadataEditor is a widget that allows to set new metadata for the selected
+track. The metadata can be searched online by writing inside the TextFormField.
+
+The results, if present are returned as FutureBuilder and listed with a GridView
+(this allows for flexible visualization in different orientations). They contain
+image, name and artist. If tapped, the metadata of the selected track is
+replaced with the metadata of the tapped track.
+
+The LinearGradient widget allows to apply a pleasant color to the AppBar.
+
+\subsubsection{AlbumInfo}
+
+\begin{figure}[H]
+	\noindent
+	\makebox[\textwidth]{ 
+		\includegraphics[scale=0.4]{images/AlbumInfo.png}}
+	\caption{AlbumInfo} 
+\end{figure}
+
+The AlbumInfo screen is composed by the AppBar, the PlayBar and if available
+(FutureBuilder), the info about the requested album.
+
+The information about the album is contained in the NestedScrollView. At the top
+we have a Card, showing the album cover. The cover will be hidden if scrolling
+down the GridView. The grid is composed of tiles with track number and name.
+
+\subsubsection{ArtistInfo}
+
+\begin{figure}[H]
+	\noindent
+	\makebox[\textwidth]{ 
+		\includegraphics[scale=0.4]{images/ArtistInfo.png}}
+	\caption{ArtistInfo} 
+\end{figure}
+
+The ArtistInfo screen is composed by the AppBar, the PlayBar and if available
+(FutureBuilder), the info about the requested artist.
+
+The information about the artist is contained in the NestedScrollView. The grid
+is composed of cards with album image, name and artist.
+
+\subsubsection{AlbumTracks}
+
+\begin{figure}[H]
+	\noindent
+	\makebox[\textwidth]{ 
+		\includegraphics[scale=0.4]{images/AlbumTracks.png}}
+	\caption{AlbumTracks} 
+\end{figure}
+
+The AlbumTracks screen is composed by the AppBar, the PlayBar and the TrackList.
+It receives as input the list of tracks of an album, and displays them in a
+grid by using the TrackList.
+
+\subsubsection{ArtistAlbums}
+
+\begin{figure}[H]
+	\noindent
+	\makebox[\textwidth]{ 
+		\includegraphics[scale=0.4]{images/ArtistAlbums.png}}
+	\caption{ArtistAlbums} 
+\end{figure}
+
+TBC.
 
 \end{document}
