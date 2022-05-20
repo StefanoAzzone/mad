@@ -54,7 +54,6 @@ class _ShowPlaylistState extends State<ShowPlaylist> {
         widget.playlist.removeTrack(track);
         database.saveAllData();
       }, widget.playlist.tracks),
-      floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
       bottomNavigationBar: const BottomAppBar(
           child: SizedBox(
         child: PlayBar(),

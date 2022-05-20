@@ -1,6 +1,7 @@
 \documentclass{article}
 \usepackage{float}
 \usepackage{graphicx}
+\usepackage{subfig}
 \author{Simone Abelli, Stefano Azzone}
 \title{DIMA Project report: MBox}
 \begin{document}
@@ -545,18 +546,211 @@ is composed of cards with album image, name and artist.
 \end{figure}
 
 The AlbumTracks screen is composed by the AppBar, the PlayBar and the TrackList.
+
 It receives as input the list of tracks of an album, and displays them in a
 grid by using the TrackList.
+
+The first button of the grid instead allows to shuffle the album tracks, add
+them to the queue and start playback.
 
 \subsubsection{ArtistAlbums}
 
 \begin{figure}[H]
 	\noindent
 	\makebox[\textwidth]{ 
-		\includegraphics[scale=0.4]{images/ArtistAlbums.png}}
-	\caption{ArtistAlbums} 
+		\includegraphics[scale=0.35]{images/ArtistAlbums.png}}
+	\caption{ArtistAlbums}
 \end{figure}
 
-TBC.
+The ArtistAlbums screen is composed by:
+\begin{itemize}
+    \item the AppBar, that shows the name of the artist, 
+    \item the PlayBar at the bottom, that allows controlling playback and
+        accessing the queue with a tap,
+    \item the albums of the selected artist organized in a grid; above it there
+        is a card containing a small description of the artist and their image.
+\end{itemize}
+
+When tapping the card, the GestureDetector opens the ArtistInfo page of the
+artist.
+
+\subsubsection{PlayingTrack}
+
+\begin{figure}[H]
+	\noindent
+	\makebox[\textwidth]{ 
+		\includegraphics[scale=0.35]{images/PlayingTrack.png}}
+	\caption{PlayingTrack}
+\end{figure}
+
+The PlayingTrack screen has a column composed of:
+\begin{itemize}
+    \item The track name and its artist
+    \item The CoverButton that shows the album art of the current track, and If
+        tapped the lyrics.
+    \item The ProgressBar that shows the current position in the song.
+    \item The Play/Pause, skip forward and backward, on the left the info button
+        that shows the ArtistInfo screen, on the right the button to access the
+        ShowQueue screen.
+\end{itemize}
+
+\subsubsection{SelectTracks}
+
+\begin{figure}[H]
+	\noindent
+	\makebox[\textwidth]{ 
+		\includegraphics[scale=0.5]{images/SelectTracks.png}}
+	\caption{SelectTracks}
+\end{figure}
+
+The SelectTracks screen is composed by a TrackList, and returns the tapped track
+to the calling widget.
+
+\subsubsection{ShowPlaylist}
+
+\begin{figure}[H]
+	\noindent
+	\makebox[\textwidth]{ 
+		\includegraphics[scale=0.5]{images/ShowPlaylist.png}}
+	\caption{ShowPlaylist}
+\end{figure}
+
+The ShowPlaylist screen is composed by:
+\begin{itemize}
+    \item the AppBar that contains the title of the selected playlist and the
+        add button on the right, to add a track to the playlist through the
+        SelectTracks screen.
+    \item a SwipeTrackList that allows with a swipe to delete the swiped track,
+        and is otherwise a normal TrackList.
+    \item the PlayBar that allows to control music playback.
+\end{itemize}
+
+\subsubsection{ShowQueue}
+
+\begin{figure}[H]
+	\noindent
+	\makebox[\textwidth]{ 
+		\includegraphics[scale=0.35]{images/ShowQueue.png}}
+	\caption{ShowQueue}
+\end{figure}
+
+The ShowQueue screen is composed by:
+\begin{itemize}
+    \item the AppBar titled "Queue", and the
+        add button on the right, to add a track to the queue through the
+        SelectTracks screen.
+    \item a Grid that lists the songs in the queue, composed by a number on the
+        left that represent their position in the queue (0 if currently playing,
+        greater than 0 if to be played, lesser than 0 if already played), the
+        album art and track title and artist.
+
+        By swiping one of the tracks it can be removed from the queue.
+    \item the PlayBar that allows to control music playback.
+\end{itemize}
+
+\subsection{Deployment View}
+
+The deployment of our software is completely bound to the smart device of the
+user, with no additional hardware required (i.e. no need of servers/additional
+internet infrastrucures to manage the service). 
+
+\begin{figure}[H]
+	\noindent
+	\makebox[\textwidth]{ 
+		\includegraphics[scale=0.5]{images/Deployment.png}}
+	\caption{ShowQueue}
+\end{figure}
+
+Nevertheless for the correct usage of the application some external services are
+actually required: 
+
+\begin{itemize}
+    \item Spotify is used to fetch the tracks' missing metadata
+    \item Genius is used to find the lyrics of the songs, since this information
+    is not provided by Spotify
+    \item Youtube is used as a source of musical videos for the tracks not
+    present on the storage of the device
+    \item Wikipedia is used to get information about the artists
+\end{itemize}
+
+For what concerns the actual distribution of the software, as for most of the
+mobile applications, we will use the usual app stores (e.g Google play store).
+
+\newpage
+
+\section{User interface design}
+
+\setlength{\tabcolsep}{40pt}
+\begin{figure}[H]
+    \begin{tabular}{cc}
+    \subfloat[Tracks scrolled]{\includegraphics[width = 1.5in]{screens/1. Tracks.jpg}} &
+    \subfloat[Tracks]{\includegraphics[width = 1.5in]{screens/2. Tracks_shuffle.jpg}}\\
+    \\\\
+    \subfloat[Albums]{\includegraphics[width = 1.5in]{screens/3. Albums.jpg}} &
+    \subfloat[Artists]{\includegraphics[width = 1.5in]{screens/4. Artists.jpg}}
+    \end{tabular} 
+\end{figure}
+
+\newpage
+\begin{figure}[H]
+    \begin{tabular}{cc}
+    \subfloat[Playlists]{\includegraphics[width = 1.5in]{screens/5. Playlists.jpg}} &
+    \subfloat[PlayingTrack]{\includegraphics[width = 1.5in]{screens/6. PlayingTrack.jpg}}\\
+    \\\\
+    \subfloat[PlayingTrack with lyrics]{\includegraphics[width = 1.5in]{screens/7. Lyrics.jpg}} &
+    \subfloat[ArtistInfo]{\includegraphics[width = 1.5in]{screens/8. ArtistInfo.jpg}}
+    \end{tabular}
+\end{figure}
+
+\newpage
+\begin{figure}[H]
+    \begin{tabular}{cc}
+    \subfloat[AlbumInfo adfadsad]{\includegraphics[width = 1.5in]{screens/9. AlbumInfo.jpg}&
+    \subfloat[AlbumTracks]{\includegraphics[width = 1.5in]{screens/10. AlbumTracks.jpg}}\\
+    \\\\
+    \subfloat[ArtistAlbums]{\includegraphics[width = 1.5in]{screens/11. ArtistAlbums.jpg}} &
+    \subfloat[ShowPlaylist]{\includegraphics[width = 1.5in]{screens/12. ShowPlaylist.jpg}}
+    \end{tabular}
+\end{figure}
+
+\newpage
+\begin{figure}[H]
+    \begin{tabular}{cc}
+    \subfloat[SelectTracks]{\includegraphics[width = 1.5in]{screens/13. SelectTracks.jpg}} &
+    \subfloat[ShowQueue]{\includegraphics[width = 1.5in]{screens/14. ShowQueue.jpg}}\\
+    \end{tabular}
+\end{figure}
+
+\newpage
+
+\begin{figure}
+    \includegraphics[width = 4.5in]{screens/15. Tracks_landscape.jpg}
+    \caption{Tracks}
+\end{figure}
+
+\begin{figure}
+    \includegraphics[width = 4.5in]{screens/16. Albums_landscape.jpg}
+    \caption{Albums}
+\end{figure}
+
+\begin{figure}
+    \includegraphics[width = 4.5in]{screens/17. Artists_landscape.jpg}
+    \caption{Artists}
+\end{figure}
+
+\begin{figure}
+    \includegraphics[width = 4.5in]{screens/18. AlbumTracks_landscape.jpg}
+    \caption{AlbumTracks}
+\end{figure}
+
+\begin{figure}
+    \includegraphics[width = 4.5in]{screens/19. AlbumInfo_landscape.jpg}
+    \caption{AlbumInfo}
+\end{figure}
+
+\begin{figure}
+    \includegraphics[width = 4.5in]{screens/20. ArtistInfo_landscape.jpg}
+    \caption{ArtistInfo}
+\end{figure}
 
 \end{document}
