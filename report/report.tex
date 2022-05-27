@@ -680,11 +680,93 @@ mobile applications, we will use the usual app stores (e.g Google play store).
 
 \section{User interface design}
 
+The UI is composed by different screens that provide the user with a way to
+interact with the system. In this section we present some screenshots that show
+how the screens look like along with a brief description of how the user can
+navigate between the screens.
+\\\\
+The interface is intuitive, simple to use, and it does not require the user to
+read a manual.
+
+\subsection{Screens description}
+When the application is opened, the first screen shown is the Home page, that
+contains a list of tabs.
+\\\\
+The first tab (\textit{image a}) shows all the tracks present on the device in a list. By
+tapping on one of the tracks the playback starts and the app navigates to the
+PlayingTrack screen (\textit{image f}). By tapping on the magnifying
+glass on the upper right corner of the screen, the user is presented with a way
+to search for tracks not present on the device and if desired play them through
+an external service (\textit{image o}). Long tapping a track (\textit{image b}) opens
+a dropdown menu with three options: the user can add the song to an existing
+playlist, to the queue, or change its metadata.
+\\\\
+The second tab (\textit{image c}) contains the albums. Tapping on an album, the app
+navigates to the AlbumTracks screen (\textit{image j}), that allows to pick a track to
+play from the album or shuffle the tracks and play them.
+\\\\
+The third tab (\textit{image d}) containst the artists.  By long pressing the image of an
+artist it is possible to change it. Tapping on an artist icon opens the
+ArtistAlbums (\textit{image k}) screen, that provides some information about the artist
+and allows selecting one of the albums by that artist.
+\\\\
+The fourth and last tab (\textit{image e}) shows the playlists. A new playlist can be
+created by tapping the plus button in the lower right corner of the screen. By
+tapping one of the existing playlists the user can view the contents of it in
+the ShowPlaylist screen (\textit{image l}). Long pressing a playlist it is possible to
+delete it.
+\\\\
+In all these tabs, at the very bottom of the screen, if there is at least a song
+in the queue, a bar is shown. This bar shows the current song artwork, title and
+artist, and allows to pause or resume playback. By tapping the bar itself, the
+PlayingTrack (\textit{image f}) screen is shown.
+\\\\
+In the PlayingTrack screen (\textit{image f}), the user is shown the track name, artist
+and cover. They can see the current playback progress and change it by
+dragging the slider. On the very bottom of the screen there are, in order from
+left to right: the ArtistInfo button, the previous track button, the play/pause
+button, the next track button, the ShowQueue button.
+By tapping on the cover the lyrics of the current song are shown (\textit{image g}).
+\\\\
+In the ArtistInfo screen (\textit{image h}) the user can see all the albums from the
+artist (also those not present on the device). Selecting one of the albums, the
+AlbumInfo screen is shown (\textit{image i}). Here the cover of that album and its tracks
+are provided. By tapping on one of those tracks, the user can listen to them on
+YouTube.
+\\\\
+The ShowPlaylist screen (\textit{image l}) lists the tracks present in a playlist. By
+selecting one, all the tracks in the playlist will be added to the queue and the
+selected track will be played. By pressing the shuffle button the tracks are
+played in random order. The plus button on the top right corner allows to add
+new tracks to the playlist. The user can easily remove a track from the playlist
+by swiping right.
+\\\\
+The ShowQueue screen (\textit{image n}) lists all the tracks in the queue, sorted by
+playback order. The plus button on the top right corner allows to add new tracks
+to the queue. The user can easily remove a track from the queue by swiping
+right. 
+\\\\
+The SelectTracks screen (\textit{image m}) is reached either from the ShowPlaylist or
+from the ShowQueue screens to add tracks. A list of the tracks is provided, and
+by tapping one, it is added to the playlist/queue.
+\\\\
+The EditMetadata and SearchTrack screens (\textit{image o}) look very similar. They
+both have a search bar on which the user can type their query, and they provide
+a list of results, from which it is possible to select one. In the latter screen
+the selected track is opened on YouTube, while in the former the metadata of the
+song to be changed are replaced with the new ones.
+\\\\
+When the device is in landscape mode, there are slight changes to the UI (\textit{images
+q to v}): for example the lists of tracks become grids with two columns, and
+the grids of albums and artists have two additional columns.
+
+\subsection{Screenshots}
+
 \setlength{\tabcolsep}{40pt}
 \begin{figure}[H]
     \begin{tabular}{cc}
     \subfloat[Tracks scrolled]{\includegraphics[width = 1.5in]{screens/1. Tracks.jpg}} &
-    \subfloat[Tracks]{\includegraphics[width = 1.5in]{screens/2. Tracks_shuffle.jpg}}\\
+    \subfloat[Tracks]{\includegraphics[width = 1.5in]{screens/2. Tracks_dropdown.jpg}}\\
     \\\\
     \subfloat[Albums]{\includegraphics[width = 1.5in]{screens/3. Albums.jpg}} &
     \subfloat[Artists]{\includegraphics[width = 1.5in]{screens/4. Artists.jpg}}
@@ -705,7 +787,7 @@ mobile applications, we will use the usual app stores (e.g Google play store).
 \newpage
 \begin{figure}[H]
     \begin{tabular}{cc}
-    \subfloat[AlbumInfo adfadsad]{\includegraphics[width = 1.5in]{screens/9. AlbumInfo.jpg}&
+    \subfloat[AlbumInfo]{\includegraphics[width = 1.5in]{screens/9. AlbumInfo.jpg}}&
     \subfloat[AlbumTracks]{\includegraphics[width = 1.5in]{screens/10. AlbumTracks.jpg}}\\
     \\\\
     \subfloat[ArtistAlbums]{\includegraphics[width = 1.5in]{screens/11. ArtistAlbums.jpg}} &
@@ -718,39 +800,105 @@ mobile applications, we will use the usual app stores (e.g Google play store).
     \begin{tabular}{cc}
     \subfloat[SelectTracks]{\includegraphics[width = 1.5in]{screens/13. SelectTracks.jpg}} &
     \subfloat[ShowQueue]{\includegraphics[width = 1.5in]{screens/14. ShowQueue.jpg}}\\
+    \\\\
+    \subfloat[SearchTracks / EditMetadata]{\includegraphics[width = 1.5in]{screens/21. SearchTracks.jpg}} &
+    \subfloat[ArtistEditor]{\includegraphics[width = 1.5in]{screens/22. ArtistEditor.jpg}}\\
     \end{tabular}
 \end{figure}
 
 \newpage
 
-\begin{figure}
-    \includegraphics[width = 4.5in]{screens/15. Tracks_landscape.jpg}
-    \caption{Tracks}
+\begin{figure}[H]
+    \subfloat[ciao]{\includegraphics[width = 4.5in]{screens/15. Tracks_landscape.jpg}}\\\\
+    \subfloat[ciao]{\includegraphics[width = 4.5in]{screens/16. Albums_landscape.jpg}}\\\\
+    \subfloat[ciao]{\includegraphics[width = 4.5in]{screens/17. Artists_landscape.jpg}}
 \end{figure}
 
-\begin{figure}
-    \includegraphics[width = 4.5in]{screens/16. Albums_landscape.jpg}
-    \caption{Albums}
+\newpage
+
+\setcounter{subfigure}{19}
+\begin{figure}[H]
+    \subfloat[ciao]{\includegraphics[width = 4.5in]{screens/18. AlbumTracks_landscape.jpg}}\\\\
+    \subfloat[ciao]{\includegraphics[width = 4.5in]{screens/19. AlbumInfo_landscape.jpg}}\\\\
+    \subfloat[ciao]{\includegraphics[width = 4.5in]{screens/20. ArtistInfo_landscape.jpg}}
 \end{figure}
 
-\begin{figure}
-    \includegraphics[width = 4.5in]{screens/17. Artists_landscape.jpg}
-    \caption{Artists}
-\end{figure}
+\newpage
 
-\begin{figure}
-    \includegraphics[width = 4.5in]{screens/18. AlbumTracks_landscape.jpg}
-    \caption{AlbumTracks}
-\end{figure}
+\section{Implementation and Testing}
 
-\begin{figure}
-    \includegraphics[width = 4.5in]{screens/19. AlbumInfo_landscape.jpg}
-    \caption{AlbumInfo}
-\end{figure}
+\subsection{Overview}
+In this last section we provide all the necessary specifications about the
+implementation and the testing of the system.
+\\\\
+This phase is, of course, critical for the development of a reliable software
+system. It is important to observe that, while testing can show the presence of
+bugs in the code, passing the tests does not imply the absence of errors in the
+final application. Still, with our tests, we will try to find the majority of
+the bugs before the product hits the market (and also after, maintenance is
+important).
 
-\begin{figure}
-    \includegraphics[width = 4.5in]{screens/20. ArtistInfo_landscape.jpg}
-    \caption{ArtistInfo}
-\end{figure}
+\subsection{Implementation}
+For all the implementation processes we have chosen a \textbf{bottom-up}
+approach, which consists in implementing first the base components, and then, in
+a iterative way, those that require them. We topologically sort the dependencies
+between the components such that every time we implement one of them we have
+already realized all the others on which it depends.
+\\\\
+The unit testing has been carried out in parallel with the implementation. Using
+the bottom-up approach we have used some drivers, during all testing process, to
+mimic the behavior of the elements that use the component under test. On
+the other hand, the selected approach does not require the creation of stubs,
+elements that simulate the behavior of not yet implemented modules, required by
+the component under test.
+\\\\
+With this incremental approach we have in each moment fully functional
+components, being sure that the work already done is complete and functional.
+Moreover, beginning from the bottom, the core components have been implemented
+first, and so the ones that have been tested, improving the robustness of the
+overall system.
+\\\\
+The first element that we have implemented is the \textbf{Database} component,
+which manages the model, i.e. the data, of our application, and so it is
+required by most of the components of the system.
+\\\\
+At this point we can implement the \textbf{Loader} component; this component is essential
+for the rest of the application, since it provides all the information obtained
+from the internet, so we implement it right after the Database.
+\\\\
+The \textbf{Player} provides core functionalities to the rest of the application
+and must be implemented as soon as the Database and the Loader are completed,
+because it depends heavily on them.
+\\\\
+With these components the core of the application is ready even if there is no
+graphical interface to access it yet. Before we move to the frontend components,
+we can implement the \textbf{Worker} to improve the performance of
+the Database.
+\\\\
+For the components of the user interface we implement first the \textbf{Home}
+screen, and shortly after the tabs it holds: \textbf{Tracks}, \textbf{Albums},
+\textbf{Artists}, \textbf{Playlists}. After these, we implement the
+\textbf{PlayingTrack} screen. Indeed this is the center of the application and
+the other peripherical screens can now be implemented.
+\\\\
+We can now implement all the remaining screen following a bottom up order:
+\begin{enumerate}
+    \item \textbf{ArtistInfo} and \textbf{ShowQueue}
+    \item \textbf{AlbumInfo} and \textbf{SelectTracks}
+    \item \textbf{SearchSong} and \textbf{MetadataEditor}
+\end{enumerate}
+
+\subsection{Testing}
+As we develop the system we have to check that all functional and non functional
+requirements have are met. In particular for the backend components some tests
+have been devised so to check that the core offered features work as expected.
+The Database, Worker, Loader are unit tested with automatic testing. Integration
+tests for the backend have been developed to check that the components work
+together correctly.
+\\\\
+For what concerns the frontend part automatic testing is very hard to implement,
+since it would consits in checking regressions in GUI. So for checking that the
+screens are correct we save the GUI appearance in a particular state and then we
+visually check that changes to the code do not introduce regression errors.
 
 \end{document}
