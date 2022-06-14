@@ -31,13 +31,14 @@ The topics touched by this document are:
 
 \subsection{Scope}
 MBox is an application for mobile devices that allows users to access all the
-music present on their devices without having to worry about manually managing 
-the metadata. The target user has basic knowledge of the functions of the
-mobile device (e.g. is able to interact with the filesystem). Since the
-application is focused on users who want to listen to music, which is usually
-done with a portable device, we will focus smartphones maily (the application
-also works on tablets). For the development of this application we have decided
-to use flutter since it's a framework thought for multiplatform deployment.
+music present on their devices without having to worry about manually managing
+the metadata. The target user has basic knowledge of the functions of the mobile
+device (e.g. is able to interact with the filesystem). Since the application is
+focused on users who want to listen to music, which is usually done with a
+portable device, we will focus smartphones mainly, but the application also
+works on tablets. For the development of this application we have decided to use
+flutter since it's a framework thought for multiplatform deployment and allows
+for easy porting.
 
 \subsection{Market analysis}
 On Android and iOS there are many applications that allow the users to listen to
@@ -52,7 +53,7 @@ tracks present on the device and completes them with missing metadata,
 a functionality that the competitors do not offer.
 
 Moreover MBox also allows to look for other songs not present on the device, and
-shows information about artist, albums and tracks.
+shows information about artists, albums and tracks.
 
 
 \subsection{Glossary}
@@ -169,7 +170,7 @@ shows the \textbf{Home} screen. The Home screen is composed by 4 tabs:
         add a new playlist or remove an existing one.
 \end{itemize}
 
-By keeping a track pressed it is possible to open a drop down menu with a few
+By long pressing a track it is possible to open a drop down menu with a few
 entries:
 \begin{itemize}
     \item \textit{Edit metadata}: switch to the \textbf{MetadataEditor} screen
@@ -178,7 +179,7 @@ entries:
     \item \textit{Add to playlist}
 \end{itemize}
 
-By keeping an artist pressed it is possible to switch to the
+By long pressing an artist it is possible to switch to the
 \textbf{ArtistEditor} screen in order to change its image.
 
 By touching the magnifying glass in the top right corner of the application, it
@@ -204,7 +205,7 @@ From the \textbf{PlayingTrack} screen it is possible to:
 
 The \textbf{ShowQueue} screen shows the current track queue; the tracks are
 ordered according to their position in the queue, where the currently playing
-track has index 0, the past tracks have negative index, and the future tracks
+track has index 0, the played tracks have negative index, and the future tracks
 have positive index. From here it is possible to add new tracks to the queue by
 means of the \textbf{SelectTracks} screen. Almost every screen has a
 \textbf{PlayBar} that allows to pause and resume playback, and shows currently
@@ -239,18 +240,20 @@ Moreover our database has other functionalities that are tightly coupled with
 the domain's data and it would thus be difficult to integrate them in a
 traditional one, and probably inefficient.
 \\\\
-When the appication boots, the database is initialized.
+When the application boots, the database is initialized.
 \\
 It uses the worker isolate and the metadata loader to discover which tracks are
 present on the device:
 \begin{enumerate}
-    \item Loads the saved database file (if it exists) with all its contents:
-    tracks, artists, albums, playlist, current track queue.
-    \item Checks the Music folder for songs not present in the database ile.
+    \item The saved database file is loaded (if it exists) with all its
+        contents: tracks, artists, albums, playlist, current track queue.
+    \item The Music folder is checked for songs not present in the database
+        file.
     \item For those songs the missing metadata, available on the internet, are
         downloaded and written in the music file (as id3 tag). 
-    \item The new tracks are inserted in the database (along with its metadata).
-    \item Update the database file.
+    \item The new tracks are inserted in the database (along with their
+        metadata).
+    \item The database file is updated.
 \end{enumerate}
 Once the database is initialized all the other components can access the music
 data from it. 
@@ -277,9 +280,9 @@ internet. It is capable of:
     \item Retrieving and extracting track information from the Spotify api.
     \item Retrieving and extracting lyrics from the Genius api.
     \item Retrieving information about artists from Wikipedia.
-    \item Searching for songs on YouTube.
+    \item Looking for songs on YouTube.
 \end{enumerate}
-All these functions are used by the application to perform all its tasks.
+All these functionalities are used by the application to perform all its tasks.
 
 \paragraph{Player}
 The player is the component that allows music playback: it allows to pause or
@@ -311,7 +314,7 @@ unique interface that the user can access.
 Using this pattern the user does not need to the internal structure of the
 software and it can use the simple screens of the application to interact with
 the backend. Another major benefit of this pattern is that any change in the
-backend of the architecture will stay undetectable from the user, provided that
+backend of the architecture will be hidden from the user, provided that
 the facade stays the same.
 
 For instance, if we decided to substitute the existing database with a SQL based
@@ -421,7 +424,7 @@ orientation.
 	\caption{PlayBar} 
 \end{figure}
 
-The PlayBar contains on the right a button that allow to play or pause music,
+The PlayBar contains a button that allow to play or pause music,
 depending on current track queue state. On the left there is the description of
 the currently playing track, with album cover, track name and artist.
 
@@ -676,8 +679,8 @@ internet infrastrucures to manage the service).
 	\caption{Deployment view}
 \end{figure}
 
-Nevertheless for the correct usage of the application some external services are
-actually required: 
+Nevertheless for the full functionalities of the application some external
+services are actually required: 
 
 \begin{itemize}
     \item Spotify is used to fetch the tracks' missing metadata
@@ -769,7 +772,7 @@ tapping one of the existing playlists the user can view the contents of it in
 the ShowPlaylist screen (\textit{image l}). Long pressing a playlist it is possible to
 delete it.
 \\\\
-In all these tabs, at the very bottom of the screen, if there is at least a song
+In all the tabs, at the very bottom of the screen, if there is at least a song
 in the queue, a bar is shown. This bar shows the current song artwork, title and
 artist, and allows to pause or resume playback. By tapping the bar itself, the
 PlayingTrack (\textit{image f}) screen is shown.
@@ -887,12 +890,12 @@ implementation and the testing of the system.
 This phase is, of course, critical for the development of a reliable software
 system. It is important to observe that, while testing can show the presence of
 bugs in the code, passing the tests does not imply the absence of errors in the
-final application. Still, with our tests, we will try to find the majority of
+final application. Still, with our tests, we try to find the majority of
 the bugs before the product hits the market (and also after, maintenance is
 important).
 
 \subsection{Implementation}
-For all the implementation processes we have chosen a \textbf{bottom-up}
+For the implementation process we have chosen a \textbf{bottom-up}
 approach, which consists in implementing first the base components, and then, in
 a iterative way, those that require them. We topologically sort the dependencies
 between the components such that every time we implement one of them we have
@@ -911,7 +914,7 @@ Moreover, beginning from the bottom, the core components have been implemented
 first, and so the ones that have been tested, improving the robustness of the
 overall system.
 \\\\
-The first element that we have implemented is the \textbf{Database} component,
+The first element that we implement is the \textbf{Database} component,
 which manages the model, i.e. the data, of our application, and so it is
 required by most of the components of the system.
 \\\\
