@@ -37,8 +37,24 @@ the metadata. The target user has basic knowledge of the functions of the
 mobile device (e.g. is able to interact with the filesystem). Since the
 application is focused on users who want to listen to music, which is usually
 done with a portable device, we will focus smartphones maily (the application
-also works on tablets). For the development of this applications we have decided
+also works on tablets). For the development of this application we have decided
 to use flutter since it's a framework thought for multiplatform deployment.
+
+\subsection{Market analysis}
+On Android and iOS there are many applications that allow the users to listen to
+music present on the device or the respective app stores (e.g. Google Play Music
+on Android, or the stock Music app on iOS). Nevertheless those applications do
+not allow metadata management and some do not even allow to show lyrics when
+present (e.g. Google Play Music).
+
+From this point of view MBox is an evolution of existing music players since it
+allows a simple and automatic metadata management. It automatically detects the
+tracks present on the device and completes them with missing metadata,
+a functionality that the competitors do not offer.
+
+Moreover MBox also allows to look for other songs not present on the device, and
+shows information about artist, albums and tracks.
+
 
 \subsection{Glossary}
 \paragraph{Queue:} a queue is a data structure containing a list of tracks
@@ -658,7 +674,7 @@ internet infrastrucures to manage the service).
 	\noindent
 	\makebox[\textwidth]{ 
 		\includegraphics[scale=0.5]{images/Deployment.png}}
-	\caption{ShowQueue}
+	\caption{Deployment view}
 \end{figure}
 
 Nevertheless for the correct usage of the application some external services are
@@ -668,13 +684,51 @@ actually required:
     \item Spotify is used to fetch the tracks' missing metadata
     \item Genius is used to find the lyrics of the songs, since this information
     is not provided by Spotify
-    \item Youtube is used as a source of musical videos for the tracks not
+    \item YouTube is used as a source of musical videos for the tracks not
     present on the storage of the device
     \item Wikipedia is used to get information about the artists
 \end{itemize}
 
 For what concerns the actual distribution of the software, as for most of the
 mobile applications, we will use the usual app stores (e.g Google play store).
+
+\newpage
+
+\subsection{External Services}
+The functionalities of the application are supported by a series of external
+services:
+
+\subsubsection{API}
+\begin{itemize}
+    \item \textbf{Spotify API}: when the application boots, tracks missing metadata are
+    updated. If the ID3 tag containing the title of the song and the artist is
+    available, it is used to obtain more information about the track (e.g. album
+    cover, artist image). Otherwise the filename is used to determine the
+    specific track.
+    \item \textbf{Genius API}: provides the correct Genius page containing the lyrics;
+    the lyrics are then extracted by the application.
+    \item \textbf{YouTube}: we scrape the search page to get the link of the video, then
+    the application that handles YouTube links will play that video.
+    \item \textbf{Wikipedia API}: used to get the page of the artist.
+\end{itemize}
+
+\subsubsection{Libraries}
+\begin{itemize}
+    \item The \textbf{audioplayers} flutter library is able to play music given
+    a path to the track.
+    \item \textbf{audiotagger} is the only available flutter library able to
+    read and write ID3 tags of mp3 files.
+    \item \textbf{path\_provider} allows to find the path of the music folder and
+    the database file.
+    \item \textbf{crypto} for the hash function.
+    \item \textbf{http} to fetch web pages.
+    \item \textbf{html} to parse web pages.
+    \item \textbf{url\_launcher} to launch YouTube links on the appropriate
+    application.
+    \item \textbf{permission\_handler} to ask and obtain internal storage
+    permissions from the user.
+    \item \textbf{image} for image handling.
+\end{itemize}
 
 \newpage
 
@@ -900,5 +954,6 @@ For what concerns the frontend part automatic testing is very hard to implement,
 since it would consits in checking regressions in GUI. So for checking that the
 screens are correct we save the GUI appearance in a particular state and then we
 visually check that changes to the code do not introduce regression errors.
+
 
 \end{document}
