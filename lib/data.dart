@@ -542,7 +542,7 @@ class Database {
     List<bool> checkPresence = List.generate(tracks.length, (index) => false);
     List<int> toAdd = List.generate(0, (index) => 0);
     List<Tag?> tags = List.generate(0, (index) => Tag());
-    List<FileSystemEntity> files = Directory(MUSIC_PATH).listSync();
+    List<FileSystemEntity> files = Directory(MUSIC_PATH).listSync(recursive: true);
     for (var i = 0; i < files.length; i++) {
       if (SUPPORTED_FORMATS.contains(p.extension(files[i].path))) {
         Tag? tag = await tagger.readTags(
