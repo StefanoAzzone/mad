@@ -34,11 +34,15 @@ class _ArtistCardState extends State<ArtistCard> {
           Column(
             children: [
               SizedBox(
+                width: size.width / 20,
+                height: size.height / 40,
+              ),
+              SizedBox(
                 width: (orientation == Orientation.portrait)
                     ? size.width / 2
                     : size.width / 2,
                 height: (orientation == Orientation.portrait)
-                    ? size.height / 4
+                    ? size.height / 5
                     : size.height / 2,
                 child: FutureBuilder(
                   future: loader.getWikipedia(widget.artist.name),

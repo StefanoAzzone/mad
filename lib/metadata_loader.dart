@@ -279,7 +279,7 @@ class MetadataLoader {
   Future<String> getLyricsFromTrack(var item) async {
     try {
       return await queryLyrics(
-          extractTitleFromTrack(item) + " " + extractArtistNameFromTrack(item));
+          extractTitleFromTrack(item).split(' - ')[0] + " " + extractArtistNameFromTrack(item));
     } catch (e) {
       await checkConnection();
       return "";
