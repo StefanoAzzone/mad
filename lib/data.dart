@@ -541,7 +541,8 @@ class Database {
     List<bool> checkPresence = List.generate(tracks.length, (index) => false);
     List<int> toAdd = List.generate(0, (index) => 0);
     List<Tag?> tags = List.generate(0, (index) => Tag());
-    List<FileSystemEntity> files = Directory(MUSIC_PATH).listSync(recursive: true);
+    List<FileSystemEntity> files =
+        Directory(MUSIC_PATH).listSync(recursive: true);
     for (var i = 0; i < files.length; i++) {
       if (SUPPORTED_FORMATS.contains(p.extension(files[i].path))) {
         Tag? tag = await tagger.readTags(
@@ -713,9 +714,20 @@ class Database {
       }
     }
 
+    Uint8List? thumbnailList;
+
     Album? tmp = containsAlbum(hash(albumName + artist.name));
     if (tmp != null) {
       //The album was already in the db
+      if (tmp.cover == defaultImage && cover != null) {
+        // If the album cover was missing
+        thumbnailList =
+            encodePng(copyResize(decodeImage(cover)!, width: 120)) as Uint8List;
+        tmp.cover = img.Image.memory(cover);
+        tmp.thumbnail = img.Image.memory(thumbnailList);
+        saveAlbumCover(tmp.id, cover);
+        saveAlbumThumbnail(tmp.id, thumbnailList);
+      }
       return tmp;
     }
 
@@ -729,9 +741,9 @@ class Database {
         //   cover = await loader.extractCoverFromAlbum(alb);
         // }
       }
-      Uint8List? thumbnailList;
       img.Image thumbnailImage;
       img.Image coverImage;
+
       if (cover != null) {
         thumbnailList =
             encodePng(copyResize(decodeImage(cover)!, width: 120)) as Uint8List;
@@ -776,7 +788,8 @@ class Database {
     await tagger.writeTag(path: path, tagField: "artist", value: artist.name);
 
     /***ALBUM***/
-    Album album = await extractAlbum("", path, artist, null, metadata);
+    Uint8List? cover = await loader.extractCoverFromTrack(metadata);
+    Album album = await extractAlbum("", path, artist, cover, metadata);
     await tagger.writeTag(path: path, tagField: "album", value: album.name);
 
     Track newtrack = Track(title, path, artist, album, lyrics, trackNumber);
