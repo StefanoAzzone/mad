@@ -894,6 +894,7 @@ class Database {
   void insertAlbum(Album album) async {
     for (int i = 0; i < albums.length; i++) {
       if (album.name.compareTo(albums[i].name) < 0) {
+        album.artist.addAlbum(album);
         albums.insert(i, album);
         return;
       }
