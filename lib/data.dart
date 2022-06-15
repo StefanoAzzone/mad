@@ -426,7 +426,6 @@ class Database {
 
     for (var e in (json['playlists'] as List<dynamic>)) {
       insertPlaylist(Playlist.fromJson(e as Map<String, dynamic>));
-      insertPlaylist(Playlist.fromJson(e as Map<String, dynamic>));
     }
     return true;
   }

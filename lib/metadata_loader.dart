@@ -58,7 +58,6 @@ class MetadataLoader {
             body: <String, String>{
               'grant_type': 'client_credentials',
             });
-
         spotifyToken = jsonDecode(response.body)['access_token'];
         print(response.body);
         return true;

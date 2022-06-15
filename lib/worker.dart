@@ -9,7 +9,6 @@ enum Command {
   getLocalImage,
   saveImage,
   saveDatabase,
-  flush,
 }
 
 class Message {
