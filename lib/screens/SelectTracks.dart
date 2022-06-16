@@ -25,7 +25,7 @@ class SelectTracks extends StatelessWidget {
           centerTitle: true,
         ),
         body: Column(children: [
-          Expanded(child: TrackList(callback, list)),
+          Expanded(child: TrackList(callback, list, false)),
           const PlayBar(),
         ]));
   }

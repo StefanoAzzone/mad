@@ -323,10 +323,12 @@ class MetadataLoader {
   }
 
   Future<http.Response> queryAPI(String query) {
-    //String url = base + searchEndPoint + "?" + "q=" + query;
-    String url = "https://api.spotify.com/v1/search?query=" +
+    String url = base +
+        searchEndPoint +
+        "?" +
+        "query=" +
         query +
-        "&market=ES&offset=0&limit=20";
+        "&market=IT&offset=0&limit=20";
     return http.get(Uri.parse(url), headers: <String, String>{
       "Accept": "application/json",
       'Content-Type': 'application/json',

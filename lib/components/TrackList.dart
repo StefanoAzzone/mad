@@ -6,7 +6,8 @@ import 'package:mad/metadata_loader.dart';
 class TrackList extends StatefulWidget {
   final Function callback;
   final List<Track> tracks;
-  const TrackList(this.callback, this.tracks, {Key? key}) : super(key: key);
+  final bool numbers;
+  const TrackList(this.callback, this.tracks, this.numbers, {Key? key}) : super(key: key);
   @override
   State<TrackList> createState() => _TrackListState();
 }
@@ -186,6 +187,11 @@ class _TrackListState extends State<TrackList> {
                   child: ListTile(
                     title: Row(
                       children: [
+                        Text(
+                          (widget.numbers == true ? 
+                                    widget.tracks[index - 1]
+                                      .trackNumber.toString().padLeft(2, '0') : "")
+                        ),
                         SizedBox(
                           width: size.width * 0.15,
                           height: 50,
@@ -193,7 +199,7 @@ class _TrackListState extends State<TrackList> {
                         ),
                         const SizedBox(
                           height: 50,
-                          width: 10,
+                          width: 5,
                         ),
                         SizedBox(
                             height: 50,
