@@ -134,6 +134,12 @@ class Album {
       };
 
   void addTrack(Track track) {
+    for (int i = 0; i < trackList.length; i++) {
+      if (track.trackNumber < trackList[i].trackNumber) {
+        trackList.insert(i, track);
+        return;
+      }
+    }
     trackList.add(track);
   }
 
@@ -614,7 +620,7 @@ class Database {
     if (lyrics == "") {
       //Lyrics tag missing
       if (info == null && loader.connected) {
-        info = await loader.searchFirstTrack(baseName(path));
+        info = await loader.searchFirstTrack(title);
       }
 
       if (info != null) {
@@ -632,7 +638,7 @@ class Database {
     /***TRACK NUMBER***/
     if (trackNumber == -1) {
       if (info == null && loader.connected) {
-        info = await loader.searchFirstTrack(baseName(path));
+        info = await loader.searchFirstTrack(title);
       }
 
       if (info != null) {
@@ -649,13 +655,30 @@ class Database {
 
     /***ARTIST***/
     if (info == null && loader.connected) {
-      info = await loader.searchFirstTrack(baseName(path));
+      info = await loader.searchFirstTrack(title);
     }
+
     Artist artist = await extractArtist(artistName, path, info);
 
     /***ALBUM***/
+    Uint8List? cover = await tagger.readArtwork(path: path);
+    //cover ??= await loader.extractCoverFromTrack(info);
     Album album = await extractAlbum(
-        albumName, path, artist, await tagger.readArtwork(path: path), info);
+        albumName, path, artist, cover, info);
+
+    if(cover == null)
+    {
+      String coverPath = (await _coversDirectory).path + "/" + album.id.toString();
+      if(await File(coverPath).exists())
+      {
+        await tagger.writeTags(
+          path: path,
+          tag: Tag(
+            artwork: coverPath,
+          ),
+        );
+      }
+    }
 
     return Track(title, path, artist, album, lyrics, trackNumber);
   }
@@ -790,6 +813,18 @@ class Database {
     /***ALBUM***/
     Uint8List? cover = await loader.extractCoverFromTrack(metadata);
     Album album = await extractAlbum("", path, artist, cover, metadata);
+
+    String coverPath = (await _coversDirectory).path + "/" + album.id.toString();
+    if(await File(coverPath).exists())
+    {
+      await tagger.writeTags(
+        path: path,
+        tag: Tag(
+          artwork: coverPath,
+        ),
+      );
+    }
+
     await tagger.writeTag(path: path, tagField: "album", value: album.name);
 
     Track newtrack = Track(title, path, artist, album, lyrics, trackNumber);

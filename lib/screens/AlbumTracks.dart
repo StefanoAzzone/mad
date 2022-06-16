@@ -29,14 +29,17 @@ class _AlbumTracksState extends State<AlbumTracks> {
         body: Column(children: [
           Expanded(
             child: TrackList((List<Track> tracks, int index) async {
-              player.pause();
-              trackQueue.reset();
-              trackQueue.addList(tracks);
-              trackQueue.setCurrent(index);
-              player.play();
-              await Navigator.pushNamed(context, '/playingTrack');
-              setState(() {});
-            }, widget.album.trackList),
+                player.pause();
+                trackQueue.reset();
+                trackQueue.addList(tracks);
+                trackQueue.setCurrent(index);
+                player.play();
+                await Navigator.pushNamed(context, '/playingTrack');
+                setState(() {});
+              }, 
+              widget.album.trackList,
+              true,
+            ),
           ),
         ]),
         bottomNavigationBar: const BottomAppBar(
