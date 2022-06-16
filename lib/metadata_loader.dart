@@ -278,8 +278,9 @@ class MetadataLoader {
 
   Future<String> getLyricsFromTrack(var item) async {
     try {
-      return await queryLyrics(
-          extractTitleFromTrack(item).split(' - ')[0] + " " + extractArtistNameFromTrack(item));
+      return await queryLyrics(extractTitleFromTrack(item).split(' - ')[0] +
+          " " +
+          extractArtistNameFromTrack(item));
     } catch (e) {
       await checkConnection();
       return "";
@@ -322,8 +323,10 @@ class MetadataLoader {
   }
 
   Future<http.Response> queryAPI(String query) {
-    String url = base + searchEndPoint + "?" + "q=" + query;
-    // print(url);
+    //String url = base + searchEndPoint + "?" + "q=" + query;
+    String url = "https://api.spotify.com/v1/search?query=" +
+        query +
+        "&market=ES&offset=0&limit=20";
     return http.get(Uri.parse(url), headers: <String, String>{
       "Accept": "application/json",
       'Content-Type': 'application/json',

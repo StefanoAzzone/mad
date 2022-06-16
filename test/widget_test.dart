@@ -7,9 +7,31 @@
 
 import 'dart:convert';
 import 'dart:io';
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mad/Player.dart';
+import 'package:mad/buttons/ArtistCard.dart';
+import 'package:mad/buttons/CoverButton.dart';
+import 'package:mad/buttons/PlayButton.dart';
+import 'package:mad/buttons/reload_button.dart';
+import 'package:mad/components/AlbumList.dart';
+import 'package:mad/components/ArtistList.dart';
+import 'package:mad/components/PlayBar.dart';
+import 'package:mad/components/PlaylistList.dart';
+import 'package:mad/components/TrackList.dart';
 import 'package:mad/data.dart';
 import 'package:mad/metadata_loader.dart';
+import 'package:mad/screens/AlbumTracks.dart';
+import 'package:mad/screens/ArtistAlbums.dart';
+import 'package:mad/screens/Editor/ArtistEditor.dart';
+import 'package:mad/screens/Editor/MetadataEditor.dart';
+import 'package:mad/screens/Home.dart';
+import 'package:mad/screens/Info/AlbumInfo.dart';
+import 'package:mad/screens/Info/ArtistInfo.dart';
+import 'package:mad/screens/PlayingTrack.dart';
+import 'package:mad/screens/SelectTracks.dart';
+import 'package:mad/screens/ShowPlaylist.dart';
+import 'package:mad/screens/ShowQueue.dart';
 
 void main() {
   var Artist1 = Artist("Artist1", defaultImage);
@@ -165,5 +187,140 @@ void main() {
       var n = await Database.worker.getLocalImage("path");
       expect(n, null);
     });
+  });
+
+  testWidgets('Homepage', (WidgetTester tester) async {
+    Widget widget = MaterialApp(title: 'Test', initialRoute: '/', routes: {
+      '/': (context) => const MyHomePage(title: 'Test'),
+      '/playingTrack': (context) => const PlayingTrack(),
+      '/queue': (context) => const ShowQueue(),
+      ExtractArgumentsSelectTracks.routeName: (context) =>
+          const ExtractArgumentsSelectTracks(),
+      '/editMetadata': (context) => const MetadataEditor(),
+      ExtractArgumentsArtistEditor.routeName: (context) =>
+          const ExtractArgumentsArtistEditor(),
+      ExtractArgumentsAlbumTracks.routeName: (context) =>
+          const ExtractArgumentsAlbumTracks(),
+      ExtractArgumentsArtistAlbums.routeName: (context) =>
+          const ExtractArgumentsArtistAlbums(),
+      ExtractArgumentsShowPlaylist.routeName: (context) =>
+          const ExtractArgumentsShowPlaylist(),
+      ExtractArgumentsArtistInfo.routeName: (context) =>
+          const ExtractArgumentsArtistInfo(),
+      ExtractArgumentsAlbumInfo.routeName: (context) =>
+          const ExtractArgumentsAlbumInfo(),
+    });
+    await tester.pumpWidget(widget);
+
+    expect(find.byIcon(Icons.search), findsOneWidget);
+    expect(find.byIcon(Icons.music_note), findsOneWidget);
+    expect(find.byIcon(Icons.album), findsOneWidget);
+    expect(find.byIcon(Icons.person), findsOneWidget);
+    expect(find.byIcon(Icons.playlist_play), findsOneWidget);
+    expect(find.byType(ReloadButton), findsOneWidget);
+    expect(find.byType(TrackList), findsOneWidget);
+    expect(find.byType(PlayBar), findsOneWidget);
+    expect(find.textContaining("Nothing in queue"), findsOneWidget);
+    expect(find.textContaining("Shuffle"), findsOneWidget);
+    expect(find.textContaining("track1"), findsOneWidget);
+    expect(find.textContaining("track2"), findsOneWidget);
+    expect(find.textContaining("track3"), findsOneWidget);
+    expect(find.textContaining("track4"), findsOneWidget);
+  });
+
+  testWidgets('playingTrack', (WidgetTester tester) async {
+    Widget widget = MaterialApp(title: 'Test', initialRoute: '/', routes: {
+      '/': (context) => const PlayingTrack(),
+    });
+    await tester.pumpWidget(widget);
+
+    expect(find.byIcon(Icons.art_track), findsOneWidget);
+    expect(find.byIcon(Icons.skip_previous_rounded), findsOneWidget);
+    expect(find.byIcon(Icons.skip_next_rounded), findsOneWidget);
+    expect(find.byIcon(Icons.view_list), findsOneWidget);
+    expect(find.byType(PlayButton), findsOneWidget);
+    expect(find.byType(CoverButton), findsOneWidget);
+  });
+
+  testWidgets('SelectTracks', (WidgetTester tester) async {
+    Widget widget = MaterialApp(title: 'Test', initialRoute: '/', routes: {
+      '/': (context) => SelectTracks(() {}),
+    });
+    await tester.pumpWidget(widget);
+
+    expect(find.text("Select the tracks:"), findsOneWidget);
+    expect(find.byType(TrackList), findsOneWidget);
+    expect(find.byType(PlayBar), findsOneWidget);
+  });
+
+  testWidgets('ShowQueue', (WidgetTester tester) async {
+    Widget widget = MaterialApp(title: 'Test', initialRoute: '/', routes: {
+      '/': (context) => const ShowQueue(),
+    });
+    await tester.pumpWidget(widget);
+
+    expect(find.byIcon(Icons.add), findsOneWidget);
+    expect(find.text("Queue"), findsOneWidget);
+    expect(find.byType(PlayBar), findsOneWidget);
+    expect(find.textContaining("Nothing in queue"), findsOneWidget);
+    expect(find.byType(ListTile), findsNothing);
+  });
+
+  testWidgets('MetadataEditor', (WidgetTester tester) async {
+    Widget widget = MaterialApp(title: 'Test', initialRoute: '/', routes: {
+      '/': (context) => const MetadataEditor(),
+    });
+    await tester.pumpWidget(widget);
+    expect(
+        find.text(
+            "Cannot access server.\nTry to check your internet connection."),
+        findsOneWidget);
+  });
+
+  testWidgets('AlbumTracks', (WidgetTester tester) async {
+    Widget widget = MaterialApp(title: 'Test', initialRoute: '/', routes: {
+      '/': (context) => AlbumTracks(Album1),
+    });
+    await tester.pumpWidget(widget);
+    expect(find.textContaining("Album1"), findsOneWidget);
+    expect(find.textContaining("Shuffle"), findsOneWidget);
+    expect(find.textContaining("track1"), findsOneWidget);
+    expect(find.byType(PlayBar), findsOneWidget);
+    expect(find.textContaining("Nothing in queue"), findsOneWidget);
+  });
+
+  testWidgets('AlbumInfo', (WidgetTester tester) async {
+    Widget widget = MaterialApp(title: 'Test', initialRoute: '/', routes: {
+      '/': (context) => const AlbumInfo("Album1"),
+    });
+
+    await tester.pumpWidget(widget);
+
+    expect(find.textContaining("Cannot access server"), findsOneWidget);
+  });
+
+  testWidgets('ArtistInfo', (WidgetTester tester) async {
+    Widget widget = MaterialApp(title: 'Test', initialRoute: '/', routes: {
+      '/': (context) => const ArtistInfo("Artist1"),
+    });
+
+    await tester.pumpWidget(widget);
+
+    expect(find.textContaining("Cannot access server"), findsOneWidget);
+  });
+
+  testWidgets('ShowPlaylist', (WidgetTester tester) async {
+    p1.addTrack(Track2);
+    p1.addTrack(Track4);
+    Widget widget = MaterialApp(title: 'Test', initialRoute: '/', routes: {
+      '/': (context) => ShowPlaylist(p1),
+    });
+
+    await tester.pumpWidget(widget);
+
+    expect(find.textContaining("track1"), findsOneWidget);
+    expect(find.textContaining("track2"), findsOneWidget);
+    expect(find.textContaining("track3"), findsNothing);
+    expect(find.textContaining("track4"), findsOneWidget);
   });
 }
