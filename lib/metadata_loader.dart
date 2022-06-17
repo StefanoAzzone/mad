@@ -8,6 +8,7 @@ import 'package:html/parser.dart' as parser;
 MetadataLoader loader = MetadataLoader.instance;
 
 class MetadataLoader {
+  late http.Client client;
   bool connected = false;
   int lastPingTime = 0;
   int lastTokenTime = 0;
@@ -37,6 +38,11 @@ class MetadataLoader {
   MetadataLoader._internal();
 
   Future<bool> initialize() async {
+    return initializeWithClient(http.Client());
+  }
+
+  Future<bool> initializeWithClient(http.Client client) async {
+    this.client = client;
     int now = DateTime.now().millisecondsSinceEpoch;
     //Initialize if the token is missing or expired
     if (spotifyToken == "" || now - lastTokenTime > (3600 * 1000)) {
@@ -47,7 +53,7 @@ class MetadataLoader {
       Codec<String, String> stringToBase64 = utf8.fuse(base64);
       //SPOTIFY AUTHENTICATION//
       try {
-        http.Response response = await http.post(
+        http.Response response = await client.post(
             Uri.parse(accounts + authReqEndPoint),
             headers: <String, String>{
               'Content-Type': 'application/x-www-form-urlencoded',
@@ -201,7 +207,7 @@ class MetadataLoader {
 
   Future<Uint8List> extractCoverFromAlbum(var item) async {
     String url = item["images"][0]["url"];
-    return (await http.get(Uri.parse(url))).bodyBytes;
+    return (await client.get(Uri.parse(url))).bodyBytes;
   }
 
   String extractTitleFromTrack(var item) {
@@ -220,7 +226,7 @@ class MetadataLoader {
     try {
       var tmp = items[index]["album"]["images"];
       String url = tmp[tmp.length - 1]["url"];
-      return (await http.get(Uri.parse(url))).bodyBytes;
+      return (await client.get(Uri.parse(url))).bodyBytes;
     } catch (e) {
       await checkConnection();
       return null;
@@ -250,7 +256,7 @@ class MetadataLoader {
   Future<Uint8List?> extractCoverFromTrack(var item) async {
     try {
       String url = item["album"]["images"][0]["url"];
-      return (await http.get(Uri.parse(url))).bodyBytes;
+      return (await client.get(Uri.parse(url))).bodyBytes;
     } catch (e) {
       await checkConnection();
       return Future(() => null);
@@ -291,7 +297,7 @@ class MetadataLoader {
     try {
       String url = base + artistsEndPoint + "/" + Id;
       http.Response response =
-          await http.get(Uri.parse(url), headers: <String, String>{
+          await client.get(Uri.parse(url), headers: <String, String>{
         "Accept": "application/json",
         'Content-Type': 'application/json',
         'Authorization': 'Bearer ' + spotifyToken,
@@ -299,7 +305,7 @@ class MetadataLoader {
 
       if (jsonDecode(response.body)["images"].length == 0) return null;
       url = jsonDecode(response.body)["images"][0]["url"];
-      return (await http.get(Uri.parse(url))).bodyBytes;
+      return (await client.get(Uri.parse(url))).bodyBytes;
     } catch (e) {
       await checkConnection();
       return null;
@@ -312,7 +318,7 @@ class MetadataLoader {
           'https://en.wikipedia.org/w/api.php?action=query&prop=extracts&exintro&format=json&explaintext&titles=' +
               query;
       http.Response res =
-          await http.get(Uri.parse(url)).timeout(const Duration(seconds: 1));
+          await client.get(Uri.parse(url)).timeout(const Duration(seconds: 1));
       var json = jsonDecode(res.body) as Map;
       var ret = json["query"]["pages"].entries.toList()[0].value["extract"];
       return ret;
@@ -329,7 +335,7 @@ class MetadataLoader {
         "query=" +
         query +
         "&market=IT&offset=0&limit=20";
-    return http.get(Uri.parse(url), headers: <String, String>{
+    return client.get(Uri.parse(url), headers: <String, String>{
       "Accept": "application/json",
       'Content-Type': 'application/json',
       'Authorization': 'Bearer ' + spotifyToken,
@@ -339,7 +345,7 @@ class MetadataLoader {
   Future<http.Response> queryAlbumTracks(String id) {
     String url = base + albumsEndPoint + '/' + id + "/tracks";
     // print(url);
-    return http.get(Uri.parse(url), headers: <String, String>{
+    return client.get(Uri.parse(url), headers: <String, String>{
       "Accept": "application/json",
       'Content-Type': 'application/json',
       'Authorization': 'Bearer ' + spotifyToken,
@@ -349,7 +355,7 @@ class MetadataLoader {
   Future<http.Response> queryArtistAlbums(String id) {
     String url = base + artistsEndPoint + '/' + id + "/albums";
     // print(url);
-    return http.get(Uri.parse(url), headers: <String, String>{
+    return client.get(Uri.parse(url), headers: <String, String>{
       "Accept": "application/json",
       'Content-Type': 'application/json',
       'Authorization': 'Bearer ' + spotifyToken,
@@ -366,7 +372,7 @@ class MetadataLoader {
         "&access_token=" +
         geniusToken;
     // print(url);
-    http.Response response = await http.get(Uri.parse(url));
+    http.Response response = await client.get(Uri.parse(url));
 
     var json = jsonDecode(response.body);
     if (json["response"]["hits"].length != 0) {
@@ -374,11 +380,11 @@ class MetadataLoader {
           json["response"]["hits"][0]["result"]["api_path"] +
           "?access_token=" +
           geniusToken;
-      response = await http.get(Uri.parse(url));
+      response = await client.get(Uri.parse(url));
 
       json = jsonDecode(response.body);
       url = json["response"]["song"]["url"] + "?access_token=" + geniusToken;
-      response = await http.get(Uri.parse(url));
+      response = await client.get(Uri.parse(url));
 
       List lyricsNodes = parser
           .parse(response.body)
@@ -392,7 +398,7 @@ class MetadataLoader {
 
   Future<String> queryYouTubeUrl(String query) async {
     String url = youtubeSearchUrl + query;
-    http.Response response = await http.get(Uri.parse(url));
+    http.Response response = await client.get(Uri.parse(url));
 
     int i = response.body.indexOf("/watch?v=");
     int j = response.body.substring(i).indexOf('"');
