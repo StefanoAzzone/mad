@@ -63,7 +63,8 @@ class MetadataLoader {
             },
             body: <String, String>{
               'grant_type': 'client_credentials',
-            });
+            }
+        );
         spotifyToken = jsonDecode(response.body)['access_token'];
         print(response.body);
         return true;
@@ -79,8 +80,8 @@ class MetadataLoader {
     int now = DateTime.now().millisecondsSinceEpoch;
     if (now - lastPingTime > 1000) {
       try {
-        final result = await InternetAddress.lookup('google.com');
-        if (result.isNotEmpty && result[0].rawAddress.isNotEmpty) {
+        final result = await client.get(Uri.parse('http://google.com'));
+        if (result.statusCode == 200) {
           lastPingTime = now;
           if (connected == false) {
             connected = true;
