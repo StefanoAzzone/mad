@@ -10,6 +10,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mad/Player.dart';
+import 'package:mad/bar/ProgressBar.dart';
 import 'package:mad/buttons/ArtistCard.dart';
 import 'package:mad/buttons/CoverButton.dart';
 import 'package:mad/buttons/PlayButton.dart';
